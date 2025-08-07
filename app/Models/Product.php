@@ -87,4 +87,20 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // Bonus relationships
+    public function bonusRules()
+    {
+        return $this->hasMany(BonusRule::class);
+    }
+
+    public function bonusRulesAsBonus()
+    {
+        return $this->hasMany(BonusRule::class, 'bonus_product_id');
+    }
+
+    public function bonusItems()
+    {
+        return $this->hasMany(BonusItem::class);
+    }
 }

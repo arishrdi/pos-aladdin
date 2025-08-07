@@ -18,7 +18,10 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-    
-    
-    
+
+    // Bonus relationships
+    public function bonusRules()
+    {
+        return $this->hasMany(BonusRule::class);
+    }
 }

@@ -48,6 +48,22 @@
                     <label class="block text-sm mb-1 font-medium">Catatan</label>
                     <input type="text" id="inputCatatan" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring" placeholder="Tambahkan catatan">
                 </div>
+                
+                <!-- Upload Bukti Section -->
+                <div class="mb-4 text-left">
+                    <label class="block text-sm mb-1 font-medium text-red-600">Upload Bukti (Wajib) *</label>
+                    <div class="border-2 border-dashed border-green-300 rounded-lg p-4 text-center bg-green-50">
+                        <input type="file" id="addCashProof" multiple accept="image/*,.pdf" class="hidden" required>
+                        <div class="cursor-pointer" onclick="document.getElementById('addCashProof').click()">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-green-500 mb-2"></i>
+                            <p class="text-sm font-medium text-green-600">Klik untuk upload bukti</p>
+                            <p class="text-xs text-green-500 mt-1">JPG, PNG, PDF • Maks 5MB</p>
+                        </div>
+                    </div>
+                    <div id="addCashProofPreview" class="mt-2 space-y-1">
+                        <!-- File previews will appear here -->
+                    </div>
+                </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeModal('tambahKasModal')" class="px-4 py-2 border border-green-400 text-green-500 rounded hover:bg-green-50">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Tambah Kas</button>
@@ -79,6 +95,22 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="withdrawNote">Catatan</label>
                     <input id="withdrawNote" name="withdrawNote" type="text" placeholder="Tambahkan catatan" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-500">
+                </div>
+                
+                <!-- Upload Bukti Section -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2 text-red-600">Upload Bukti (Wajib) *</label>
+                    <div class="border-2 border-dashed border-red-300 rounded-lg p-4 text-center bg-red-50">
+                        <input type="file" id="withdrawCashProof" multiple accept="image/*,.pdf" class="hidden" required>
+                        <div class="cursor-pointer" onclick="document.getElementById('withdrawCashProof').click()">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-red-500 mb-2"></i>
+                            <p class="text-sm font-medium text-red-600">Klik untuk upload bukti</p>
+                            <p class="text-xs text-red-500 mt-1">JPG, PNG, PDF • Maks 5MB</p>
+                        </div>
+                    </div>
+                    <div id="withdrawCashProofPreview" class="mt-2 space-y-1">
+                        <!-- File previews will appear here -->
+                    </div>
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeModal('withdrawModal')" class="px-4 py-2 border border-green-400 text-green-500 rounded-lg hover:bg-green-50">Batal</button>
@@ -181,14 +213,8 @@
         }
     }
 
-    // Modal functions
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-    }
+    // Modal functions (using global functions from utils.js)
+    // openModal and closeModal functions are defined in utils.js
 
     // Show authentication error
     function showAuthError(message = 'Anda perlu login untuk mengakses fitur ini') {
@@ -212,6 +238,17 @@
         const amount = parseFloat(document.getElementById('inputJumlah').value);
         const reason = document.getElementById('inputCatatan').value;
         const outletId = getCurrentOutletId();
+        
+        // Check if proof files are uploaded
+        const proofFiles = document.getElementById('addCashProof').files;
+        if (proofFiles.length === 0) {
+            showAlert({
+                title: 'Gagal',
+                message: 'Upload bukti wajib dilakukan',
+                type: 'error'
+            });
+            return;
+        }
 
         if (isNaN(amount) || amount <= 0) {
             showAlert({
@@ -223,6 +260,15 @@
         }
 
         try {
+            // Store proof files info for future use (when backend supports file upload)
+            const proofFilesInfo = Array.from(proofFiles).map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+            }));
+            
+            console.log('Add Cash - Proof files uploaded:', proofFilesInfo);
+            
             const response = await fetch('/api/cash-register-transactions/add-cash', {
                 method: 'POST',
                 headers: {
@@ -233,7 +279,8 @@
                 body: JSON.stringify({
                     amount: amount,
                     outlet_id: outletId,
-                    reason: reason
+                    reason: reason,
+                    proof_files: proofFilesInfo // Include proof files info
                 })
             });
 
@@ -246,7 +293,7 @@
             if (result.success) {
                 showAlert({
                     title: 'Berhasil',
-                    message: 'Kas berhasil ditambahkan: ' + formatRupiah(amount),
+                    message: `Kas berhasil ditambahkan: ${formatRupiah(amount)} dengan ${proofFilesInfo.length} bukti`,
                     type: 'success'
                 });
                 
@@ -280,6 +327,17 @@
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         const reason = document.getElementById('withdrawNote').value;
         const outletId = getCurrentOutletId();
+        
+        // Check if proof files are uploaded
+        const proofFiles = document.getElementById('withdrawCashProof').files;
+        if (proofFiles.length === 0) {
+            showAlert({
+                title: 'Gagal',
+                message: 'Upload bukti wajib dilakukan',
+                type: 'error'
+            });
+            return;
+        }
 
         if (isNaN(amount) || amount <= 0) {
             showAlert({
@@ -300,6 +358,15 @@
         }
 
         try {
+            // Store proof files info for future use (when backend supports file upload)
+            const proofFilesInfo = Array.from(proofFiles).map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type
+            }));
+            
+            console.log('Withdraw Cash - Proof files uploaded:', proofFilesInfo);
+            
             const response = await fetch('/api/cash-register-transactions/subtract-cash', {
                 method: 'POST',
                 headers: {
@@ -310,7 +377,8 @@
                 body: JSON.stringify({
                     amount: amount,
                     outlet_id: outletId,
-                    reason: reason
+                    reason: reason,
+                    proof_files: proofFilesInfo // Include proof files info
                 })
             });
 
@@ -323,7 +391,7 @@
             if (result.success) {
                 showAlert({
                     title: 'Berhasil',
-                    message: 'Kas berhasil diambil: ' + formatRupiah(amount),
+                    message: `Kas berhasil diambil: ${formatRupiah(amount)} dengan ${proofFilesInfo.length} bukti`,
                     type: 'success'
                 });
                 
@@ -435,10 +503,112 @@
     `;
     document.head.appendChild(style);
 
+    // File upload functions
+    function validateFile(file) {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+        const maxFileSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+            showAlert({
+                title: 'File Tidak Valid',
+                message: `File ${file.name} tidak didukung. Hanya JPG, PNG, dan PDF yang diperbolehkan.`,
+                type: 'error'
+            });
+            return false;
+        }
+
+        if (file.size > maxFileSize) {
+            showAlert({
+                title: 'File Terlalu Besar',
+                message: `File ${file.name} terlalu besar. Maksimal 5MB.`,
+                type: 'error'
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function handleFileUpload(files, previewContainer, inputId) {
+        previewContainer.innerHTML = '';
+        const validFiles = [];
+
+        Array.from(files).forEach((file) => {
+            if (!validateFile(file)) return;
+            
+            validFiles.push(file);
+
+            const previewElement = document.createElement('div');
+            previewElement.className = 'flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded text-sm';
+            
+            previewElement.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-file${file.type.startsWith('image/') ? '-image' : '-pdf'} text-gray-500"></i>
+                    <span class="font-medium text-gray-700">${file.name}</span>
+                    <span class="text-gray-500">(${formatFileSize(file.size)})</span>
+                </div>
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="this.closest('div').remove(); updateFileInput('${inputId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            previewContainer.appendChild(previewElement);
+        });
+
+        if (validFiles.length > 0) {
+            showAlert({
+                title: 'Berhasil',
+                message: `${validFiles.length} file berhasil diupload`,
+                type: 'success'
+            });
+        }
+
+        return validFiles;
+    }
+
+    function updateFileInput(inputId) {
+        // Remove file from input when preview is removed
+        document.getElementById(inputId).value = '';
+    }
+
+    // Initialize file upload handlers
+    function setupFileUpload() {
+        // Add Cash proof upload
+        const addCashProof = document.getElementById('addCashProof');
+        const addCashPreview = document.getElementById('addCashProofPreview');
+        
+        if (addCashProof && addCashPreview) {
+            addCashProof.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files, addCashPreview, 'addCashProof');
+            });
+        }
+
+        // Withdraw Cash proof upload  
+        const withdrawCashProof = document.getElementById('withdrawCashProof');
+        const withdrawCashPreview = document.getElementById('withdrawCashProofPreview');
+        
+        if (withdrawCashProof && withdrawCashPreview) {
+            withdrawCashProof.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files, withdrawCashPreview, 'withdrawCashProof');
+            });
+        }
+    }
+
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
         // Fetch initial cash balance
         fetchCashBalance();
+        
+        // Setup file upload handlers
+        setupFileUpload();
         
         // Set up form submit handlers
         document.getElementById('tambahKasForm')?.addEventListener('submit', submitTambahKas);

@@ -73,8 +73,14 @@ class Outlet extends Model
         return $this->hasOne(User::class, 'outlet_id', 'id')->where('role', 'manajer');
     }
 
-    
-    
-    
+    // Bonus relationships
+    public function bonusRules()
+    {
+        return $this->hasMany(BonusRule::class);
+    }
 
+    public function bonusTransactions()
+    {
+        return $this->hasMany(BonusTransaction::class);
+    }
 }

@@ -12,7 +12,10 @@ class OrderItem extends Model
         'quantity',
         'price',
         'subtotal',
-        'discount'
+        'discount',
+        'is_bonus',
+        'bonus_transaction_id',
+        'bonus_item_id'
     ];
 
     public function order()
@@ -24,6 +27,32 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    
-    
+
+    // Bonus relationships
+    public function bonusTransaction()
+    {
+        return $this->belongsTo(BonusTransaction::class);
+    }
+
+    public function bonusItem()
+    {
+        return $this->belongsTo(BonusItem::class);
+    }
+
+    // Scopes
+    public function scopeBonus($query)
+    {
+        return $query->where('is_bonus', true);
+    }
+
+    public function scopeNonBonus($query)
+    {
+        return $query->where('is_bonus', false);
+    }
+
+    // Helper methods
+    public function isBonus(): bool
+    {
+        return (bool) $this->is_bonus;
+    }
 }

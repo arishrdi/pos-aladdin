@@ -86,4 +86,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(CashRegisterTransaction::class);
     }
+
+    // Bonus relationships
+    public function bonusTransactionsAsCashier()
+    {
+        return $this->hasMany(BonusTransaction::class, 'cashier_id');
+    }
+
+    public function bonusTransactionsAsApprover()
+    {
+        return $this->hasMany(BonusTransaction::class, 'approved_by');
+    }
+
+    public function bonusTransactionsAsRejector()
+    {
+        return $this->hasMany(BonusTransaction::class, 'rejected_by');
+    }
+
+    public function bonusTransactionsAsAuthorizer()
+    {
+        return $this->hasMany(BonusTransaction::class, 'authorized_by');
+    }
 }

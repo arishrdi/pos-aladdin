@@ -52,23 +52,28 @@
                 </div>
                 
                 <div class="mb-4">
-                    {{-- <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Subtotal:</span>
-                        <span id="paymentSubtotal" class="font-bold">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Diskon:</span>
-                        <span id="paymentDiscount" class="font-bold">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-700">Pajak:</span>
-                        <span id="paymentTax" class="text-gray-700">Rp 0</span>
-                    </div> --}}
                     <div class="flex justify-between mb-4">
                         <span class="text-gray-700">Total Pembayaran:</span>
                         <span id="paymentGrandTotal" class="text-green-500 font-bold text-lg">Rp 0</span>
                     </div>
                     
+                    <!-- Kategori Transaksi -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Kategori Transaksi
+                        </label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="transactionCategory" value="lunas" class="mr-2 text-green-600" checked>
+                                <span class="text-sm">Lunas</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="transactionCategory" value="dp" class="mr-2 text-green-600">
+                                <span class="text-sm">DP (Uang Muka)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="paymentMethod">
                             Metode Pembayaran
@@ -93,16 +98,77 @@
                                 <p class="text-sm">Nomor Rekening: <span id="bankAccountNumber">-</span></p>
                             </div>
                         </div>
+
+                        <!-- Upload Bukti Pembayaran -->
+                        <div id="uploadProofSection" class="hidden mt-4">
+                            <div class="mb-4">
+                                <!-- Cash Proof Upload -->
+                                <div id="cashProofUploadSection" class="hidden">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Upload Bukti Pembayaran Cash (Opsional)
+                                    </label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+                                        <input type="file" id="cashProofUpload" multiple accept="image/*,.pdf" class="hidden">
+                                        <div class="cursor-pointer" onclick="document.getElementById('cashProofUpload').click()">
+                                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                                            <p class="text-sm text-gray-600">Klik untuk upload bukti pembayaran</p>
+                                            <p class="text-xs text-gray-500 mt-1">JPG, PNG, PDF • Maks 5MB per file</p>
+                                        </div>
+                                    </div>
+                                    <div id="cashProofPreview" class="mt-2 space-y-1">
+                                        <!-- File previews will appear here -->
+                                    </div>
+                                </div>
+
+                                <!-- Transfer Proof Upload -->
+                                <div id="transferProofUploadSection" class="hidden">
+                                    <label class="block text-sm font-bold mb-2 text-red-600">
+                                        Upload Bukti Transfer (Wajib) *
+                                    </label>
+                                    <div class="border-2 border-dashed border-red-300 rounded-lg p-4 text-center bg-red-50">
+                                        <input type="file" id="transferProofUpload" multiple accept="image/*,.pdf" class="hidden" required>
+                                        <div class="cursor-pointer" onclick="document.getElementById('transferProofUpload').click()">
+                                            <i class="fas fa-cloud-upload-alt text-2xl text-red-500 mb-2"></i>
+                                            <p class="text-sm font-medium text-red-600">Klik untuk upload bukti transfer</p>
+                                            <p class="text-xs text-red-500 mt-1">JPG, PNG, PDF • Maks 5MB per file</p>
+                                        </div>
+                                    </div>
+                                    <div id="transferProofPreview" class="mt-2 space-y-1">
+                                        <!-- File previews will appear here -->
+                                    </div>
+                                </div>
+
+                                <!-- QRIS Proof Upload -->
+                                <div id="qrisProofUploadSection" class="hidden">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Upload Bukti Pembayaran QRIS (Opsional)
+                                    </label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+                                        <input type="file" id="qrisProofUpload" multiple accept="image/*,.pdf" class="hidden">
+                                        <div class="cursor-pointer" onclick="document.getElementById('qrisProofUpload').click()">
+                                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                                            <p class="text-sm text-gray-600">Klik untuk upload bukti pembayaran QRIS</p>
+                                            <p class="text-xs text-gray-500 mt-1">JPG, PNG, PDF • Maks 5MB per file</p>
+                                        </div>
+                                    </div>
+                                    <div id="qrisProofPreview" class="mt-2 space-y-1">
+                                        <!-- File previews will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div id="cashPaymentSection" class="mb-4">
+                    <!-- Amount Received Section - Always show for DP, only for cash when Lunas -->
+                    <div id="amountReceivedSection" class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="amountReceived">
-                            Jumlah Uang Diterima
+                            <span id="amountReceivedLabel">Jumlah Uang Diterima</span>
                         </label>
                         <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
                     </div>
                     
-                    <div class="mb-4">
+                    <!-- Change Section - Only show for cash payments when Lunas -->
+                    <div id="changeSection" class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="changeAmount">
                             Kembalian
                         </label>

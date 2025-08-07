@@ -20,7 +20,7 @@
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
             <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Menampilkan riwayat transaksi: <span class="outlet-name">Loading...</span></h2>
-            <p class="text-sm text-gray-600">Data riwayat transaksi kas untuk <span class=" outlet-name"></span></p>
+            <p class="text-sm text-gray-600">Data riwayat transaksi untuk <span class=" outlet-name"></span></p>
         </div>
     </div>
 </div>
@@ -43,14 +43,37 @@
             </div>
         </div>
         
-        <!-- Search Bar -->
-        <div class="w-full sm:w-72 relative">
-            <input type="text" id="searchInvoice"
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Cari Invoice..." />
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                <i data-lucide="search" class="w-4 h-4"></i>
-            </span>
+        <!-- Filter and Search Row -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <!-- Search Bar -->
+            <div class="flex-1 relative">
+                <input type="text" id="searchInvoice"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Cari Invoice..." />
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </span>
+            </div>
+            
+            <!-- Status Filter -->
+            <div class="relative">
+                <select id="statusFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
+                    <option value="">Semua Status</option>
+                    <option value="pending">Menunggu</option>
+                    <option value="completed">Selesai</option>
+                    <option value="cancelled">Dibatalkan</option>
+                </select>
+            </div>
+            
+            <!-- Approval Filter -->
+            <div class="relative">
+                <select id="approvalFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
+                    <option value="">Semua Approval</option>
+                    <option value="pending">Menunggu Approval</option>
+                    <option value="approved">Disetujui</option>
+                    <option value="rejected">Ditolak</option>
+                </select>
+            </div>
         </div>
     </div>
     
@@ -64,6 +87,7 @@
                     <th class="py-3 font-bold">Kasir</th>
                     <th class="py-3 font-bold">Pembayaran</th>
                     <th class="py-3 font-bold">Status</th>
+                    <th class="py-3 font-bold">Approval</th>
                     <th class="py-3 font-bold">Total</th>
                     <th class="py-3 font-bold text-left">Aksi</th>
                 </tr>
@@ -71,7 +95,7 @@
             <tbody class="text-gray-700 divide-y">
                 <!-- Data akan diisi secara dinamis -->
                 <tr>
-                    <td colspan="7" class="py-8 text-center">
+                    <td colspan="8" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2 mx-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
@@ -115,6 +139,37 @@
                     <p class="text-gray-500">Status</p>
                     <p id="detailStatus" class="font-medium"></p>
                 </div>
+                <div>
+                    <p class="text-gray-500">Status Approval</p>
+                    <p id="detailApprovalStatus" class="font-medium"></p>
+                </div>
+            </div>
+            
+            <!-- Approval Information Section -->
+            <div id="approvalInfoSection" class="hidden mb-4 p-3 bg-gray-50 rounded-lg">
+                <h4 class="font-medium mb-2 text-gray-700">Informasi Approval</h4>
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                    <div id="approverInfo" class="hidden">
+                        <span class="text-gray-500">Disetujui/Ditolak oleh:</span>
+                        <span id="detailApprover" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="approvalDateInfo" class="hidden">
+                        <span class="text-gray-500">Tanggal Approval:</span>
+                        <span id="detailApprovalDate" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="approvalNotesInfo" class="hidden">
+                        <span class="text-gray-500">Catatan:</span>
+                        <span id="detailApprovalNotes" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="rejectionReasonInfo" class="hidden">
+                        <span class="text-gray-500">Alasan Penolakan:</span>
+                        <span id="detailRejectionReason" class="font-medium ml-1 text-red-600"></span>
+                    </div>
+                    <div id="paymentProofInfo" class="hidden">
+                        <span class="text-gray-500">Bukti Pembayaran:</span>
+                        <a id="detailPaymentProofLink" href="#" class="font-medium ml-1 text-blue-600 hover:text-blue-800">Lihat Bukti</a>
+                    </div>
+                </div>
             </div>
             
             <div class="mb-4">
@@ -154,7 +209,7 @@
 
 <!-- Modal Konfirmasi Refund -->
 <div id="modalRefund" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-96">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
                 <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
@@ -164,19 +219,134 @@
                 <div class="mt-2">
                     <p class="text-sm text-gray-600">Anda yakin ingin melakukan refund untuk transaksi ini?</p>
                     <p id="refundInvoiceText" class="text-sm font-medium mt-1"></p>
+                    
+                    <!-- Transaction Summary -->
+                    <div id="refundTransactionSummary" class="mt-3 p-3 bg-gray-50 rounded-md">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">Detail Transaksi:</h4>
+                        <div class="text-sm text-gray-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Total Transaksi:</span>
+                                <span id="refundTotalAmount" class="font-medium"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Metode Pembayaran:</span>
+                                <span id="refundPaymentMethod" class="font-medium"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tanggal:</span>
+                                <span id="refundDate" class="font-medium"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Refund Reason -->
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Refund *</label>
+                        <select id="refundReason" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="">Pilih alasan refund</option>
+                            <option value="produk_rusak">Produk Rusak/Cacat</option>
+                            <option value="salah_produk">Salah Produk</option>
+                            <option value="tidak_sesuai">Tidak Sesuai Ekspektasi</option>
+                            <option value="dibatalkan_pelanggan">Dibatalkan Pelanggan</option>
+                            <option value="kesalahan_sistem">Kesalahan Sistem</option>
+                            <option value="lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Custom Reason -->
+                    <div id="customReasonSection" class="hidden mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan Tambahan</label>
+                        <textarea id="customReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Jelaskan alasan refund secara detail..."></textarea>
+                    </div>
+                    
                     <div class="mt-3 p-3 bg-yellow-50 rounded-md">
-                        <p class="text-xs text-yellow-700">Transaksi yang direfund tidak dapat dikembalikan. Pastikan produk telah dikembalikan sebelum melakukan refund.</p>
+                        <p class="text-xs text-yellow-700"><strong>Perhatian:</strong> Refund tidak dapat dibatalkan. Pastikan produk telah dikembalikan dan semua persyaratan refund terpenuhi.</p>
                     </div>
                 </div>
-                <div class="mt-4 flex justify-end gap-3">
+                <div class="mt-6 flex justify-end gap-3">
                     <button onclick="closeRefundModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                         Batal
                     </button>
                     <button onclick="processRefund()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
-                        Konfirmasi Refund
+                        Proses Refund
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Approve Transaksi -->
+<div id="modalApprove" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-96">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 p-2 bg-green-100 rounded-full">
+                <i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900">Setujui Transaksi</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-600">Anda yakin ingin menyetujui transaksi ini?</p>
+                    <p id="approveInvoiceText" class="text-sm font-medium mt-1"></p>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+                        <textarea id="approvalNotes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tambahkan catatan approval..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-3">
+                    <button onclick="closeApproveModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                        Batal
+                    </button>
+                    <button onclick="processApprove()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none">
+                        Setujui Transaksi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Reject Transaksi -->
+<div id="modalReject" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-96">
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
+                <i data-lucide="x-circle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900">Tolak Transaksi</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-600">Berikan alasan penolakan transaksi ini:</p>
+                    <p id="rejectInvoiceText" class="text-sm font-medium mt-1"></p>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Penolakan *</label>
+                        <textarea id="rejectionReason" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Jelaskan alasan penolakan..." required></textarea>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-3">
+                    <button onclick="closeRejectModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                        Batal
+                    </button>
+                    <button onclick="processReject()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                        Tolak Transaksi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Payment Proof -->
+<div id="modalPaymentProof" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Bukti Pembayaran</h3>
+            <button onclick="closePaymentProofModal()" class="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="text-center">
+            <img id="paymentProofImage" src="" alt="Bukti Pembayaran" class="max-w-full max-h-96 mx-auto rounded-lg shadow-md">
         </div>
     </div>
 </div>
@@ -213,16 +383,10 @@
         // Load data awal
         fetchTransactionHistory();
         
-        // Pencarian
-        document.getElementById('searchInvoice').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                const invoice = row.cells[0]?.textContent?.toLowerCase() || '';
-                row.style.display = invoice.includes(searchTerm) ? '' : 'none';
-            });
-        });
+        // Pencarian dan Filter
+        document.getElementById('searchInvoice').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('approvalFilter').addEventListener('change', applyFilters);
 
         // Connect outlet selection to transaction history updates
         connectOutletSelectionToHistory();
@@ -426,7 +590,7 @@
         if (!transactions || transactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="py-4 text-center text-gray-500">
+                    <td colspan="8" class="py-4 text-center text-gray-500">
                         Tidak ada transaksi pada tanggal ini.
                     </td>
                 </tr>
@@ -437,6 +601,7 @@
         transactions.forEach(transaction => {
             const row = document.createElement('tr');
             row.className = 'border-b hover:bg-gray-50';
+            row.dataset.transactionId = transaction.id; // Add transaction ID for filtering
             row.innerHTML = `
                 <td class="py-4">${transaction.order_number}</td>
                 <td class="py-4">${formatDateTime(transaction.created_at)}</td>
@@ -447,20 +612,45 @@
                     </span>
                 </td>
                 <td class="py-4">
-                    <span class="px-2 py-1 ${transaction.status === 'completed' ? 'text-green-600' : 'text-red-500'} font-bold text-xs">
-                        ${transaction.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                    <span class="px-2 py-1 ${getStatusBadgeClass(transaction.status)} rounded-full text-xs font-medium">
+                        ${getStatusText(transaction.status)}
+                    </span>
+                </td>
+                <td class="py-4">
+                    <span class="px-2 py-1 ${getApprovalBadgeClass(transaction.approval_status)} rounded-full text-xs font-medium">
+                        ${getApprovalStatusText(transaction.approval_status)}
                     </span>
                 </td>
                 <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
-                <td class="py-4 flex space-x-2">
-                    <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-green-600">
-                        <i data-lucide="eye" class="w-5 h-5"></i>
-                    </a>
-                    ${transaction.status === 'completed' ? `
-                    <a href="#" onclick="openRefundModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-red-600">
-                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-                    </a>
-                    ` : ''}
+                <td class="py-4">
+                    <div class="flex space-x-2">
+                        <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Lihat Detail">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </a>
+                        ${transaction.payment_proof_url ? `
+                        <a href="#" onclick="openPaymentProofModal('${transaction.payment_proof_url}')" class="text-gray-600 hover:text-purple-600" title="Lihat Bukti Pembayaran">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                        </a>
+                        ` : ''}
+                        ${transaction.approval_status === 'pending' ? `
+                        <a href="#" onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-green-600" title="Setujui">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#" onclick="openRejectModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-red-600" title="Tolak">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </a>
+                        ` : ''}
+                        ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
+                        <a href="#" onclick="openCancellationRequestModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-orange-600" title="${transaction.status === 'pending' ? 'Minta Pembatalan' : 'Minta Refund'}">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                        </a>
+                        ` : ''}
+                        ${transaction.cancellation_status === 'requested' ? `
+                        <a href="#" onclick="openCancellationApprovalModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Review Permintaan">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </a>
+                        ` : ''}
+                    </div>
                 </td>
             `;
             tbody.appendChild(row);
@@ -498,6 +688,7 @@
                 dateTime: document.getElementById('detailDateTime'),
                 paymentMethod: document.getElementById('detailPaymentMethod'),
                 status: document.getElementById('detailStatus'),
+                approvalStatus: document.getElementById('detailApprovalStatus'),
                 total: document.getElementById('detailTotal'),
                 subtotal: document.getElementById('detailSubtotal'),
                 tax: document.getElementById('detailTax'),
@@ -519,13 +710,77 @@
             elements.invoice.textContent = transaction.order_number;
             elements.dateTime.textContent = formatDateTime(transaction.created_at);
             elements.paymentMethod.textContent = getPaymentMethodText(transaction.payment_method);
-            elements.status.textContent = transaction.status === 'completed' ? 'Selesai' : 'Dibatalkan';
+            elements.status.textContent = getStatusText(transaction.status);
+            elements.approvalStatus.textContent = getApprovalStatusText(transaction.approval_status);
             elements.total.textContent = formatCurrency(transaction.total);
             elements.subtotal.textContent = formatCurrency(transaction.subtotal);
             elements.tax.textContent = formatCurrency(transaction.tax);
             elements.discount.textContent = formatCurrency(transaction.discount);
             elements.totalPaid.textContent = formatCurrency(transaction.total_paid);
             elements.change.textContent = formatCurrency(transaction.change);
+
+            // Handle approval information
+            const approvalSection = document.getElementById('approvalInfoSection');
+            const approverInfo = document.getElementById('approverInfo');
+            const approvalDateInfo = document.getElementById('approvalDateInfo');
+            const approvalNotesInfo = document.getElementById('approvalNotesInfo');
+            const rejectionReasonInfo = document.getElementById('rejectionReasonInfo');
+            const paymentProofInfo = document.getElementById('paymentProofInfo');
+
+            // Reset approval info visibility
+            approverInfo.classList.add('hidden');
+            approvalDateInfo.classList.add('hidden');
+            approvalNotesInfo.classList.add('hidden');
+            rejectionReasonInfo.classList.add('hidden');
+            paymentProofInfo.classList.add('hidden');
+
+            let showApprovalSection = false;
+
+            // Show approver info if available
+            if (transaction.approved_by) {
+                document.getElementById('detailApprover').textContent = transaction.approved_by;
+                approverInfo.classList.remove('hidden');
+                showApprovalSection = true;
+            }
+
+            // Show approval date if available
+            if (transaction.approved_at) {
+                document.getElementById('detailApprovalDate').textContent = transaction.approved_at;
+                approvalDateInfo.classList.remove('hidden');
+                showApprovalSection = true;
+            }
+
+            // Show approval notes if available
+            if (transaction.approval_notes) {
+                document.getElementById('detailApprovalNotes').textContent = transaction.approval_notes;
+                approvalNotesInfo.classList.remove('hidden');
+                showApprovalSection = true;
+            }
+
+            // Show rejection reason if available
+            if (transaction.rejection_reason) {
+                document.getElementById('detailRejectionReason').textContent = transaction.rejection_reason;
+                rejectionReasonInfo.classList.remove('hidden');
+                showApprovalSection = true;
+            }
+
+            // Show payment proof link if available
+            if (transaction.payment_proof_url) {
+                const proofLink = document.getElementById('detailPaymentProofLink');
+                proofLink.onclick = (e) => {
+                    e.preventDefault();
+                    openPaymentProofModal(transaction.payment_proof_url);
+                };
+                paymentProofInfo.classList.remove('hidden');
+                showApprovalSection = true;
+            }
+
+            // Show/hide approval section
+            if (showApprovalSection) {
+                approvalSection.classList.remove('hidden');
+            } else {
+                approvalSection.classList.add('hidden');
+            }
 
             // Isi items
             elements.items.innerHTML = '';
@@ -576,28 +831,75 @@
         modal.classList.remove('flex');
     }
 
-    // Fungsi untuk modal refund (ubah teks menjadi pembatalan)
-    function openRefundModal(invoiceNumber, orderId) {
+    // Fungsi untuk modal refund
+    // Request cancellation/refund (for cashiers and admin)
+    function openCancellationRequestModal(invoiceNumber, orderId) {
         try {
+            // Find transaction in cache
+            const transaction = transactionsCache.find(t => t.id == orderId);
+            if (!transaction) {
+                showAlert('error', 'Data transaksi tidak ditemukan');
+                return;
+            }
+
+            // Check if transaction can request cancellation
+            if (!['pending', 'completed'].includes(transaction.status)) {
+                showAlert('error', 'Transaksi ini tidak dapat dibatalkan atau direfund');
+                return;
+            }
+
+            // Check if already has cancellation request
+            if (transaction.cancellation_status && transaction.cancellation_status !== 'none') {
+                showAlert('error', 'Transaksi ini sudah memiliki permintaan pembatalan/refund');
+                return;
+            }
+
             // Pastikan modal dan elemen-elemennya ada
             const modal = document.getElementById('modalRefund');
             const invoiceTextEl = document.getElementById('refundInvoiceText');
             const modalTitleEl = document.getElementById('modalRefundTitle');
             const confirmButton = modal?.querySelector('button:last-child');
+            const refundReasonSelect = document.getElementById('refundReason');
+            const customReasonSection = document.getElementById('customReasonSection');
+            const customReasonTextarea = document.getElementById('customReason');
             
             if (!modal || !invoiceTextEl || !modalTitleEl || !confirmButton) {
                 throw new Error('Elemen modal tidak ditemukan. Pastikan struktur HTML benar.');
             }
 
+            // Determine request type
+            const requestType = transaction.status === 'pending' ? 'pembatalan' : 'refund';
+            
             // Isi data ke modal
             invoiceTextEl.textContent = `Invoice: ${invoiceNumber}`;
-            modalTitleEl.textContent = 'Konfirmasi Pembatalan Order';
+            modalTitleEl.textContent = `Permintaan ${requestType.charAt(0).toUpperCase() + requestType.slice(1)}`;
             
-            // Simpan orderId di data attribute
+            // Fill transaction summary
+            document.getElementById('refundTotalAmount').textContent = formatCurrency(transaction.total);
+            document.getElementById('refundPaymentMethod').textContent = getPaymentMethodText(transaction.payment_method);
+            document.getElementById('refundDate').textContent = formatDateTime(transaction.created_at);
+            
+            // Reset form
+            refundReasonSelect.value = '';
+            customReasonSection.classList.add('hidden');
+            customReasonTextarea.value = '';
+            
+            // Simpan transaction data di modal
             modal.dataset.orderId = orderId;
+            modal.dataset.transactionData = JSON.stringify(transaction);
+            
+            // Setup reason change handler
+            refundReasonSelect.onchange = function() {
+                if (this.value === 'lainnya') {
+                    customReasonSection.classList.remove('hidden');
+                } else {
+                    customReasonSection.classList.add('hidden');
+                    customReasonTextarea.value = '';
+                }
+            };
             
             // Ubah teks tombol konfirmasi
-            confirmButton.textContent = 'Konfirmasi Pembatalan';
+            confirmButton.textContent = `Ajukan ${requestType.charAt(0).toUpperCase() + requestType.slice(1)}`;
             
             // Tampilkan modal
             modal.classList.remove('hidden');
@@ -605,7 +907,7 @@
             
         } catch (error) {
             console.error('Error in openRefundModal:', error);
-            showAlert('error', 'Gagal membuka modal pembatalan: ' + error.message);
+            showAlert('error', 'Gagal membuka modal refund: ' + error.message);
         }
     }
 
@@ -614,55 +916,230 @@
         document.getElementById('modalRefund').classList.remove('flex');
     }
 
+    // Process cancellation/refund request
     async function processRefund() {
-        const orderId = document.getElementById('modalRefund').dataset.orderId;
+        const modal = document.getElementById('modalRefund');
+        const orderId = modal.dataset.orderId;
+        const refundReasonSelect = document.getElementById('refundReason');
+        const customReasonTextarea = document.getElementById('customReason');
+        
         try {
+            // Validate required fields
+            if (!refundReasonSelect.value) {
+                showAlert('error', 'Pilih alasan terlebih dahulu');
+                return;
+            }
+
+            if (refundReasonSelect.value === 'lainnya' && !customReasonTextarea.value.trim()) {
+                showAlert('error', 'Keterangan tambahan wajib diisi untuk alasan "Lainnya"');
+                return;
+            }
+
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = '/login';
                 return;
             }
 
+            // Prepare cancellation reason
+            let cancellationReason = refundReasonSelect.options[refundReasonSelect.selectedIndex].text;
+            if (refundReasonSelect.value === 'lainnya') {
+                cancellationReason += ': ' + customReasonTextarea.value.trim();
+            }
+
             // Tampilkan loading state
-            const confirmButton = document.querySelector('#modalRefund button:last-child');
+            const confirmButton = modal.querySelector('button:last-child');
             const originalButtonText = confirmButton.innerHTML;
             confirmButton.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Memproses...
+                Mengajukan Permintaan...
             `;
             confirmButton.disabled = true;
 
-            // Menggunakan endpoint cancelOrder yang sudah ada
-            const response = await fetch(`/api/orders/cancel/${orderId}`, {
+            // Create cancellation request
+            const requestData = {
+                reason: cancellationReason,
+                notes: customReasonTextarea.value.trim() || null
+            };
+
+            // Call the new cancellation request API
+            const response = await fetch(`/api/orders/cancellation/request/${orderId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify(requestData)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || `Gagal memproses pembatalan (Status: ${response.status})`);
+                throw new Error(errorData.message || `Gagal mengajukan permintaan (Status: ${response.status})`);
             }
 
             const result = await response.json();
-            showAlert('success', 'Pembatalan berhasil diproses');
+            
+            // Get transaction details for success message
+            const transactionData = JSON.parse(modal.dataset.transactionData || '{}');
+            const requestType = transactionData.status === 'pending' ? 'pembatalan' : 'refund';
+            const successMessage = `Permintaan ${requestType} berhasil diajukan untuk Invoice ${transactionData.order_number || ''}. Menunggu persetujuan admin.`;
+            
+            showAlert('success', successMessage);
             closeRefundModal();
             fetchTransactionHistory(); // Refresh data
+            
         } catch (error) {
             console.error('Error:', error);
             showAlert('error', error.message);
         } finally {
             // Kembalikan tombol ke state awal
-            const confirmButton = document.querySelector('#modalRefund button:last-child');
-            confirmButton.innerHTML = 'Konfirmasi Pembatalan';
+            const confirmButton = modal.querySelector('button:last-child');
+            confirmButton.innerHTML = 'Proses Refund';
             confirmButton.disabled = false;
+        }
+    }
+
+    // Admin function to review and approve/reject cancellation requests
+    function openCancellationApprovalModal(invoiceNumber, orderId) {
+        try {
+            // Find transaction in cache
+            const transaction = transactionsCache.find(t => t.id == orderId);
+            if (!transaction) {
+                showAlert('error', 'Data transaksi tidak ditemukan');
+                return;
+            }
+
+            // Check if transaction has pending cancellation request
+            if (transaction.cancellation_status !== 'requested') {
+                showAlert('error', 'Tidak ada permintaan pembatalan/refund yang pending');
+                return;
+            }
+
+            // Create and show approval modal
+            const modalHtml = `
+                <div id="cancellationApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <h3 class="text-lg font-semibold mb-4">Review Permintaan ${transaction.status === 'pending' ? 'Pembatalan' : 'Refund'}</h3>
+                        
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600 mb-2">Invoice: ${invoiceNumber}</p>
+                            <p class="text-sm text-gray-600 mb-2">Total: ${formatCurrency(transaction.total)}</p>
+                            <p class="text-sm text-gray-600 mb-2">Alasan: ${transaction.cancellation_reason || 'Tidak ada alasan'}</p>
+                            <p class="text-sm text-gray-600 mb-4">Keterangan: ${transaction.cancellation_notes || 'Tidak ada keterangan'}</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Admin (opsional)</label>
+                            <textarea id="adminNotes" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="closeCancellationApprovalModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">Batal</button>
+                            <button onclick="rejectCancellationRequest('${orderId}')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Tolak</button>
+                            <button onclick="approveCancellationRequest('${orderId}')" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Setujui</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        } catch (error) {
+            console.error('Error in openCancellationApprovalModal:', error);
+            showAlert('error', 'Gagal membuka modal approval: ' + error.message);
+        }
+    }
+
+    function closeCancellationApprovalModal() {
+        const modal = document.getElementById('cancellationApprovalModal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    async function approveCancellationRequest(orderId) {
+        try {
+            const adminNotes = document.getElementById('adminNotes').value.trim();
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const response = await fetch(`/api/orders/cancellation/approve/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    admin_notes: adminNotes
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menyetujui permintaan');
+            }
+
+            const result = await response.json();
+            showAlert('success', 'Permintaan pembatalan/refund berhasil disetujui');
+            closeCancellationApprovalModal();
+            fetchTransactionHistory(); // Refresh data
+
+        } catch (error) {
+            console.error('Error approving cancellation:', error);
+            showAlert('error', error.message);
+        }
+    }
+
+    async function rejectCancellationRequest(orderId) {
+        try {
+            const adminNotes = document.getElementById('adminNotes').value.trim();
+            
+            if (!adminNotes) {
+                showAlert('error', 'Catatan admin wajib diisi untuk penolakan');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const response = await fetch(`/api/orders/cancellation/reject/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    admin_notes: adminNotes
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menolak permintaan');
+            }
+
+            const result = await response.json();
+            showAlert('success', 'Permintaan pembatalan/refund berhasil ditolak');
+            closeCancellationApprovalModal();
+            fetchTransactionHistory(); // Refresh data
+
+        } catch (error) {
+            console.error('Error rejecting cancellation:', error);
+            showAlert('error', error.message);
         }
     }
 
@@ -698,6 +1175,55 @@
         
         // Refresh ikon Lucide
         if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Function untuk apply filters
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInvoice').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const approvalFilter = document.getElementById('approvalFilter').value;
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            // Skip loading/empty state rows
+            if (row.cells.length < 8) {
+                return;
+            }
+            
+            const invoice = row.cells[0]?.textContent?.toLowerCase() || '';
+            const statusText = row.cells[4]?.textContent?.toLowerCase() || '';
+            const approvalText = row.cells[5]?.textContent?.toLowerCase() || '';
+            
+            // Get actual status values from the data
+            let actualStatus = '';
+            let actualApprovalStatus = '';
+            
+            // Extract status from transaction data if available
+            if (row.dataset && row.dataset.transactionId) {
+                const transaction = transactionsCache.find(t => t.id == row.dataset.transactionId);
+                if (transaction) {
+                    actualStatus = transaction.status;
+                    actualApprovalStatus = transaction.approval_status;
+                }
+            } else {
+                // Fallback: derive from display text
+                if (statusText.includes('selesai')) actualStatus = 'completed';
+                else if (statusText.includes('menunggu')) actualStatus = 'pending';
+                else if (statusText.includes('dibatalkan')) actualStatus = 'cancelled';
+                
+                if (approvalText.includes('disetujui')) actualApprovalStatus = 'approved';
+                else if (approvalText.includes('menunggu')) actualApprovalStatus = 'pending';
+                else if (approvalText.includes('ditolak')) actualApprovalStatus = 'rejected';
+            }
+            
+            // Apply filters
+            const matchesSearch = invoice.includes(searchTerm);
+            const matchesStatus = !statusFilter || actualStatus === statusFilter;
+            const matchesApproval = !approvalFilter || actualApprovalStatus === approvalFilter;
+            
+            const shouldShow = matchesSearch && matchesStatus && matchesApproval;
+            row.style.display = shouldShow ? '' : 'none';
+        });
     }
 
     // Helper untuk format tanggal
@@ -762,6 +1288,239 @@
         
         // Format dalam YYYY-MM-DD
         return `${year}-${month}-${day}`;
+    }
+
+    // Helper untuk status transaksi
+    function getStatusText(status) {
+        const statusMap = {
+            'pending': 'Menunggu',
+            'completed': 'Selesai',
+            'cancelled': 'Dibatalkan'
+        };
+        return statusMap[status] || status || 'Tidak diketahui';
+    }
+
+    function getStatusBadgeClass(status) {
+        const classMap = {
+            'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'completed': 'bg-green-100 text-green-800 border-green-200',
+            'cancelled': 'bg-red-100 text-red-800 border-red-200'
+        };
+        return classMap[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Helper untuk approval status
+    function getApprovalStatusText(approvalStatus) {
+        const statusMap = {
+            'pending': 'Menunggu Approval',
+            'approved': 'Disetujui',
+            'rejected': 'Ditolak'
+        };
+        return statusMap[approvalStatus] || approvalStatus || 'Tidak diketahui';
+    }
+
+    function getApprovalBadgeClass(approvalStatus) {
+        const classMap = {
+            'pending': 'bg-orange-100 text-orange-800 border-orange-200',
+            'approved': 'bg-green-100 text-green-800 border-green-200',
+            'rejected': 'bg-red-100 text-red-800 border-red-200'
+        };
+        return classMap[approvalStatus] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Modal functions untuk approval
+    function openApproveModal(invoiceNumber, orderId) {
+        try {
+            const modal = document.getElementById('modalApprove');
+            const invoiceTextEl = document.getElementById('approveInvoiceText');
+            const notesTextarea = document.getElementById('approvalNotes');
+            
+            if (!modal || !invoiceTextEl || !notesTextarea) {
+                throw new Error('Elemen modal approve tidak ditemukan');
+            }
+
+            invoiceTextEl.textContent = `Invoice: ${invoiceNumber}`;
+            notesTextarea.value = '';
+            modal.dataset.orderId = orderId;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } catch (error) {
+            console.error('Error in openApproveModal:', error);
+            showAlert('error', 'Gagal membuka modal approval: ' + error.message);
+        }
+    }
+
+    function closeApproveModal() {
+        const modal = document.getElementById('modalApprove');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function processApprove() {
+        const modal = document.getElementById('modalApprove');
+        const orderId = modal.dataset.orderId;
+        const notes = document.getElementById('approvalNotes').value.trim();
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const confirmButton = modal.querySelector('button:last-child');
+            const originalButtonText = confirmButton.innerHTML;
+            confirmButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Memproses...
+            `;
+            confirmButton.disabled = true;
+
+            const response = await fetch(`/api/orders/approve/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ notes: notes })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Gagal menyetujui transaksi (Status: ${response.status})`);
+            }
+
+            const result = await response.json();
+            showAlert('success', 'Transaksi berhasil disetujui');
+            closeApproveModal();
+            fetchTransactionHistory();
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
+        } finally {
+            const confirmButton = modal.querySelector('button:last-child');
+            confirmButton.innerHTML = 'Setujui Transaksi';
+            confirmButton.disabled = false;
+        }
+    }
+
+    function openRejectModal(invoiceNumber, orderId) {
+        try {
+            const modal = document.getElementById('modalReject');
+            const invoiceTextEl = document.getElementById('rejectInvoiceText');
+            const reasonTextarea = document.getElementById('rejectionReason');
+            
+            if (!modal || !invoiceTextEl || !reasonTextarea) {
+                throw new Error('Elemen modal reject tidak ditemukan');
+            }
+
+            invoiceTextEl.textContent = `Invoice: ${invoiceNumber}`;
+            reasonTextarea.value = '';
+            modal.dataset.orderId = orderId;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } catch (error) {
+            console.error('Error in openRejectModal:', error);
+            showAlert('error', 'Gagal membuka modal penolakan: ' + error.message);
+        }
+    }
+
+    function closeRejectModal() {
+        const modal = document.getElementById('modalReject');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    async function processReject() {
+        const modal = document.getElementById('modalReject');
+        const orderId = modal.dataset.orderId;
+        const reason = document.getElementById('rejectionReason').value.trim();
+        
+        if (!reason) {
+            showAlert('error', 'Alasan penolakan harus diisi');
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const confirmButton = modal.querySelector('button:last-child');
+            const originalButtonText = confirmButton.innerHTML;
+            confirmButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Memproses...
+            `;
+            confirmButton.disabled = true;
+
+            const response = await fetch(`/api/orders/reject/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Gagal menolak transaksi (Status: ${response.status})`);
+            }
+
+            const result = await response.json();
+            showAlert('success', 'Transaksi berhasil ditolak');
+            closeRejectModal();
+            fetchTransactionHistory();
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('error', error.message);
+        } finally {
+            const confirmButton = modal.querySelector('button:last-child');
+            confirmButton.innerHTML = 'Tolak Transaksi';
+            confirmButton.disabled = false;
+        }
+    }
+
+    function openPaymentProofModal(imageUrl) {
+        try {
+            const modal = document.getElementById('modalPaymentProof');
+            const image = document.getElementById('paymentProofImage');
+            
+            if (!modal || !image) {
+                throw new Error('Elemen modal payment proof tidak ditemukan');
+            }
+
+            image.src = imageUrl;
+            image.onerror = function() {
+                image.alt = 'Gambar tidak dapat dimuat';
+                image.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkdhZ2FsIG1lbXVhdCBnYW1iYXI8L3RleHQ+PC9zdmc+';
+            };
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } catch (error) {
+            console.error('Error in openPaymentProofModal:', error);
+            showAlert('error', 'Gagal membuka bukti pembayaran: ' + error.message);
+        }
+    }
+
+    function closePaymentProofModal() {
+        const modal = document.getElementById('modalPaymentProof');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 </script>
 

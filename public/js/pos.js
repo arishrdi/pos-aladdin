@@ -596,10 +596,21 @@ document.addEventListener('DOMContentLoaded', function () {
       productElement.setAttribute('data-category', categoryName.toLowerCase());
       productElement.setAttribute('data-name', product.name.toLowerCase());
 
-      // Hitung stok yang tersisa (total stok - yang sudah di keranjang)
+      // Hitung stok yang tersisa (total stok - yang sudah di keranjang - yang di bonus)
       const cartItem = cart.find(item => item.id === product.id);
       const reservedInCart = cartItem ? cartItem.quantity : 0;
-      const availableStock = (product.quantity || 0) - reservedInCart;
+      
+      // Hitung reserved quantity dari CartManager jika tersedia
+      let reservedInBonus = 0;
+      if (typeof window.cartManager !== 'undefined' && window.cartManager.getReservedQuantity) {
+        const totalReserved = window.cartManager.getReservedQuantity(product.id);
+        reservedInBonus = totalReserved - reservedInCart; // karena total sudah termasuk cart
+      } else {
+        // Fallback jika CartManager tidak tersedia
+        reservedInBonus = 0;
+      }
+      
+      const availableStock = (product.quantity || 0) - reservedInCart - reservedInBonus;
 
       // Tampilkan berbeda untuk produk tidak aktif
       if (product.is_active === false) {
@@ -661,10 +672,17 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        // Hitung stok yang tersedia
+        // Hitung stok yang tersedia (termasuk reserved untuk bonus)
         const cartItem = cart.find(item => item.id === product.id);
         const reservedInCart = cartItem ? cartItem.quantity : 0;
-        const availableStock = (product.quantity || 0) - reservedInCart;
+        
+        let reservedInBonus = 0;
+        if (typeof window.cartManager !== 'undefined' && window.cartManager.getReservedQuantity) {
+          const totalReserved = window.cartManager.getReservedQuantity(product.id);
+          reservedInBonus = totalReserved - reservedInCart;
+        }
+        
+        const availableStock = (product.quantity || 0) - reservedInCart - reservedInBonus;
 
         // Validasi stok
         if (availableStock <= 0) {

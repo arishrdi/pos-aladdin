@@ -15,6 +15,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\PrintTemplateController;
 use App\Http\Controllers\InventoryHistoryController;
 use App\Http\Controllers\CashRegisterTransactionController;
+use App\Http\Controllers\BonusController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -125,6 +126,30 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);
 
+        // Bonus management routes (Admin/Supervisor only)
+        Route::controller(BonusController::class)->prefix('bonus')->group(function () {
+            Route::get('/rules', 'getBonusRules'); // Get bonus rules for outlet
+            Route::post('/rules', 'createBonusRule')->middleware('role:admin'); // Create bonus rule (admin only)
+            Route::put('/rules/{id}', 'updateBonusRule')->middleware('role:admin'); // Update bonus rule (admin only)
+            Route::delete('/rules/{id}', 'deleteBonusRule')->middleware('role:admin'); // Delete bonus rule (admin only)
+            Route::get('/pending', 'getPendingBonuses'); // Get pending bonuses for approval
+            Route::post('/approve/{id}', 'approveBonus'); // Approve bonus transaction
+            Route::post('/reject/{id}', 'rejectBonus'); // Reject bonus transaction
+            Route::get('/stats', 'getBonusStats'); // Get bonus statistics
+        });
+
+        // Order approval routes (Admin/Supervisor only)
+        Route::controller(OrderController::class)->prefix('orders')->group(function () {
+            Route::get('/pending', 'getPendingOrders'); // Get pending orders for approval
+            Route::post('/approve/{id}', 'approveOrder'); // Approve order
+            Route::post('/reject/{id}', 'rejectOrder'); // Reject order
+            
+            // Cancellation/Refund approval routes
+            Route::get('/cancellation/pending', 'getPendingCancellations'); // Get pending cancellation/refund requests
+            Route::post('/cancellation/approve/{id}', 'approveCancellation'); // Approve cancellation/refund
+            Route::post('/cancellation/reject/{id}', 'rejectCancellation'); // Reject cancellation/refund
+        });
+
         Route::get('/admin', function () {
             return response()->json([
                 'message' => 'Ini untuk admin'
@@ -134,6 +159,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::middleware('role:kasir,admin,supervisor')->group(function () {
         
+        Route::post('/upload/payment-proofs', [OrderController::class, 'uploadPaymentProofs']);
+
         Route::get('/products/barcode/{barcode}', [ProductController::class, 'findByBarcode'])->middleware('role:kasir');
 
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
@@ -159,9 +186,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(OrderController::class)->group(function () {
             Route::post('/orders', 'store');
             Route::get('/orders/revenue/{outletId}', 'oneMonthRevenue');
-            Route::post('/orders/cancel/{orderId}', 'cancelOrder');
+            Route::post('/orders/cancel/{orderId}', 'cancelOrder'); // Legacy method
             Route::get('/orders/history', 'orderHistory');
             Route::get('/orders/history/admin', 'orderAdmin');
+            
+            // Cancellation request route (for cashiers)
+            Route::post('/orders/cancellation/request/{id}', 'requestCancellation'); // Request cancellation/refund
         });
 
         Route::controller(CashRegisterController::class)->group(function () {
@@ -184,6 +214,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/balance/{id}', 'getBalance');
             Route::post('/add-cash', 'addCash');
             Route::post('/subtract-cash', 'subtractCash');
+        });
+
+        // Bonus routes for cashiers, admin, and supervisors
+        Route::controller(BonusController::class)->prefix('bonus')->group(function () {
+            Route::post('/manual', 'createManualBonus'); // Create manual bonus transaction
+            Route::post('/calculate-auto', 'calculateAutomaticBonus'); // Calculate automatic bonus for cart
+            Route::get('/history', 'getBonusHistory'); // Get bonus history for outlet
         });
     });
 

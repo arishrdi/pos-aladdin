@@ -89,6 +89,81 @@
         </div>
 
         @include('partials.pos.modal.modal-history-transaksi')
+        
+        <!-- Modal Refund Confirmation -->
+        <div id="refundModal" class="fixed inset-0 z-60 hidden">
+            <!-- Overlay -->
+            <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('refundModal')"></div>
+            
+            <!-- Modal Box -->
+            <div class="bg-white w-[90%] md:w-1/2 max-w-md mx-auto rounded shadow-lg z-60 relative mt-20">
+                <!-- Header -->
+                <div class="p-4 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-red-600">Konfirmasi Refund</h3>
+                        <button onclick="tutupModal('refundModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+                    </div>
+                </div>
+                
+                <!-- Body -->
+                <div class="p-6">
+                    <div class="text-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <h4 id="refundModalTitle" class="text-lg font-semibold mb-2">Ajukan Permintaan Refund</h4>
+                        <p class="text-gray-600 mb-4">
+                            Permintaan untuk transaksi <span id="refundInvoice" class="font-mono font-bold"></span> 
+                            dengan total <span id="refundTotal" class="font-bold text-red-600"></span>
+                        </p>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                            <p class="text-sm text-blue-700">
+                                <strong>Info:</strong> Permintaan ini akan dikirim ke admin untuk persetujuan. 
+                                Anda akan mendapat notifikasi ketika permintaan sudah diproses.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Alasan Refund -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Alasan Refund <span class="text-red-500">*</span>
+                        </label>
+                        <select id="refundReason" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Pilih alasan...</option>
+                            <option value="customer_request">Permintaan Pelanggan</option>
+                            <option value="defective_product">Produk Rusak/Cacat</option>
+                            <option value="wrong_item">Barang Salah</option>
+                            <option value="system_error">Kesalahan Sistem</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Catatan Tambahan -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Catatan Tambahan (Opsional)
+                        </label>
+                        <textarea id="refundNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                  placeholder="Masukkan catatan tambahan jika diperlukan..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="border-t p-4 bg-gray-50 rounded-b">
+                    <div class="flex justify-end gap-3">
+                        <button onclick="tutupModal('refundModal')" 
+                                class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                        <button onclick="prosesRefund()" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            Ajukan Permintaan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -268,17 +343,33 @@
                     </td>
                     <td class="p-2 border font-medium">Rp ${formatUang(transaksi.total)}</td>
                     <td class="p-2 border">
-                        <button onclick="lihatDetail('${transaksi.invoice}')" class="text-blue-500 hover:text-blue-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                        </button>
-                        <button onclick="cetakStruk('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Cetak Struk">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </button>
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="lihatDetail('${transaksi.invoice}')" class="text-blue-500 hover:text-blue-700" title="Lihat Detail">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                            <button onclick="cetakStruk('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Cetak Struk">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                            </button>
+                            ${transaksi.status === 'Selesai' ? `
+                            <button onclick="bukaModalRefund('${transaksi.invoice}')" class="text-red-500 hover:text-red-700" title="Ajukan Refund">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                                </svg>
+                            </button>
+                            ` : ''}
+                            ${transaksi.status === 'pending' ? `
+                            <button onclick="bukaModalRefund('${transaksi.invoice}')" class="text-orange-500 hover:text-orange-700" title="Ajukan Pembatalan">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                            ` : ''}
+                        </div>
                     </td>
                 </tr>
             `).join("")
@@ -960,4 +1051,138 @@
             document.head.appendChild(meta);
         }
     });
+
+    // Variabel global untuk menyimpan data transaksi yang akan di-refund
+    let transaksiRefund = null;
+
+    // Fungsi untuk membuka modal refund
+    function bukaModalRefund(nomorInvoice) {
+        const transaksi = semuaTransaksi.find(t => t.invoice === nomorInvoice);
+        if (!transaksi) {
+            alert('Transaksi tidak ditemukan');
+            return;
+        }
+
+        // Cek apakah transaksi dapat diminta pembatalan/refund
+        if (!['Selesai', 'pending'].includes(transaksi.status)) {
+            alert('Hanya transaksi dengan status "Selesai" atau "Pending" yang dapat diminta pembatalan/refund');
+            return;
+        }
+
+        // Simpan data transaksi untuk diproses
+        transaksiRefund = transaksi;
+
+        // Determine request type
+        const requestType = transaksi.status === 'pending' ? 'Pembatalan' : 'Refund';
+        
+        // Update modal title
+        document.getElementById('refundModalTitle').textContent = `Ajukan Permintaan ${requestType}`;
+
+        // Isi data ke modal
+        document.getElementById('refundInvoice').textContent = transaksi.invoice;
+        document.getElementById('refundTotal').textContent = `Rp ${formatUang(transaksi.total)}`;
+        
+        // Reset form
+        document.getElementById('refundReason').value = '';
+        document.getElementById('refundNotes').value = '';
+
+        // Buka modal
+        bukaModal('refundModal');
+    }
+
+    // Fungsi untuk memproses refund
+    async function prosesRefund() {
+        if (!transaksiRefund) {
+            alert('Data transaksi tidak ditemukan');
+            return;
+        }
+
+        // Validasi input
+        const reason = document.getElementById('refundReason').value;
+        const notes = document.getElementById('refundNotes').value;
+
+        if (!reason) {
+            alert('Silakan pilih alasan');
+            document.getElementById('refundReason').focus();
+            return;
+        }
+
+        // Determine request type
+        const requestType = transaksiRefund.status === 'pending' ? 'pembatalan' : 'refund';
+
+        // Konfirmasi final
+        const confirmMessage = `Anda akan mengajukan permintaan ${requestType} untuk:\\n\\n` +
+                               `Invoice: ${transaksiRefund.invoice}\\n` +
+                               `Total: Rp ${formatUang(transaksiRefund.total)}\\n\\n` +
+                               `Apakah Anda yakin ingin melanjutkan?`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        try {
+            // Disable tombol untuk mencegah double click
+            const refundButton = document.querySelector('#refundModal button[onclick="prosesRefund()"]');
+            const originalText = refundButton.textContent;
+            refundButton.disabled = true;
+            refundButton.textContent = 'Memproses...';
+
+            // Ambil token dari localStorage atau meta tag
+            const token = localStorage.getItem('token') || document.querySelector('meta[name="csrf-token"]').content;
+
+            // Siapkan data permintaan
+            const requestData = {
+                reason: reason,
+                notes: notes || null
+            };
+
+            // Kirim request ke backend
+            const response = await fetch(`/api/orders/cancellation/request/${transaksiRefund.id}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || `HTTP Error: ${response.status}`);
+            }
+
+            if (result.success) {
+                // Tutup modal
+                tutupModal('refundModal');
+                
+                // Tampilkan pesan sukses
+                const requestType = transaksiRefund.status === 'pending' ? 'pembatalan' : 'refund';
+                alert(`Permintaan ${requestType} berhasil diajukan!\\n\\nInvoice: ${transaksiRefund.invoice}\\nJumlah: Rp ${formatUang(transaksiRefund.total)}\\n\\nPermintaan akan diproses oleh admin.`);
+                
+                // Refresh data transaksi
+                const hariIni = new Date();
+                await ambilDataTransaksi(hariIni, hariIni);
+                
+                // Reset data transaksi
+                transaksiRefund = null;
+            } else {
+                throw new Error(result.message || 'Gagal mengajukan permintaan');
+            }
+
+        } catch (error) {
+            console.error('Error processing request:', error);
+            alert(`Gagal mengajukan permintaan: ${error.message}`);
+        } finally {
+            // Restore tombol
+            const refundButton = document.querySelector('#refundModal button[onclick="prosesRefund()"]');
+            if (refundButton) {
+                refundButton.disabled = false;
+                refundButton.textContent = 'Ajukan Permintaan';
+            }
+        }
+    }
 </script>

@@ -11,5 +11,11 @@ class Member extends Model
     public function orders() {
         return $this->hasMany(Order::class);
     }
+
+    // Bonus relationships
+    public function bonusTransactions()
+    {
+        return $this->hasMany(BonusTransaction::class);
+    }
 }
 
