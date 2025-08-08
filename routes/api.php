@@ -17,6 +17,7 @@ use App\Http\Controllers\InventoryHistoryController;
 use App\Http\Controllers\CashRegisterTransactionController;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\CashRequestController;
+use App\Http\Controllers\CashReportController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -157,6 +158,17 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/approve/{id}', 'approveRequest'); // Approve cash request
             Route::post('/reject/{id}', 'rejectRequest'); // Reject cash request
             Route::get('/history', 'getRequests'); // Get cash requests history
+        });
+
+        // Cash reporting routes (Admin/Supervisor only)
+        Route::controller(CashReportController::class)->prefix('cash-reports')->group(function () {
+            Route::get('/current-balance', 'getCurrentBalance'); // Get current cash balance
+            Route::get('/balance-trend', 'getBalanceTrend'); // Get balance trend for dashboard
+            Route::get('/cash-flow-report', 'getCashFlowReport'); // Generate comprehensive cash flow report
+            Route::get('/daily-snapshots', 'getDailySnapshots'); // Get daily snapshots with pagination
+            Route::post('/generate-snapshot', 'generateSnapshot'); // Generate daily snapshot manually
+            Route::post('/reconcile-balance', 'reconcileBalance'); // Reconcile cash balance with physical count
+            Route::get('/dashboard-summary', 'getDashboardSummary'); // Get cash summary for dashboard
         });
 
         Route::get('/admin', function () {

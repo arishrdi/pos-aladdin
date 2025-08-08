@@ -7,6 +7,7 @@ use App\Models\CashRegister;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
+use App\Services\CashBalanceService;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,6 +20,13 @@ use Illuminate\Support\Str;
 class OrderController extends Controller
 {
     use ApiResponse;
+
+    protected $cashBalanceService;
+
+    public function __construct(CashBalanceService $cashBalanceService)
+    {
+        $this->cashBalanceService = $cashBalanceService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -1008,20 +1016,13 @@ class OrderController extends Controller
             // Approve order
             $order->approve($user, $request->input('notes'));
 
-            // Add to cash register when approved
-            $cashRegister = CashRegister::where('outlet_id', $order->outlet_id)->first();
-            if ($cashRegister) {
-                $cashRegister->addCash(
-                    $order->total,
-                    $order->user_id,
-                    $order->shift_id,
-                    'Penjualan POS (Approved), Invoice #' . $order->order_number,
-                    'pos'
-                );
-            }
-
             // Update order status to completed
             $order->update(['status' => 'completed']);
+
+            // Record cash transaction jika payment method adalah cash
+            if ($order->payment_method === 'cash') {
+                $this->cashBalanceService->recordDailySalesTransaction($order);
+            }
 
             DB::commit();
 

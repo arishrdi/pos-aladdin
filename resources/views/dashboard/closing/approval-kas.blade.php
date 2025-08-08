@@ -22,6 +22,81 @@
     </div>
 </div>
 
+<!-- Card: Saldo Kas -->
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h3 class="text-2xl font-bold text-blue-600">
+            <i data-lucide="wallet" class="w-6 h-6 inline mr-2"></i>
+            Saldo Kas Hari Ini
+        </h3>
+        <div class="flex items-center gap-2 mt-2 sm:mt-0">
+            <span class="text-xs text-gray-500" id="balanceLastUpdate">Terakhir diperbarui: -</span>
+            <button onclick="refreshBalanceInfo()" class="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Saldo Awal -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-green-800">Saldo Awal</h4>
+                <i data-lucide="sunrise" class="w-5 h-5 text-green-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-green-700" id="openingBalance">Rp 0</p>
+            <p class="text-xs text-green-600 mt-1">Mulai hari</p>
+        </div>
+
+        <!-- Saldo Saat Ini -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-blue-800">Saldo Saat Ini</h4>
+                <i data-lucide="dollar-sign" class="w-5 h-5 text-blue-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-blue-700" id="currentBalance">Rp 0</p>
+            <div class="flex items-center mt-1">
+                <span class="text-xs" id="balanceChangeText">Tidak berubah</span>
+                <i data-lucide="trending-up" class="w-3 h-3 ml-1 text-green-500 hidden" id="balanceUpIcon"></i>
+                <i data-lucide="trending-down" class="w-3 h-3 ml-1 text-red-500 hidden" id="balanceDownIcon"></i>
+            </div>
+        </div>
+
+        <!-- Perubahan Hari Ini -->
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-orange-800">Perubahan Hari Ini</h4>
+                <i data-lucide="activity" class="w-5 h-5 text-orange-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-orange-700" id="netChange">Rp 0</p>
+            <p class="text-xs text-orange-600 mt-1" id="transactionCount">0 transaksi</p>
+        </div>
+    </div>
+
+    <!-- Detail Breakdown -->
+    <div class="mt-4 pt-4 border-t border-gray-200">
+        <h5 class="font-semibold text-gray-700 mb-2">Rincian Kas Hari Ini:</h5>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Penjualan Tunai:</span>
+                <span class="font-semibold text-green-600" id="salesCash">Rp 0</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Tambah Kas:</span>
+                <span class="font-semibold text-blue-600" id="manualAdditions">Rp 0</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Kurang Kas:</span>
+                <span class="font-semibold text-red-600" id="manualSubtractions">Rp 0</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-600">Refund:</span>
+                <span class="font-semibold text-orange-600" id="refunds">Rp 0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Card: Permintaan Kas Menunggu Approval -->
 <div class="bg-white rounded-lg shadow p-4 mb-6" id="pendingRequestsCard">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -145,13 +220,15 @@
                     <th class="py-3 font-bold">Waktu</th>
                     <th class="py-3 font-bold">Tipe</th>
                     <th class="py-3 font-bold">Alasan</th>
+                    <th class="py-3 font-bold">Saldo Awal</th>
                     <th class="py-3 font-bold">Total</th>
+                    <th class="py-3 font-bold">Saldo Akhir</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="cash-history-table">
                 <!-- Data akan dimasukkan lewat JavaScript -->
                 <tr class="border-b hover:bg-gray-50">
-                    <td colspan="5" class="py-8 text-center">
+                    <td colspan="7" class="py-8 text-center">
                         <div class="inline-flex flex-col items-center justify-center gap-2 w-full">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
@@ -299,6 +376,13 @@ function getSelectedOutletId() {
     }
     
     return 1; // default
+}
+
+function refreshBalanceInfo() {
+    const outletId = getSelectedOutletId();
+    if (window.fetchBalanceInfo) {
+        window.fetchBalanceInfo(outletId);
+    }
 }
 
 function showAlert(type, message) {
@@ -746,8 +830,11 @@ function submitApproval(event) {
             closeApprovalModal();
             const outletId = getSelectedOutletId();
             fetchPendingRequests(outletId);
-            fetchCashHistory(outletId, selectedDate);
+            if (window.fetchCashHistory) {
+                window.fetchCashHistory(outletId, selectedDate);
+            }
             fetchCashRequestHistory(outletId);
+            fetchBalanceInfo(outletId);
         } else {
             throw new Error(response.data.message || 'Gagal menyetujui permintaan');
         }
@@ -822,7 +909,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Token not found. User might need to login again.');
         document.getElementById('cash-history-table').innerHTML = `
             <tr class="border-b hover:bg-gray-50">
-                <td colspan="5" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
+                <td colspan="7" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
             </tr>
         `;
         return;
@@ -852,12 +939,123 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    function fetchBalanceInfo(outletId) {
+        console.log(`Fetching balance info for outlet ID: ${outletId}`);
+        
+        // Update loading state
+        document.getElementById('openingBalance').textContent = 'Memuat...';
+        document.getElementById('currentBalance').textContent = 'Memuat...';
+        document.getElementById('netChange').textContent = 'Memuat...';
+        
+        // Fetch current balance
+        axios.get('/api/cash-reports/current-balance', {
+            params: { outlet_id: outletId },
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            const data = response.data.data;
+            updateBalanceDisplay(data);
+        })
+        .catch(error => {
+            console.error('Error fetching current balance:', error);
+            showBalanceError('Gagal memuat saldo saat ini');
+        });
+        
+        // Fetch dashboard summary for detailed breakdown
+        axios.get('/api/cash-reports/dashboard-summary', {
+            params: { outlet_id: outletId },
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            const data = response.data.data;
+            updateBalanceBreakdown(data);
+        })
+        .catch(error => {
+            console.error('Error fetching dashboard summary:', error);
+        });
+    }
+    
+    function updateBalanceDisplay(data) {
+        // Format currency
+        const formatCurrency = (amount) => 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+        
+        // Update main balance cards
+        document.getElementById('openingBalance').textContent = formatCurrency(data.opening_balance);
+        document.getElementById('currentBalance').textContent = formatCurrency(data.current_balance);
+        document.getElementById('netChange').textContent = formatCurrency(data.net_change);
+        
+        // Update change indicators
+        const changePercentage = data.net_change_percentage || 0;
+        const balanceChangeText = document.getElementById('balanceChangeText');
+        const balanceUpIcon = document.getElementById('balanceUpIcon');
+        const balanceDownIcon = document.getElementById('balanceDownIcon');
+        
+        // Reset icons
+        balanceUpIcon.classList.add('hidden');
+        balanceDownIcon.classList.add('hidden');
+        
+        if (changePercentage > 0) {
+            balanceChangeText.textContent = `+${changePercentage.toFixed(1)}%`;
+            balanceChangeText.className = 'text-xs text-green-600';
+            balanceUpIcon.classList.remove('hidden');
+        } else if (changePercentage < 0) {
+            balanceChangeText.textContent = `${changePercentage.toFixed(1)}%`;
+            balanceChangeText.className = 'text-xs text-red-600';
+            balanceDownIcon.classList.remove('hidden');
+        } else {
+            balanceChangeText.textContent = 'Tidak berubah';
+            balanceChangeText.className = 'text-xs text-gray-500';
+        }
+        
+        // Update last update time
+        const now = new Date();
+        const timeString = now.toLocaleString('id-ID', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('balanceLastUpdate').textContent = `Terakhir diperbarui: ${timeString}`;
+    }
+    
+    function updateBalanceBreakdown(data) {
+        const formatCurrency = (amount) => 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+        
+        const today = data.today || {};
+        
+        // Update breakdown details
+        document.getElementById('salesCash').textContent = formatCurrency(today.total_sales_cash);
+        document.getElementById('manualAdditions').textContent = formatCurrency(today.manual_additions);
+        document.getElementById('manualSubtractions').textContent = formatCurrency(today.manual_subtractions);
+        document.getElementById('refunds').textContent = formatCurrency(today.refunds);
+        
+        // Update transaction count
+        const transactionCount = today.transactions_count || 0;
+        document.getElementById('transactionCount').textContent = `${transactionCount} transaksi`;
+    }
+    
+    function showBalanceError(message) {
+        document.getElementById('openingBalance').textContent = 'Error';
+        document.getElementById('currentBalance').textContent = 'Error';
+        document.getElementById('netChange').textContent = 'Error';
+        showAlert('error', message);
+    }
+
     function fetchCashHistory(outletId, date = null) {
         console.log(`Fetching cash history for outlet ID: ${outletId} on date: ${date}`);
         
         document.getElementById('cash-history-table').innerHTML = `
             <tr class="border-b hover:bg-gray-50">
-                <td colspan="5" class="py-4 text-center text-gray-500">Memuat data...</td>
+                <td colspan="7" class="py-4 text-center text-gray-500">Memuat data...</td>
             </tr>
         `;
 
@@ -879,15 +1077,28 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            const data = response.data.data;
+            const responseData = response.data.data;
             
-            if (data.length > 0 && data[0].outlet) {
-                updateOutletInfo(data[0].outlet);
+            // Handle new API response structure
+            let transactions = [];
+            let openingBalance = 0;
+            
+            if (responseData.transactions) {
+                // New structure with balance info
+                transactions = responseData.transactions;
+                openingBalance = responseData.opening_balance || 0;
+            } else {
+                // Fallback for old structure
+                transactions = responseData;
+            }
+            
+            if (transactions.length > 0 && transactions[0].outlet) {
+                updateOutletInfo(transactions[0].outlet);
             } else {
                 updateOutletInfoFromSelection();
             }
             
-            renderCashHistory(data);
+            renderCashHistory(transactions, openingBalance);
         })
         .catch(error => {
             console.error('Error fetching cash history:', error);
@@ -895,13 +1106,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.removeItem('token');
                 document.getElementById('cash-history-table').innerHTML = `
                     <tr class="border-b hover:bg-gray-50">
-                        <td colspan="5" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
+                        <td colspan="7" class="py-4 text-center text-red-500">Sesi login telah berakhir. Silakan login kembali.</td>
                     </tr>
                 `;
             } else {
                 document.getElementById('cash-history-table').innerHTML = `
                     <tr class="border-b hover:bg-gray-50">
-                        <td colspan="5" class="py-4 text-center text-red-500">Terjadi kesalahan saat memuat data: ${error.response?.data?.message || error.message}</td>
+                        <td colspan="7" class="py-4 text-center text-red-500">Terjadi kesalahan saat memuat data: ${error.response?.data?.message || error.message}</td>
                     </tr>
                 `;
             }
@@ -940,26 +1151,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function renderCashHistory(data) {
+    function renderCashHistory(data, openingBalance = 0) {
         const tableBody = document.getElementById('cash-history-table');
         tableBody.innerHTML = '';
 
         if (!data || data.length === 0) {
             tableBody.innerHTML = `
                 <tr class="border-b hover:bg-gray-50">
-                    <td colspan="5" class="py-4 text-center text-gray-500">Tidak ada data transaksi kas untuk ditampilkan</td>
+                    <td colspan="7" class="py-4 text-center text-gray-500">Tidak ada data transaksi kas untuk ditampilkan</td>
                 </tr>
             `;
             return;
         }
 
-        data.forEach(transaction => {
+        // Calculate running balance untuk setiap transaksi
+        // Sortir transaksi berdasarkan waktu untuk memastikan urutan yang benar
+        const sortedData = [...data].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        
+        // Use opening balance dari API
+        const startingBalance = parseFloat(openingBalance) || 0;
+        
+        // Render transactions dalam urutan kronologis
+        const displayData = [...sortedData].reverse(); // Reverse untuk tampilkan yang terbaru dulu
+        const balanceHistory = [];
+        
+        // Hitung balance history
+        let runningBalance = startingBalance;
+        sortedData.forEach(transaction => {
+            const isAdd = transaction.type === 'add';
+            const amount = parseFloat(transaction.amount);
+            const previousBalance = runningBalance;
+            runningBalance += isAdd ? amount : -amount;
+            
+            balanceHistory.push({
+                id: transaction.id,
+                beforeBalance: previousBalance,
+                afterBalance: runningBalance
+            });
+        });
+        
+        // Render dalam urutan terbalik (terbaru dulu)
+        displayData.forEach(transaction => {
             const formattedTime = moment(transaction.created_at).format('HH:mm:ss');
             const formattedDate = moment(transaction.created_at).format('DD MMM YYYY');
             const isAdd = transaction.type === 'add';
             const formattedAmount = new Intl.NumberFormat('id-ID').format(transaction.amount);
             const userName = transaction.user ? transaction.user.name : 'System';
             const reason = transaction.reason || '-';
+            
+            // Find balance info untuk transaction ini
+            const balanceInfo = balanceHistory.find(b => b.id === transaction.id);
+            const beforeBalance = balanceInfo ? balanceInfo.beforeBalance : 0;
+            const afterBalance = balanceInfo ? balanceInfo.afterBalance : 0;
+            
+            const formatCurrency = (amount) => 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
 
             const row = document.createElement('tr');
             row.className = 'border-b hover:bg-gray-50';
@@ -976,9 +1221,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 </td>
                 <td class="text-sm text-gray-600">${reason}</td>
+                <td class="text-sm text-blue-600">${formatCurrency(beforeBalance)}</td>
                 <td class="${isAdd ? 'text-green-600' : 'text-red-600'} font-semibold">
                     ${isAdd ? '+' : '-'}Rp ${formattedAmount}
                 </td>
+                <td class="text-sm text-blue-700 font-semibold">${formatCurrency(afterBalance)}</td>
             `;
             
             tableBody.appendChild(row);
@@ -993,6 +1240,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchCashHistory(initialOutletId, initialDate);
     fetchPendingRequests(initialOutletId);
     fetchCashRequestHistory(initialOutletId);
+    fetchBalanceInfo(initialOutletId);
     
     // Add status filter event listener
     document.getElementById('statusFilter').addEventListener('change', function() {
@@ -1001,8 +1249,9 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchCashRequestHistory(outletId, status);
     });
     
-    // Make fetchCashHistory available globally for the approval functions
+    // Make functions available globally for the approval functions
     window.fetchCashHistory = fetchCashHistory;
+    window.fetchBalanceInfo = fetchBalanceInfo;
 });
 </script>
 

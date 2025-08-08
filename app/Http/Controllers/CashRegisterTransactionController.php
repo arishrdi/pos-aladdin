@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CashRegister;
 use App\Models\CashRegisterTransaction;
 use App\Models\Shift;
+use App\Services\CashBalanceService;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +17,13 @@ class CashRegisterTransactionController extends Controller
 {
 
     use ApiResponse;
+    
+    protected $cashBalanceService;
+
+    public function __construct(CashBalanceService $cashBalanceService)
+    {
+        $this->cashBalanceService = $cashBalanceService;
+    }
     /**
      * Display a listing of the transactions.
      * Menampilkan daftar transaksi cash register.
@@ -39,7 +48,24 @@ class CashRegisterTransactionController extends Controller
                 })
                 ->get();
 
-            return $this->successResponse($transactions, 'Successfully get cash register transactions');
+            // Add opening balance info untuk hari ini
+            $responseData = [
+                'transactions' => $transactions,
+                'opening_balance' => 0,
+                'current_balance' => 0
+            ];
+
+            if ($date && $outlet_id) {
+                try {
+                    $responseData['opening_balance'] = $this->cashBalanceService->getOpeningBalance($outlet_id, $date);
+                    $responseData['current_balance'] = $this->cashBalanceService->getCurrentBalance($outlet_id);
+                } catch (\Exception $e) {
+                    // If balance service fails, continue without balance info
+                    \Log::warning('Failed to get balance info: ' . $e->getMessage());
+                }
+            }
+
+            return $this->successResponse($responseData, 'Successfully get cash register transactions');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

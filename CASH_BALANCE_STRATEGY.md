@@ -144,9 +144,7 @@ public function approveOrder($orderId) {
 
 #### 3.3 Real-time Updates
 **Implementation Options**:
-- WebSocket integration (recommended)
 - AJAX polling (simpler alternative)
-- Server-sent events
 
 ### **Phase 4: Reporting & Analytics**
 
