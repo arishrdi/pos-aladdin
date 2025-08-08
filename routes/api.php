@@ -16,6 +16,7 @@ use App\Http\Controllers\PrintTemplateController;
 use App\Http\Controllers\InventoryHistoryController;
 use App\Http\Controllers\CashRegisterTransactionController;
 use App\Http\Controllers\BonusController;
+use App\Http\Controllers\CashRequestController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -150,6 +151,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/cancellation/reject/{id}', 'rejectCancellation'); // Reject cancellation/refund
         });
 
+        // Cash request approval routes (Admin/Supervisor only)
+        Route::controller(CashRequestController::class)->prefix('cash-requests')->group(function () {
+            Route::get('/pending', 'getPendingRequests'); // Get pending cash requests for approval
+            Route::post('/approve/{id}', 'approveRequest'); // Approve cash request
+            Route::post('/reject/{id}', 'rejectRequest'); // Reject cash request
+            Route::get('/history', 'getRequests'); // Get cash requests history
+        });
+
         Route::get('/admin', function () {
             return response()->json([
                 'message' => 'Ini untuk admin'
@@ -221,6 +230,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/manual', 'createManualBonus'); // Create manual bonus transaction
             Route::post('/calculate-auto', 'calculateAutomaticBonus'); // Calculate automatic bonus for cart
             Route::get('/history', 'getBonusHistory'); // Get bonus history for outlet
+        });
+
+        // Cash request routes (for cashiers, admin, and supervisors)
+        Route::controller(CashRequestController::class)->prefix('cash-requests')->group(function () {
+            Route::post('/request', 'requestCash'); // Request cash addition/subtraction (cashiers)
+            Route::get('/my-requests', 'getRequests'); // Get user's own cash requests
         });
     });
 

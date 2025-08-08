@@ -144,7 +144,6 @@
                     <i data-lucide="calendar" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stok Pertanggal</span>
                 </a>
-                @if(auth()->check() && auth()->user()->role !== 'supervisor')
                 <a href="/penyesuaian-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="edit" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Penyesuaian Stok</span>
@@ -157,7 +156,6 @@
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve Stok</span>
                 </a>
-                @endif
             </div>
         </div>
 
@@ -197,6 +195,10 @@
                 <a href="/riwayat-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="wallet" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Kas</span>
+                </a>
+                <a href="/approval-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="wallet" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Approval Kas</span>
                 </a>
                 <a href="/riwayat-transaksi" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>

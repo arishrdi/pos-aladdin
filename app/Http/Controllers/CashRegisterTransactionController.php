@@ -9,6 +9,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CashRegisterTransactionController extends Controller
 {
@@ -201,10 +202,29 @@ class CashRegisterTransactionController extends Controller
             $request->validate([
                 'amount' => 'required|numeric|min:0',
                 'outlet_id' => 'required|exists:outlets,id',
-                'reason' => 'nullable|string'
+                'reason' => 'nullable|string',
+                'proof_files.*' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120' // max 5MB per file
             ]);
 
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
+
+            // Handle file uploads
+            $proofFiles = [];
+            if ($request->hasFile('proof_files')) {
+                foreach ($request->file('proof_files') as $file) {
+                    $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    
+                    // Create directory if not exists
+                    $uploadDir = public_path('uploads/cash_proofs');
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    // Move file to upload directory
+                    $file->move($uploadDir, $fileName);
+                    $proofFiles[] = 'cash_proofs/' . $fileName;
+                }
+            }
 
             $transaction = $cashRegister->addCash(
                 amount: $request->amount,
@@ -214,7 +234,12 @@ class CashRegisterTransactionController extends Controller
                 source: 'cash'
             );
 
-            return $this->successResponse($transaction, 'Successfully add cash');
+            // Update transaction with proof files
+            if (!empty($proofFiles)) {
+                $transaction->update(['proof_files' => $proofFiles]);
+            }
+
+            return $this->successResponse($transaction->fresh(), 'Successfully add cash with proof files');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
@@ -223,18 +248,36 @@ class CashRegisterTransactionController extends Controller
     // mengurangi uang kas
     public function subtractCash(Request $request)
     {
-
         try {
             $request->validate([
                 'amount' => 'required|numeric|min:0',
                 'outlet_id' => 'required|exists:outlets,id',
-                'reason' => 'nullable|string'
+                'reason' => 'nullable|string',
+                'proof_files.*' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120' // max 5MB per file
             ]);
 
             $cashRegister = CashRegister::where('outlet_id', $request->outlet_id)->first();
 
             if ($request->amount > $cashRegister->balance) {
                 return $this->errorResponse('Insufficient balance');
+            }
+
+            // Handle file uploads
+            $proofFiles = [];
+            if ($request->hasFile('proof_files')) {
+                foreach ($request->file('proof_files') as $file) {
+                    $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    
+                    // Create directory if not exists
+                    $uploadDir = public_path('uploads/cash_proofs');
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    // Move file to upload directory
+                    $file->move($uploadDir, $fileName);
+                    $proofFiles[] = 'cash_proofs/' . $fileName;
+                }
             }
 
             $transaction = $cashRegister->subtractCash(
@@ -244,7 +287,13 @@ class CashRegisterTransactionController extends Controller
                 reason: $request->reason,
                 source: 'cash'
             );
-            return $this->successResponse($transaction, 'Successfully subtract cash');
+
+            // Update transaction with proof files
+            if (!empty($proofFiles)) {
+                $transaction->update(['proof_files' => $proofFiles]);
+            }
+
+            return $this->successResponse($transaction->fresh(), 'Successfully subtract cash with proof files');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
@@ -252,12 +301,25 @@ class CashRegisterTransactionController extends Controller
 
     public function cashRegisterHistory(Request $request)
     {
-
-        $outletId =  $request->outlet_id;
+        $outletId = $request->outlet_id;
 
         try {
-            $cash = CashRegisterTransaction::where('outlet_id', $outletId)->orderBy('created_at', 'desc')->get();
-            return $this->successResponse($cash, 'Successfully getting cash history');
+            $transactions = CashRegisterTransaction::with(['cashRegister', 'user:id,name'])
+                ->whereHas('cashRegister', function($query) use ($outletId) {
+                    $query->where('outlet_id', $outletId);
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Transform data untuk include proof files URLs
+            $transactions->transform(function ($transaction) {
+                $data = $transaction->toArray();
+                $data['proof_files_urls'] = $transaction->proof_files_urls;
+                $data['has_proof_files'] = !empty($transaction->proof_files);
+                return $data;
+            });
+
+            return $this->successResponse($transactions, 'Successfully getting cash history');
         } catch (\Throwable $e) {
             return $this->errorResponse($e->getMessage());
         }

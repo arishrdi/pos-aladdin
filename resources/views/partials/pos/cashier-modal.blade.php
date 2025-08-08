@@ -37,7 +37,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-sm text-gray-600 mb-4">Masukkan jumlah kas yang akan ditambahkan ke mesin kasir.</p>
+            <p class="text-sm text-gray-600 mb-4">Ajukan permintaan untuk menambahkan kas ke mesin kasir. Membutuhkan persetujuan admin.</p>
 
             <form onsubmit="submitTambahKas(event)">
                 <div class="mb-4 text-left">
@@ -66,7 +66,7 @@
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeModal('tambahKasModal')" class="px-4 py-2 border border-green-400 text-green-500 rounded hover:bg-green-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Tambah Kas</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Ajukan Permintaan</button>
                 </div>
             </form>
         </div>
@@ -85,7 +85,7 @@
                 </button>
             </div>
             <p class="text-sm text-gray-500 mb-4">
-                Masukkan jumlah kas yang akan diambil dari mesin kasir.
+                Ajukan permintaan untuk mengambil kas dari mesin kasir. Membutuhkan persetujuan admin.
             </p>
             <form id="withdrawForm" onsubmit="submitWithdrawKas(event)">
                 <div class="mb-4">
@@ -114,7 +114,7 @@
                 </div>
                 <div class="flex justify-end gap-2">
                     <button type="button" onclick="closeModal('withdrawModal')" class="px-4 py-2 border border-green-400 text-green-500 rounded-lg hover:bg-green-50">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Ambil Kas</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Ajukan Permintaan</button>
                 </div>
             </form>
         </div>
@@ -260,55 +260,58 @@
         }
 
         try {
-            // Store proof files info for future use (when backend supports file upload)
-            const proofFilesInfo = Array.from(proofFiles).map(file => ({
-                name: file.name,
-                size: file.size,
-                type: file.type
-            }));
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('type', 'add');
+            formData.append('amount', amount);
+            formData.append('outlet_id', outletId);
+            formData.append('reason', reason);
             
-            console.log('Add Cash - Proof files uploaded:', proofFilesInfo);
+            // Add all proof files to FormData
+            Array.from(proofFiles).forEach((file, index) => {
+                formData.append('proof_files[]', file);
+            });
             
-            const response = await fetch('/api/cash-register-transactions/add-cash', {
+            console.log('Add Cash Request - Uploading', proofFiles.length, 'proof files');
+            
+            const response = await fetch('/api/cash-requests/request', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
+                    // Don't set Content-Type for FormData, let browser set it with boundary
                 },
-                body: JSON.stringify({
-                    amount: amount,
-                    outlet_id: outletId,
-                    reason: reason,
-                    proof_files: proofFilesInfo // Include proof files info
-                })
+                body: formData
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Gagal menambahkan kas');
+                throw new Error(result.message || 'Gagal mengajukan permintaan');
             }
 
             if (result.success) {
                 showAlert({
                     title: 'Berhasil',
-                    message: `Kas berhasil ditambahkan: ${formatRupiah(amount)} dengan ${proofFilesInfo.length} bukti`,
+                    message: `Permintaan tambah kas ${formatRupiah(amount)} berhasil diajukan dan menunggu persetujuan admin`,
                     type: 'success'
                 });
                 
-                // Refresh cash balance
-                await fetchCashBalance();
+                // No need to refresh cash balance since it's just a request
                 closeModal('tambahKasModal');
+                
+                // Reset form and clear file preview
                 e.target.reset();
+                document.getElementById('addCashProofPreview').innerHTML = '';
+                document.getElementById('addCashProof').value = '';
             } else {
-                throw new Error(result.message || 'Gagal menambahkan kas');
+                throw new Error(result.message || 'Gagal mengajukan permintaan');
             }
         } catch (error) {
-            console.error('Error adding cash:', error);
+            console.error('Error requesting cash addition:', error);
             showAlert({
                 title: 'Gagal',
-                message: error.message || 'Terjadi kesalahan saat menambahkan kas',
+                message: error.message || 'Terjadi kesalahan saat mengajukan permintaan',
                 type: 'error'
             });
         }
@@ -348,65 +351,61 @@
             return;
         }
 
-        if (amount > currentCashBalance) {
-            showAlert({
-                title: 'Gagal',
-                message: 'Saldo tidak mencukupi',
-                type: 'error'
-            });
-            return;
-        }
+        // Remove balance validation since it's now a request that will be validated by admin
 
         try {
-            // Store proof files info for future use (when backend supports file upload)
-            const proofFilesInfo = Array.from(proofFiles).map(file => ({
-                name: file.name,
-                size: file.size,
-                type: file.type
-            }));
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('type', 'subtract');
+            formData.append('amount', amount);
+            formData.append('outlet_id', outletId);
+            formData.append('reason', reason);
             
-            console.log('Withdraw Cash - Proof files uploaded:', proofFilesInfo);
+            // Add all proof files to FormData
+            Array.from(proofFiles).forEach((file, index) => {
+                formData.append('proof_files[]', file);
+            });
             
-            const response = await fetch('/api/cash-register-transactions/subtract-cash', {
+            console.log('Subtract Cash Request - Uploading', proofFiles.length, 'proof files');
+            
+            const response = await fetch('/api/cash-requests/request', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
+                    // Don't set Content-Type for FormData, let browser set it with boundary
                 },
-                body: JSON.stringify({
-                    amount: amount,
-                    outlet_id: outletId,
-                    reason: reason,
-                    proof_files: proofFilesInfo // Include proof files info
-                })
+                body: formData
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Gagal mengambil kas');
+                throw new Error(result.message || 'Gagal mengajukan permintaan');
             }
 
             if (result.success) {
                 showAlert({
                     title: 'Berhasil',
-                    message: `Kas berhasil diambil: ${formatRupiah(amount)} dengan ${proofFilesInfo.length} bukti`,
+                    message: `Permintaan kurang kas ${formatRupiah(amount)} berhasil diajukan dan menunggu persetujuan admin`,
                     type: 'success'
                 });
                 
-                // Refresh cash balance
-                await fetchCashBalance();
+                // No need to refresh cash balance since it's just a request
                 closeModal('withdrawModal');
+                
+                // Reset form and clear file preview
                 e.target.reset();
+                document.getElementById('withdrawCashProofPreview').innerHTML = '';
+                document.getElementById('withdrawCashProof').value = '';
             } else {
-                throw new Error(result.message || 'Gagal mengambil kas');
+                throw new Error(result.message || 'Gagal mengajukan permintaan');
             }
         } catch (error) {
-            console.error('Error withdrawing cash:', error);
+            console.error('Error requesting cash subtraction:', error);
             showAlert({
                 title: 'Gagal',
-                message: error.message || 'Terjadi kesalahan saat mengambil kas',
+                message: error.message || 'Terjadi kesalahan saat mengajukan permintaan',
                 type: 'error'
             });
         }

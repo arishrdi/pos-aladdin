@@ -41,7 +41,7 @@
             <option value="kasir">Kasir</option>
             <option value="supervisor">Supervisor</option>
             <option value="admin">Admin</option>
-            <option value="manajer">Manajer</option>
+            {{-- <option value="manajer">Manajer</option> --}}
           </select>
           <p id="errorPeranStaff" class="text-red-500 text-xs mt-1 hidden">Peran wajib dipilih</p>
         </div>

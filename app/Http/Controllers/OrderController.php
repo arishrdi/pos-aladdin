@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ApprovalRequest;
 use App\Models\CashRegister;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
@@ -10,6 +11,8 @@ use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -158,13 +161,13 @@ class OrderController extends Controller
             if ($request->hasFile('payment_proof')) {
                 $file = $request->file('payment_proof');
                 $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-                
+
                 // Pastikan direktori ada
                 $uploadDir = public_path('uploads/payment_proofs');
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0755, true);
                 }
-                
+
                 // Pindahkan file ke direktori public
                 $file->move($uploadDir, $fileName);
                 $paymentProofPath = 'payment_proofs/' . $fileName;
@@ -353,7 +356,7 @@ class OrderController extends Controller
             }
 
             $success = $order->requestCancellation(
-                $user, 
+                $user,
                 $request->input('reason'),
                 $request->input('notes')
             );
@@ -363,6 +366,34 @@ class OrderController extends Controller
             }
 
             $type = $order->cancellation_type;
+
+            // Load necessary relationships for email
+            $order->load(['user', 'outlet', 'items.product']);
+
+            $supervisors = $user->outlet->supervisor;
+
+            // Log::alert($supervisors);
+            foreach ($supervisors as $supervisor) {
+
+                if (empty($supervisor->email)) {
+                    Log::warning("Supervisor {$supervisor->name} tidak punya email, skip kirim email");
+                    continue;
+                }
+
+                // Determine request type for email
+                $requestType = $order->status === 'pending' ? 'PEMBATALAN TRANSAKSI' : 'REFUND TRANSAKSI';
+
+                $data = [
+                    'supervisor_name' => $supervisor->name,
+                    'cashier_name' => $user->name,
+                    'approval_request' => $requestType,
+                    'approval_data' => $order
+                ];
+
+                Log::info("Sending email to supervisor: {$supervisor->email} for {$requestType} of order {$order->order_number}");
+                Mail::to($supervisor->email)->send(new ApprovalRequest($data));
+            }
+
             return $this->successResponse($order->fresh(), "Permintaan {$type} berhasil diajukan dan menunggu persetujuan admin");
         } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
@@ -388,7 +419,7 @@ class OrderController extends Controller
             }
 
             $isRefund = ($order->status === 'completed');
-            
+
             // Approve the cancellation request
             $order->approveCancellation($user, $request->input('admin_notes'));
 
@@ -448,15 +479,15 @@ class OrderController extends Controller
             }
 
             $orders = Order::with([
-                'user:id,name', 
-                'outlet:id,name', 
+                'user:id,name',
+                'outlet:id,name',
                 'cancellationRequester:id,name',
                 'items.product:id,name'
             ])
-            ->where('outlet_id', $outletId)
-            ->where('cancellation_status', 'requested')
-            ->latest('cancellation_requested_at')
-            ->get();
+                ->where('outlet_id', $outletId)
+                ->where('cancellation_status', 'requested')
+                ->latest('cancellation_requested_at')
+                ->get();
 
             $transformedOrders = $orders->map(function ($order) {
                 return [
@@ -506,7 +537,7 @@ class OrderController extends Controller
                 $inventory->increment('quantity', $item->quantity);
 
                 $historyType = $isRefund ? 'refund' : 'adjustment';
-                $historyNotes = $isRefund 
+                $historyNotes = $isRefund
                     ? "Refund Order #{$order->order_number} - {$order->cancellation_reason}"
                     : "Pembatalan Order #{$order->order_number} - {$order->cancellation_reason}";
 
@@ -586,7 +617,7 @@ class OrderController extends Controller
                     $inventory->save();
 
                     // Catat riwayat perubahan stok
-                    $historyNotes = $isRefund 
+                    $historyNotes = $isRefund
                         ? "Refund Order #{$order->order_number} - Alasan: {$refundReason}"
                         : "Pembatalan Order #{$order->order_number}";
 
@@ -619,7 +650,7 @@ class OrderController extends Controller
             // Handle cash register adjustment
             $cashRegister = CashRegister::where('outlet_id', $order->outlet_id)->first();
             if ($cashRegister) {
-                $transactionNotes = $isRefund 
+                $transactionNotes = $isRefund
                     ? "Refund Order #{$order->order_number} - {$refundReason}"
                     : "Pembatalan Order #{$order->order_number}";
 
@@ -627,10 +658,10 @@ class OrderController extends Controller
                 // Untuk pembatalan (pending order), tidak perlu kurangi kas karena belum masuk
                 if ($isRefund) {
                     $cashRegister->subtractCash(
-                        $order->total, 
-                        auth()->user()->id, 
-                        $order->shift_id, 
-                        $transactionNotes, 
+                        $order->total,
+                        auth()->user()->id,
+                        $order->shift_id,
+                        $transactionNotes,
                         'refund'
                     );
                 }
@@ -639,7 +670,7 @@ class OrderController extends Controller
             // Commit transaksi jika semua operasi berhasil
             DB::commit();
 
-            $message = $isRefund 
+            $message = $isRefund
                 ? 'Refund berhasil diproses. Stok produk dan kas telah disesuaikan.'
                 : 'Order berhasil dibatalkan. Stok produk telah dikembalikan.';
 
@@ -676,97 +707,6 @@ class OrderController extends Controller
         }
     }
 
-    // public function orderHistory(Request $request)
-    // {
-    //     try {
-    //         $validator = Validator::make($request->query(), [
-    //             'outlet_id' => 'nullable|exists:outlets,id',
-    //             'member_id' => 'nullable|exists:members,id',
-    //             'date_from' => 'nullable|date',
-    //             'date_to' => 'nullable|date|after_or_equal:date_from',
-    //         ]);
-
-    //         if ($validator->fails()) {
-    //             return $this->errorResponse($validator->errors(), 422);
-    //         }
-
-    //         $query = Order::query();
-
-    //         if ($request->filled('outlet_id')) {
-    //             $query->where('outlet_id', $request->outlet_id);
-    //         }
-
-    //         if ($request->filled('member_id')) {
-    //             $query->where('member_id', $request->member_id);
-    //         }
-
-    //         if ($request->filled('date_from') && $request->filled('date_to')) {
-    //             $query->whereBetween('created_at', [
-    //                 $request->date_from,
-    //                 $request->date_to . ' 23:59:59'
-    //             ]);
-    //         }
-
-    //         $totalOrders = $query->count();
-    //         $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
-
-    //         $orders = $query->with([
-    //             'items.product:id,name,sku',
-    //             'outlet:id,name',
-    //             'shift:id',
-    //             'user:id,name'
-    //         ])->has('outlet')->has('user')->latest()->get();
-
-    //         // Transformasi respons
-    //         $orders->transform(function ($order) {
-    //             return [
-    //                 'id' => $order->id,
-    //                 'order_number' => $order->order_number,
-    //                 'outlet' => $order->outlet->name,
-    //                 'user' => $order->user->name,
-    //                 'total' => $order->total,
-    //                 'status' => $order->status,
-
-    //                 'subtotal' => $order->subtotal,
-    //                 'tax' => $order->tax,
-    //                 'discount' => $order->discount,
-    //                 'total_paid' => $order->total_paid,
-    //                 'change' => $order->change,
-
-    //                 'payment_method' => $order->payment_method,
-    //                 'created_at' => $order->created_at->format('d/m/Y H:i'),
-    //                 'items' => $order->items->map(function ($item) {
-    //                     return [
-    //                         'product' => $item->product->name,
-    //                         'sku' => $item->product->sku,
-    //                         'unit' => $item->product->unit,
-    //                         'quantity' => $item->quantity,
-    //                         'price' => $item->price,
-    //                         'discount' => $item->discount,
-    //                         'total' => $item->quantity * $item->price
-    //                     ];
-    //                 }),
-    //                 'member' => $order->member ? [
-    //                     'name' => $order->member->name,
-    //                     'member_code' => $order->member->member_code
-    //                 ] : null
-    //             ];
-    //         });
-
-    //         // Tambahkan informasi total ke dalam respons
-    //         $response = [
-    //             'date_from' => date('d-m-Y', strtotime($request->date_from)),
-    //             'date_to' => date('d-m-Y', strtotime($request->date_to)),
-    //             'total_orders' => $totalOrders,
-    //             'total_revenue' => $totalRevenue,
-    //             'orders' => $orders
-    //         ];
-
-    //         return $this->successResponse($response, 'Riwayat order berhasil diambil');
-    //     } catch (\Exception $e) {
-    //         return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
-    //     }
-    // }
 
     public function orderHistory(Request $request)
     {

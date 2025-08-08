@@ -72,6 +72,10 @@ class Outlet extends Model
     {
         return $this->hasOne(User::class, 'outlet_id', 'id')->where('role', 'manajer');
     }
+    public function supervisor()
+    {
+        return $this->hasMany(User::class, 'outlet_id', 'id')->where('role', 'supervisor');
+    }
 
     // Bonus relationships
     public function bonusRules()

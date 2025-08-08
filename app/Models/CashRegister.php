@@ -31,7 +31,7 @@ class CashRegister extends Model
         return $this->hasMany(CashRegisterTransaction::class);
     }
 
-    public function addCash(float $amount, int $userId, int $shiftId, string $reason, string $source): CashRegisterTransaction
+    public function addCash(float $amount, int $userId, ?int $shiftId, string $reason, string $source): CashRegisterTransaction
     {
         return DB::transaction(function () use ($amount, $userId, $shiftId, $reason, $source) {
             // Update saldo
@@ -49,7 +49,7 @@ class CashRegister extends Model
         });
     }
 
-    public function subtractCash(float $amount, int $userId, int $shiftId, string $reason, string $source): CashRegisterTransaction
+    public function subtractCash(float $amount, int $userId, ?int $shiftId, string $reason, string $source): CashRegisterTransaction
     {
         return DB::transaction(function () use ($amount, $userId, $shiftId, $reason, $source) {
             // Pastikan saldo cukup

@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ApprovalRequest extends Mailable
+class CashRequestApproval extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -31,7 +31,7 @@ class ApprovalRequest extends Mailable
     {
         return new Envelope(
             from: new Address('no-reply@demowebjalan.com', 'POS Aladdin Karpet'),
-            subject: 'Permintaan Persetujuan POS Aladdin',
+            subject: 'Permintaan Persetujuan Kas - POS Aladdin',
         );
     }
 
@@ -41,7 +41,7 @@ class ApprovalRequest extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.approval',
+            view: 'email.cash-request-approval',
             with: ['data' => $this->data]
         );
     }

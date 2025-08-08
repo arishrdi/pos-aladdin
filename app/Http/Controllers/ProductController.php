@@ -43,14 +43,14 @@ class ProductController extends Controller
                 'inventory',
                 'inventory.outlet:id,name'
             ])->get();
-    
+
             return response()->json([
                 'status' => true,
                 'message' => 'Daftar produk dengan kategori dan inventory',
                 'data' => $products
             ]);
         } catch (\Throwable $th) {
-            Log::error('Product index error: '.$th->getMessage());
+            Log::error('Product index error: ' . $th->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Terjadi kesalahan saat memuat data produk'
@@ -110,7 +110,7 @@ class ProductController extends Controller
                     'quantity' => $request->quantity,
                     'min_stock' => $request->min_stock,
                 ]);
-                
+
                 InventoryHistory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
@@ -129,17 +129,17 @@ class ProductController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->errorResponse($th->getMessage());
-        // } catch (\Illuminate\Validation\ValidationException $e) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Validasi gagal',
-        //         'errors' => collect($e->errors())->map(function ($messages, $field) {
-        //             return [
-        //                 'field' => $field,
-        //                 'messages' => $messages
-        //             ];
-        //         })->values()->all()
-        //     ], 422);
+            // } catch (\Illuminate\Validation\ValidationException $e) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Validasi gagal',
+            //         'errors' => collect($e->errors())->map(function ($messages, $field) {
+            //             return [
+            //                 'field' => $field,
+            //                 'messages' => $messages
+            //             ];
+            //         })->values()->all()
+            //     ], 422);
         }
     }
 
@@ -148,7 +148,7 @@ class ProductController extends Controller
         if ($request->has('image') && $request->image === null) {
             $request->request->remove('image');
         }
-    
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -174,33 +174,33 @@ class ProductController extends Controller
                 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
             ]);
-    
+
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->exists()) {
                 throw ValidationException::withMessages([
                     'sku' => 'SKU sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             if ($request->barcode && Product::where('barcode', $request->barcode)->exists()) {
                 throw ValidationException::withMessages([
                     'barcode' => 'Barcode sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             DB::beginTransaction();
-            
+
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('products', 'uploads');
                 $imagePath = $path;
             } else {
                 $imagePath = null;
             }
-    
+
             // Generate SKU dan barcode jika tidak diisi
             $sku = $request->sku ?? $this->generateUniqueSku();
             $barcode = $request->barcode ?? $this->generateUniqueBarcode();
-    
+
             $product = Product::create([
                 'name' => $request->name,
                 'sku' => $sku,
@@ -211,7 +211,7 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-    
+
             foreach ($request->outlet_ids as $outletId) {
                 Inventory::create([
                     'product_id' => $product->id,
@@ -219,7 +219,7 @@ class ProductController extends Controller
                     'quantity' => $request->quantity,
                     'min_stock' => $request->min_stock,
                 ]);
-                
+
                 InventoryHistory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
@@ -231,9 +231,9 @@ class ProductController extends Controller
                     'user_id' => $request->user()->id,
                 ]);
             }
-    
+
             DB::commit();
-    
+
             return $this->successResponse($product, 'Product created successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -294,28 +294,28 @@ class ProductController extends Controller
                 // 'quantity' => 'required|numeric',
                 'min_stock' => 'required|numeric',
             ]);
-    
+
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->where('id', '!=', $product->id)->exists()) {
                 throw ValidationException::withMessages([
                     'sku' => 'SKU sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             if ($request->barcode && Product::where('barcode', $request->barcode)->where('id', '!=', $product->id)->exists()) {
                 throw ValidationException::withMessages([
                     'barcode' => 'Barcode sudah digunakan oleh produk aktif'
                 ]);
             }
-    
+
             DB::beginTransaction();
-            
+
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('products', 'uploads');
             } else {
                 $imagePath = $product->image;
             }
-    
+
             $product->update([
                 'name' => $request->name,
                 'sku' => $request->sku,
@@ -326,28 +326,31 @@ class ProductController extends Controller
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
             ]);
-    
+
             foreach ($request->outlet_ids as $outletId) {
+
+                $currentQuantity = Inventory::where('product_id', $product->id)
+                    ->where('outlet_id', $outletId)
+                    ->value('quantity') ?? 0;
+
                 Inventory::updateOrCreate(
                     [
                         'product_id' => $product->id,
                         'outlet_id' => $outletId
                     ],
                     [
-                        'quantity' => Inventory::where('product_id', $product->id)
-                        ->where('outlet_id', $outletId)
-                        ->value('quantity') ?? 0,
+                        'quantity' => $currentQuantity,
                         'min_stock' => $request->min_stock
                     ]
                 );
             }
-    
+
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();
-    
+
             DB::commit();
-    
+
             return $this->successResponse($product, 'Product updated successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -375,7 +378,7 @@ class ProductController extends Controller
         }
     }
 
-   /**
+    /**
      * Get product detail with all outlets for edit form
      */
     public function getProductDetail(Product $product)
@@ -384,7 +387,7 @@ class ProductController extends Controller
             $productData = $product->load([
                 'category:id,name',
                 'outlets:id,name', // Ini hanya load outlet yang BENAR-BENAR dimiliki produk
-                'inventory' => function($query) {
+                'inventory' => function ($query) {
                     $query->select('id', 'product_id', 'outlet_id', 'quantity', 'min_stock');
                 }
             ]);
@@ -430,7 +433,7 @@ class ProductController extends Controller
     public function getOutletProducts(Request $request, $outletId)
     {
         try {
-            $user = $request->user(); 
+            $user = $request->user();
             $outlet = Outlet::findOrFail($outletId);
 
             $isCashier = strtolower($user->role) === 'kasir';
@@ -494,7 +497,7 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
-    
+
     public function getOutletProductsPOS(Request $request, $outletId)
     {
         try {
@@ -566,7 +569,7 @@ class ProductController extends Controller
             return $this->errorResponse($th->getMessage());
         }
     }
-   
+
     public function posFindByBarcode(Request $request, $outletId, $barcode)
     {
         try {
@@ -606,7 +609,7 @@ class ProductController extends Controller
                     'outlet_id' => $outletId,
                     'user_id' => auth()->id()
                 ]);
-                
+
                 return $this->errorResponse('Product not found or out of stock', 404);
             }
 
@@ -643,12 +646,11 @@ class ProductController extends Controller
                 'min_stock' => $product->min_stock,
                 'is_active' => $product->is_active,
                 'category' => $product->category ? $product->category->name : 'Uncategorized',
-                'image_url' => $product->image_url ? asset('storage/'.$product->image_url) : null,
+                'image_url' => $product->image_url ? asset('storage/' . $product->image_url) : null,
                 'inventory' => [
                     'quantity' => $stock
                 ]
             ], 'Product found');
-
         } catch (ModelNotFoundException $e) {
             Log::error('Outlet not found', [
                 'outlet_id' => $outletId,
@@ -703,7 +705,7 @@ class ProductController extends Controller
             $barcodeImage = $barcode->getBarcodePNG($code, 'C39');
             $filePath = public_path("barcodes/{$code}.png");
             File::put($filePath, base64_decode($barcodeImage));
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Barcode image generated successfully',
