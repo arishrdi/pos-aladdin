@@ -200,7 +200,23 @@
 <div class="bg-white rounded-lg shadow p-4">
     <!-- Header Card + Filter Tanggal -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h3 class="text-2xl font-bold text-gray-800">Riwayat Transaksi Kas</h3>
+        <div class="flex flex-col">
+            <h3 class="text-2xl font-bold text-gray-800">Riwayat Transaksi Kas</h3>
+            <div id="balanceMethodIndicator" class="hidden mt-1 flex items-center gap-2">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <i data-lucide="check-circle" class="w-3 h-3"></i>
+                    Saldo Komprehensif
+                </span>
+                <span class="text-xs text-gray-500">Termasuk POS, refund, dan manual kas</span>
+            </div>
+            <div id="balanceFallbackIndicator" class="hidden mt-1 flex items-center gap-2">
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    Manual Kas Saja
+                </span>
+                <span class="text-xs text-gray-500">Hanya menghitung transaksi manual</span>
+            </div>
+        </div>
         <div class="relative mt-2 sm:mt-0">
             <input id="cashDateInput" type="text"
                 class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -208,6 +224,24 @@
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
             </span>
+        </div>
+    </div>
+
+    <!-- Informational Banner -->
+    <div id="balanceInfoBanner" class="hidden mb-4 p-4 rounded-lg border-l-4">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i data-lucide="info" class="w-5 h-5 mt-0.5"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <div class="text-sm font-medium" id="bannerTitle"></div>
+                <div class="text-sm mt-1" id="bannerDescription"></div>
+            </div>
+            <div class="ml-4 flex-shrink-0">
+                <button onclick="closeBanner()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -220,9 +254,21 @@
                     <th class="py-3 font-bold">Waktu</th>
                     <th class="py-3 font-bold">Tipe</th>
                     <th class="py-3 font-bold">Alasan</th>
-                    <th class="py-3 font-bold">Saldo Awal</th>
+                    <th class="py-3 font-bold relative group">
+                        Saldo Awal
+                        <i data-lucide="info" class="w-3 h-3 inline ml-1 text-gray-400 cursor-help"></i>
+                        <div class="absolute bottom-full left-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                            Saldo kas sebelum transaksi ini
+                        </div>
+                    </th>
                     <th class="py-3 font-bold">Total</th>
-                    <th class="py-3 font-bold">Saldo Akhir</th>
+                    <th class="py-3 font-bold relative group">
+                        Saldo Akhir
+                        <i data-lucide="info" class="w-3 h-3 inline ml-1 text-gray-400 cursor-help"></i>
+                        <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                            Saldo kas setelah transaksi ini (termasuk dampak POS & refund)
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y" id="cash-history-table">
@@ -426,6 +472,11 @@ function refreshCashRequestHistory() {
     const outletId = getSelectedOutletId();
     const status = document.getElementById('statusFilter').value;
     fetchCashRequestHistory(outletId, status);
+}
+
+function closeBanner() {
+    document.getElementById('balanceInfoBanner').classList.add('hidden');
+    sessionStorage.setItem('bannerClosed', 'true');
 }
 
 function fetchCashRequestHistory(outletId, status = '') {
@@ -1082,11 +1133,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle new API response structure
             let transactions = [];
             let openingBalance = 0;
+            let comprehensiveData = null;
             
             if (responseData.transactions) {
                 // New structure with balance info
                 transactions = responseData.transactions;
                 openingBalance = responseData.opening_balance || 0;
+                comprehensiveData = responseData.comprehensive_balance_data;
             } else {
                 // Fallback for old structure
                 transactions = responseData;
@@ -1098,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateOutletInfoFromSelection();
             }
             
-            renderCashHistory(transactions, openingBalance);
+            renderCashHistory(transactions, openingBalance, comprehensiveData);
         })
         .catch(error => {
             console.error('Error fetching cash history:', error);
@@ -1151,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function renderCashHistory(data, openingBalance = 0) {
+    function renderCashHistory(data, openingBalance = 0, comprehensiveData = null) {
         const tableBody = document.getElementById('cash-history-table');
         tableBody.innerHTML = '';
 
@@ -1164,31 +1217,102 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Calculate running balance untuk setiap transaksi
+        // Calculate comprehensive running balance untuk setiap transaksi
+        let useComprehensiveBalance = false;
+        let comprehensiveRunningBalance = parseFloat(openingBalance) || 0;
+        
+        // Check if we have comprehensive data
+        if (comprehensiveData && comprehensiveData.daily_totals) {
+            useComprehensiveBalance = true;
+            
+            // Use comprehensive opening balance
+            comprehensiveRunningBalance = parseFloat(comprehensiveData.opening_balance) || 0;
+            
+            console.log('Using comprehensive balance calculation:', {
+                opening_balance: comprehensiveRunningBalance,
+                daily_totals: comprehensiveData.daily_totals
+            });
+        }
+        
         // Sortir transaksi berdasarkan waktu untuk memastikan urutan yang benar
         const sortedData = [...data].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         
-        // Use opening balance dari API
-        const startingBalance = parseFloat(openingBalance) || 0;
+        // Get all transaction types untuk comprehensive calculation
+        let allTransactions = [];
+        
+        if (useComprehensiveBalance && comprehensiveData.transactions_breakdown) {
+            // Combine all transaction types dari comprehensive data
+            const breakdown = comprehensiveData.transactions_breakdown;
+            allTransactions = [
+                ...(breakdown.manual_cash || []),
+                ...(breakdown.pos_sales || []),
+                ...(breakdown.refunds || []),
+                ...(breakdown.other || [])
+            ];
+            
+            // Sort all transactions by created_at
+            allTransactions.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            
+            console.log('All comprehensive transactions:', allTransactions.length);
+        }
         
         // Render transactions dalam urutan kronologis
         const displayData = [...sortedData].reverse(); // Reverse untuk tampilkan yang terbaru dulu
         const balanceHistory = [];
         
-        // Hitung balance history
-        let runningBalance = startingBalance;
-        sortedData.forEach(transaction => {
-            const isAdd = transaction.type === 'add';
-            const amount = parseFloat(transaction.amount);
-            const previousBalance = runningBalance;
-            runningBalance += isAdd ? amount : -amount;
+        if (useComprehensiveBalance && allTransactions.length > 0) {
+            // Calculate comprehensive running balance including all transaction types
+            let runningBalance = comprehensiveRunningBalance;
             
-            balanceHistory.push({
-                id: transaction.id,
-                beforeBalance: previousBalance,
-                afterBalance: runningBalance
+            // Process all transactions chronologically untuk accurate running balance
+            allTransactions.forEach((transaction, index) => {
+                const previousBalance = runningBalance;
+                
+                // Calculate balance change berdasarkan transaction type dan source
+                let balanceChange = 0;
+                const amount = parseFloat(transaction.amount) || 0;
+                
+                if (transaction.source === 'pos') {
+                    // POS sales always add to cash
+                    balanceChange = amount;
+                } else if (transaction.source === 'refund') {
+                    // Refunds subtract from cash
+                    balanceChange = -amount;
+                } else if (transaction.source === 'cash') {
+                    // Manual cash operations
+                    balanceChange = transaction.type === 'add' ? amount : -amount;
+                } else {
+                    // Other transactions
+                    balanceChange = transaction.type === 'add' ? amount : -amount;
+                }
+                
+                runningBalance += balanceChange;
+                
+                // Only store balance untuk manual cash transactions yang akan ditampilkan
+                if (transaction.source === 'cash') {
+                    balanceHistory.push({
+                        id: transaction.id,
+                        beforeBalance: previousBalance,
+                        afterBalance: runningBalance
+                    });
+                }
             });
-        });
+        } else {
+            // Fallback to old calculation (manual cash only)
+            let runningBalance = parseFloat(openingBalance) || 0;
+            sortedData.forEach(transaction => {
+                const isAdd = transaction.type === 'add';
+                const amount = parseFloat(transaction.amount);
+                const previousBalance = runningBalance;
+                runningBalance += isAdd ? amount : -amount;
+                
+                balanceHistory.push({
+                    id: transaction.id,
+                    beforeBalance: previousBalance,
+                    afterBalance: runningBalance
+                });
+            });
+        }
         
         // Render dalam urutan terbalik (terbaru dulu)
         displayData.forEach(transaction => {
@@ -1221,15 +1345,97 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 </td>
                 <td class="text-sm text-gray-600">${reason}</td>
-                <td class="text-sm text-blue-600">${formatCurrency(beforeBalance)}</td>
+                <td class="text-sm">
+                    <div class="text-blue-600 font-medium">${formatCurrency(beforeBalance)}</div>
+                    ${useComprehensiveBalance ? '<div class="text-xs text-gray-400">Komprehensif</div>' : '<div class="text-xs text-yellow-600">Manual saja</div>'}
+                </td>
                 <td class="${isAdd ? 'text-green-600' : 'text-red-600'} font-semibold">
                     ${isAdd ? '+' : '-'}Rp ${formattedAmount}
                 </td>
-                <td class="text-sm text-blue-700 font-semibold">${formatCurrency(afterBalance)}</td>
+                <td class="text-sm">
+                    <div class="text-blue-700 font-semibold">${formatCurrency(afterBalance)}</div>
+                    ${useComprehensiveBalance ? '<div class="text-xs text-green-600 flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i>Akurat</div>' : '<div class="text-xs text-yellow-600 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i>Parsial</div>'}
+                </td>
             `;
             
             tableBody.appendChild(row);
         });
+        
+        // Update icons untuk row content
+        if (window.lucide) window.lucide.createIcons();
+        
+        // Show visual indicators untuk calculation method
+        updateBalanceMethodIndicator(useComprehensiveBalance);
+        
+        // Log info about calculation method
+        if (useComprehensiveBalance) {
+            console.log('✅ Using comprehensive balance calculation (includes POS sales, refunds, etc.)');
+        } else {
+            console.log('⚠️ Using fallback balance calculation (manual cash only)');
+        }
+    }
+    
+    function updateBalanceMethodIndicator(isComprehensive) {
+        const comprehensiveIndicator = document.getElementById('balanceMethodIndicator');
+        const fallbackIndicator = document.getElementById('balanceFallbackIndicator');
+        
+        if (isComprehensive) {
+            // Show comprehensive indicator
+            comprehensiveIndicator.classList.remove('hidden');
+            fallbackIndicator.classList.add('hidden');
+            
+            // Update informational banner
+            updateInfoBanner(true);
+            
+            // Show success notification (only once)
+            if (!sessionStorage.getItem('comprehensiveBalanceNotified')) {
+                setTimeout(() => {
+                    showAlert('success', '✅ Saldo konsisten dengan dashboard - termasuk POS dan refund');
+                    sessionStorage.setItem('comprehensiveBalanceNotified', 'true');
+                }, 500);
+            }
+        } else {
+            // Show fallback indicator
+            comprehensiveIndicator.classList.add('hidden');
+            fallbackIndicator.classList.remove('hidden');
+            
+            // Update informational banner
+            updateInfoBanner(false);
+            
+            // Show warning notification (only once)
+            if (!sessionStorage.getItem('fallbackBalanceNotified')) {
+                setTimeout(() => {
+                    showAlert('info', '⚠️ Saldo hanya menghitung transaksi manual kas');
+                    sessionStorage.setItem('fallbackBalanceNotified', 'true');
+                }, 500);
+            }
+        }
+        
+        // Update icons
+        if (window.lucide) window.lucide.createIcons();
+    }
+    
+    function updateInfoBanner(isComprehensive) {
+        const banner = document.getElementById('balanceInfoBanner');
+        const title = document.getElementById('bannerTitle');
+        const description = document.getElementById('bannerDescription');
+        
+        // Don't show banner if user has closed it
+        if (sessionStorage.getItem('bannerClosed')) {
+            return;
+        }
+        
+        if (isComprehensive) {
+            banner.className = 'mb-4 p-4 rounded-lg border-l-4 bg-green-50 border-green-400 text-green-800';
+            title.textContent = '✅ Saldo Komprehensif Aktif';
+            description.textContent = 'Perhitungan saldo mencakup semua jenis transaksi: manual kas, penjualan POS, dan refund. Hasil saldo konsisten dengan dashboard utama.';
+        } else {
+            banner.className = 'mb-4 p-4 rounded-lg border-l-4 bg-yellow-50 border-yellow-400 text-yellow-800';
+            title.textContent = '⚠️ Mode Saldo Manual';
+            description.textContent = 'Perhitungan saldo hanya mencakup transaksi manual kas. Saldo mungkin berbeda dengan dashboard utama yang mencakup POS dan refund.';
+        }
+        
+        banner.classList.remove('hidden');
     }
 
     // Initialize with current date and outlet

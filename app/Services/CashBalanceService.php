@@ -18,21 +18,21 @@ class CashBalanceService
      */
     public function recordDailySalesTransaction(Order $order): CashRegisterTransaction
     {
-        if ($order->payment_method !== 'cash') {
-            throw new \InvalidArgumentException('Order must have cash payment method');
-        }
+        // Semua transaksi penjualan masuk ke kas outlet, tidak peduli payment method
+        // Cash langsung masuk kas, QRIS/Transfer juga akhirnya masuk ke kas outlet
 
         $cashRegister = CashRegister::where('outlet_id', $order->outlet_id)->first();
         if (!$cashRegister) {
             throw new \Exception("Cash register not found for outlet {$order->outlet_id}");
         }
 
-        // Create transaction record
+        // Create transaction record dengan detail payment method
+        $paymentMethodText = strtoupper($order->payment_method);
         $transaction = $cashRegister->addCash(
             amount: $order->total,
             userId: $order->user_id,
             shiftId: $order->shift_id,
-            reason: "Penjualan POS - Order #{$order->id}",
+            reason: "Penjualan POS ({$paymentMethodText}) - Order #{$order->order_number}",
             source: 'pos'
         );
 

@@ -1019,10 +1019,9 @@ class OrderController extends Controller
             // Update order status to completed
             $order->update(['status' => 'completed']);
 
-            // Record cash transaction jika payment method adalah cash
-            if ($order->payment_method === 'cash') {
-                $this->cashBalanceService->recordDailySalesTransaction($order);
-            }
+            // Record cash transaction untuk semua payment method 
+            // (semua penjualan menambah kas outlet, terlepas dari metode pembayaran)
+            $this->cashBalanceService->recordDailySalesTransaction($order);
 
             DB::commit();
 

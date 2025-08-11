@@ -82,8 +82,8 @@
         </div>
     </div>
 </div>
-<!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<!-- Stats Cards - Row 1 -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
     <!-- Total Penjualan -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
@@ -151,6 +151,79 @@
     </div>
 </div>
 
+<!-- Stats Cards - Row 2: New Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <!-- Total Diskon -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">Total Diskon</p>
+                <p class="text-xl font-bold text-orange-600" id="totalDiscount">Loading...</p>
+            </div>
+            <div class="bg-orange-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
+                    <path d="M9 12l2 2 4-4"></path>
+                    <path d="M21 12c.552 0 1-.448 1-1V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6c0 .552.448 1 1 1h18z"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Bonus -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">Total Bonus Keluar</p>
+                <p class="text-xl font-bold text-yellow-600" id="totalBonus">Loading...</p>
+            </div>
+            <div class="bg-yellow-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                    <path d="M4 22h16"></path>
+                    <path d="M10 14.66V17c0 .55.47.98.97 1.21C11.25 18.48 11.61 18.78 12 19c.39-.22.75-.52 1.03-.79.5-.23.97-.66.97-1.21v-2.34"></path>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transaksi Cancel -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">Transaksi Cancel</p>
+                <p class="text-xl font-bold text-red-600" id="totalCancelled">Loading...</p>
+            </div>
+            <div class="bg-red-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500">
+                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"></path>
+                    <path d="M3 16.2V21m0 0h4.8M3 21l6-6"></path>
+                    <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"></path>
+                    <path d="M3 7.8V3m0 0h4.8M3 3l6 6"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transaksi Refund -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">Transaksi Refund</p>
+                <p class="text-xl font-bold text-indigo-600" id="totalRefunded">Loading...</p>
+            </div>
+            <div class="bg-indigo-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500">
+                    <path d="M3 7v6h6"></path>
+                    <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Two Columns -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Left Column -->
@@ -171,7 +244,7 @@
     <!-- Right Column -->
     <div class="lg:col-span-1">
         <!-- Penjualan Terlaris -->
-        <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="bg-white rounded-lg p-4 card-shadow mb-6">
             <h3 class="font-semibold text-gray-800 mb-4">Penjualan Terlaris</h3>
             <p class="text-sm text-gray-600 mb-2">Produk terlaris</p>
             
@@ -183,6 +256,27 @@
                         <p class="text-sm text-gray-500">Qty: -</p>
                     </div>
                     <p class="font-bold text-green-500">Rp -</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produk Bonus Terlaris -->
+        <div class="bg-white rounded-lg p-4 card-shadow">
+            <h3 class="font-semibold text-gray-800 mb-4">Produk Bonus Terlaris</h3>
+            <p class="text-sm text-gray-600 mb-2">Bonus yang paling banyak keluar</p>
+            
+            <div class="space-y-3" id="topBonusProductsList">
+                <!-- Top bonus products will be inserted here -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">Loading...</p>
+                        <p class="text-sm text-gray-500">Qty: -</p>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-semibold">
+                            BONUS
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -361,8 +455,17 @@
         document.getElementById('averageOrder').textContent = formatCurrency(data.summary.average_order_value);
         document.getElementById('totalSalesOverview').textContent = formatCurrency(data.sales.current_period);
         
+        // Update new metrics
+        document.getElementById('totalDiscount').textContent = formatCurrency(data.summary.total_discount || 0);
+        document.getElementById('totalBonus').textContent = formatCurrency(data.summary.total_bonus_value || 0);
+        document.getElementById('totalCancelled').textContent = formatCurrency(data.summary.total_cancelled || 0);
+        document.getElementById('totalRefunded').textContent = formatCurrency(data.summary.total_refunded || 0);
+        
         // Update top products
         updateTopProducts(data.top_products);
+        
+        // Update top bonus products
+        updateTopBonusProducts(data.top_bonus_products || []);
         
         // Update chart
         updateSalesChart(data.daily_sales);
@@ -415,6 +518,38 @@
                     <p class="text-sm text-gray-500">Qty: ${product.quantity}</p>
                 </div>
                 <p class="font-bold text-green-500">${formatCurrency(product.total)}</p>
+            `;
+            container.appendChild(productElement);
+        });
+    }
+    
+    // Update top bonus products list
+    function updateTopBonusProducts(bonusProducts) {
+        const container = document.getElementById('topBonusProductsList');
+        container.innerHTML = '';
+        
+        if (bonusProducts.length === 0) {
+            container.innerHTML = `
+                <div class="flex justify-center items-center py-4">
+                    <p class="text-gray-500">Tidak ada bonus keluar dalam periode ini</p>
+                </div>
+            `;
+            return;
+        }
+        
+        bonusProducts.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.className = 'flex justify-between items-center';
+            productElement.innerHTML = `
+                <div>
+                    <p class="font-medium">${product.name}</p>
+                    <p class="text-sm text-gray-500">Qty: ${product.bonus_quantity || 0}</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-semibold">
+                        BONUS
+                    </div>
+                </div>
             `;
             container.appendChild(productElement);
         });

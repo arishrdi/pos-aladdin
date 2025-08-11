@@ -48,17 +48,21 @@ class CashRegisterTransactionController extends Controller
                 })
                 ->get();
 
-            // Add opening balance info untuk hari ini
+            // Add comprehensive balance info untuk hari ini
             $responseData = [
                 'transactions' => $transactions,
                 'opening_balance' => 0,
-                'current_balance' => 0
+                'current_balance' => 0,
+                'comprehensive_balance_data' => null
             ];
 
             if ($date && $outlet_id) {
                 try {
                     $responseData['opening_balance'] = $this->cashBalanceService->getOpeningBalance($outlet_id, $date);
                     $responseData['current_balance'] = $this->cashBalanceService->getCurrentBalance($outlet_id);
+                    
+                    // Get comprehensive balance data untuk accurate calculation
+                    $responseData['comprehensive_balance_data'] = $this->getComprehensiveBalanceData($outlet_id, $date);
                 } catch (\Exception $e) {
                     // If balance service fails, continue without balance info
                     \Log::warning('Failed to get balance info: ' . $e->getMessage());
@@ -348,6 +352,58 @@ class CashRegisterTransactionController extends Controller
             return $this->successResponse($transactions, 'Successfully getting cash history');
         } catch (\Throwable $e) {
             return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Get comprehensive balance data untuk akurat calculation
+     */
+    protected function getComprehensiveBalanceData($outletId, $date)
+    {
+        try {
+            $dateObj = Carbon::parse($date);
+            $startOfDay = $dateObj->copy()->startOfDay();
+            $endOfDay = $dateObj->copy()->endOfDay();
+
+            // Get all transactions untuk outlet pada tanggal tersebut (semua source)
+            $cashRegisterIds = CashRegister::where('outlet_id', $outletId)->pluck('id');
+            
+            $allTransactions = CashRegisterTransaction::whereIn('cash_register_id', $cashRegisterIds)
+                ->whereBetween('created_at', [$startOfDay, $endOfDay])
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            // Log untuk monitoring (can be removed in production)
+            if ($allTransactions->count() > 0) {
+                \Log::info('Comprehensive balance calculated with ' . $allTransactions->count() . ' transactions for outlet ' . $outletId);
+            }
+
+            // Group transactions by source untuk breakdown
+            $transactionsBySource = $allTransactions->groupBy('source');
+            
+            $comprehensiveData = [
+                'date' => $date,
+                'opening_balance' => $this->cashBalanceService->getOpeningBalance($outletId, $date),
+                'transactions_breakdown' => [
+                    'manual_cash' => $transactionsBySource->get('cash', collect())->toArray(),
+                    'pos_sales' => $transactionsBySource->get('pos', collect())->toArray(),
+                    'refunds' => $transactionsBySource->get('refund', collect())->toArray(),
+                    'other' => $transactionsBySource->get('other', collect())->toArray()
+                ],
+                'daily_totals' => [
+                    'manual_additions' => $allTransactions->where('source', 'cash')->where('type', 'add')->sum('amount'),
+                    'manual_subtractions' => $allTransactions->where('source', 'cash')->where('type', 'remove')->sum('amount'),
+                    'pos_sales' => $allTransactions->where('source', 'pos')->sum('amount'),
+                    'refunds' => $allTransactions->where('source', 'refund')->sum('amount'),
+                    'other_transactions' => $allTransactions->where('source', 'other')->sum('amount')
+                ]
+            ];
+
+            return $comprehensiveData;
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to get comprehensive balance data: ' . $e->getMessage());
+            return null;
         }
     }
 }

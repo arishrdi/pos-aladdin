@@ -988,11 +988,38 @@ class ReportController extends Controller
                 $totalOrders = $sales->count();
                 $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
 
+                // Calculate new metrics
+                $totalDiscount = $sales->sum('discount') ?? 0;
+                
+                // Total bonus items value dari bonus_items table (approved/used)
+                $totalBonusValue = DB::table('bonus_items')
+                    ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
+                    ->where('bonus_transactions.outlet_id', $outlet->id)
+                    ->whereBetween('bonus_transactions.created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->whereIn('bonus_items.status', ['approved', 'used'])
+                    ->sum('bonus_items.bonus_value') ?? 0;
+                
+                // Total cancelled orders value (dalam rupiah)
+                $totalCancelledValue = Order::where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->where('status', 'cancelled')
+                    ->sum('total') ?? 0;
+                
+                // Total refunded orders value (dalam rupiah)
+                $totalRefundedValue = Order::where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->where('status', 'refunded')
+                    ->sum('total') ?? 0;
+
                 $responseData['summary'] = [
                     'total_sales' => $totalSales,
                     'total_orders' => $totalOrders,
                     'total_items' => $totalItems,
                     'average_order_value' => $averageOrderValue,
+                    'total_discount' => $totalDiscount,
+                    'total_bonus_value' => $totalBonusValue,
+                    'total_cancelled' => $totalCancelledValue,
+                    'total_refunded' => $totalRefundedValue,
                 ];
 
                 // Previous period comparison
@@ -1115,6 +1142,24 @@ class ReportController extends Controller
                     ->where('orders.status', 'completed')
                     ->groupBy('products.name')
                     ->orderByDesc('quantity')
+                    ->limit(5)
+                    ->get();
+
+                // Top bonus products data
+                $responseData['top_bonus_products'] = DB::table('bonus_items')
+                    ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
+                    ->join('products', 'bonus_items.product_id', '=', 'products.id')
+                    ->select(
+                        'products.name',
+                        DB::raw('SUM(bonus_items.quantity) as bonus_quantity'),
+                        DB::raw('SUM(bonus_items.bonus_value) as total_bonus_value'),
+                        DB::raw('COUNT(bonus_items.id) as orders_count')
+                    )
+                    ->where('bonus_transactions.outlet_id', $outlet->id)
+                    ->whereBetween('bonus_transactions.created_at', [$startDate, $endDate])
+                    ->whereIn('bonus_items.status', ['approved', 'used'])
+                    ->groupBy('products.name')
+                    ->orderByDesc('bonus_quantity')
                     ->limit(5)
                     ->get();
 
