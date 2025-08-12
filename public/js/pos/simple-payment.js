@@ -32,6 +32,9 @@ class SimplePaymentManager {
         // Update total display
         document.getElementById('paymentGrandTotal').textContent = formatCurrency(totals.grandTotal);
 
+        // Update tax type display in modal
+        this.updateModalTaxTypeDisplay();
+
         // Setup payment methods
         this.setupPaymentMethods();
 
@@ -49,6 +52,26 @@ class SimplePaymentManager {
         this.transactionCategory = 'lunas';
         this.currentPaymentMethod = 'cash';
         this.updateAmountSections();
+    }
+
+    // Update tax type display in modal
+    updateModalTaxTypeDisplay() {
+        const selectedTaxType = document.querySelector('input[name="transactionTaxType"]:checked')?.value || 'non_pkp';
+        const modalTaxTypeDisplay = document.getElementById('modalTaxTypeDisplay');
+        
+        if (modalTaxTypeDisplay) {
+            const taxRate = selectedTaxType === 'pkp' ? 11 : 0;
+            const taxTypeName = selectedTaxType === 'pkp' ? 'PKP' : 'Non-PKP';
+            
+            modalTaxTypeDisplay.textContent = `${taxTypeName} (${taxRate}%)`;
+            
+            // Color coding
+            if (selectedTaxType === 'pkp') {
+                modalTaxTypeDisplay.className = 'text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-600';
+            } else {
+                modalTaxTypeDisplay.className = 'text-sm px-2 py-1 rounded-full bg-green-100 text-green-600';
+            }
+        }
     }
 
     // Setup payment methods
@@ -175,12 +198,65 @@ class SimplePaymentManager {
         }
     }
 
-    // Load bank info
+    // Load bank info based on selected tax type
     loadBankInfo() {
-        if (outletInfo.bank_account) {
-            document.getElementById('bankAccountName').textContent = outletInfo.bank_account.atas_nama || '-';
-            document.getElementById('bankName').textContent = outletInfo.bank_account.bank || '-';
-            document.getElementById('bankAccountNumber').textContent = outletInfo.bank_account.nomor || '-';
+        // Get selected tax type from cart
+        const selectedTaxType = document.querySelector('input[name="transactionTaxType"]:checked')?.value || 'non_pkp';
+        
+        let bankingInfo;
+        if (selectedTaxType === 'pkp' && outletInfo.pkp_banking) {
+            bankingInfo = {
+                atas_nama: outletInfo.pkp_banking.atas_nama,
+                bank: outletInfo.pkp_banking.bank,
+                nomor: outletInfo.pkp_banking.nomor,
+                tax_type: 'PKP',
+                tax_rate: 11
+            };
+        } else if (selectedTaxType === 'non_pkp' && outletInfo.non_pkp_banking) {
+            bankingInfo = {
+                atas_nama: outletInfo.non_pkp_banking.atas_nama,
+                bank: outletInfo.non_pkp_banking.bank,
+                nomor: outletInfo.non_pkp_banking.nomor,
+                tax_type: 'Non-PKP',
+                tax_rate: 0
+            };
+        } else {
+            // Fallback to default banking info
+            bankingInfo = {
+                atas_nama: outletInfo.bank_account?.atas_nama || '-',
+                bank: outletInfo.bank_account?.bank || '-',
+                nomor: outletInfo.bank_account?.nomor || '-',
+                tax_type: selectedTaxType === 'pkp' ? 'PKP' : 'Non-PKP',
+                tax_rate: selectedTaxType === 'pkp' ? 11 : 0
+            };
+        }
+        
+        // Update banking info display
+        document.getElementById('bankAccountName').textContent = bankingInfo.atas_nama;
+        document.getElementById('bankName').textContent = bankingInfo.bank;
+        document.getElementById('bankAccountNumber').textContent = bankingInfo.nomor;
+        
+        // Update tax type indicator
+        const taxTypeIndicator = document.getElementById('bankTaxTypeIndicator');
+        const taxInfoText = document.getElementById('taxInfoText');
+        
+        if (taxTypeIndicator && taxInfoText) {
+            taxTypeIndicator.textContent = `${bankingInfo.tax_type} (${bankingInfo.tax_rate}%)`;
+            
+            // Color coding for tax type
+            if (bankingInfo.tax_type === 'PKP') {
+                taxTypeIndicator.className = 'text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600';
+                taxInfoText.innerHTML = `
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Transfer ke rekening PKP (Pajak ${bankingInfo.tax_rate}%) - Pastikan untuk mencantumkan keterangan pajak
+                `;
+            } else {
+                taxTypeIndicator.className = 'text-xs px-2 py-1 rounded-full bg-green-100 text-green-600';
+                taxInfoText.innerHTML = `
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Transfer ke rekening Non-PKP (${bankingInfo.tax_rate}% pajak) - Transaksi bebas pajak
+                `;
+            }
         }
     }
 
@@ -358,6 +434,7 @@ class SimplePaymentManager {
     selectMember(member) {
         this.selectedMember = member;
         document.getElementById('memberName').textContent = member.name;
+        document.getElementById('memberCode').textContent = member.member_code || 'No Code';
         document.getElementById('selectedMember').classList.remove('hidden');
         document.getElementById('memberSearch').value = '';
         document.getElementById('memberDropdownList').classList.add('hidden');
@@ -410,8 +487,11 @@ class SimplePaymentManager {
         formData.append('bonus_items', JSON.stringify(cartData.bonus_items));
         formData.append('payment_method', paymentMethod);
         formData.append('transaction_category', this.transactionCategory);
+        // Get selected tax type from cart
+        const selectedTaxType = document.querySelector('input[name="transactionTaxType"]:checked')?.value || 'non_pkp';
+        
         formData.append('tax', totals.tax);
-        formData.append('tax_type', this.cartManager.taxType);
+        formData.append('tax_type', selectedTaxType);
         formData.append('discount', totals.totalDiscount);
         formData.append('member_id', this.selectedMember?.id || '');
         formData.append('transaction_type', this.cartManager.transactionType);

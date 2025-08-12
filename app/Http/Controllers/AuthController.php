@@ -167,20 +167,45 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'role' => 'required|string|in:admin,kasir,supervisor',
             'outlet_id' => 'nullable|exists:outlets,id',
+            'outlet_ids' => 'nullable|array', // For supervisors - multiple outlets
+            'outlet_ids.*' => 'exists:outlets,id',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
         ]);
 
         try {
             DB::beginTransaction();
+            
+            // For kasir, outlet_id is required
+            if ($request->role === 'kasir' && !$request->outlet_id) {
+                return $this->errorResponse('Outlet harus dipilih untuk kasir');
+            }
+            
+            // For supervisor, either outlet_id or outlet_ids can be used
+            if ($request->role === 'supervisor' && !$request->outlet_id && !$request->outlet_ids) {
+                return $this->errorResponse('Minimal satu outlet harus dipilih untuk supervisor');
+            }
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
-                'outlet_id' => $request->outlet_id,
+                'outlet_id' => $request->outlet_id, // Primary outlet for kasir
             ]);
 
+            // Handle multiple outlets for supervisor
+            if ($request->role === 'supervisor') {
+                if ($request->outlet_ids) {
+                    // Attach multiple outlets
+                    $user->outlets()->attach($request->outlet_ids);
+                } elseif ($request->outlet_id) {
+                    // Attach single outlet if outlet_ids not provided
+                    $user->outlets()->attach([$request->outlet_id]);
+                }
+            }
+
+            // Create shift only for the primary outlet
             if ($request->outlet_id) {
                 Shift::create([
                     'user_id' => $user->id,
@@ -189,7 +214,12 @@ class AuthController extends Controller
                     'end_time' => $request->end_time,
                 ]);
             }
+            
             DB::commit();
+            
+            // Load relationships for response
+            $user->load(['outlet', 'outlets']);
+            
             return $this->successResponse($user, 'User created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -200,7 +230,16 @@ class AuthController extends Controller
     public function getAllUsers($outletId)
     {
         try {
-            $users = User::with('outlet', 'lastShift')->where('outlet_id', $outletId)->get();
+            // Get users directly assigned to outlet (kasir) OR supervisors who have access to this outlet
+            $users = User::with(['outlet', 'lastShift', 'outlets'])
+                ->where(function ($query) use ($outletId) {
+                    $query->where('outlet_id', $outletId) // Kasir with direct assignment
+                          ->orWhereHas('outlets', function ($subQuery) use ($outletId) {
+                              $subQuery->where('outlets.id', $outletId); // Supervisors with access
+                          });
+                })
+                ->get();
+                
             return $this->successResponse($users, 'Users retrieved successfully');
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
@@ -215,22 +254,54 @@ class AuthController extends Controller
             'password' => 'nullable|string|min:6',
             'role' => 'required|string|in:admin,kasir,supervisor',
             'outlet_id' => 'nullable|exists:outlets,id',
+            'outlet_ids' => 'nullable|array', // For supervisors - multiple outlets
+            'outlet_ids.*' => 'exists:outlets,id',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
         ]);
 
         try {
             DB::beginTransaction();
+            
+            // Role-specific validations
+            if ($request->role === 'kasir' && !$request->outlet_id) {
+                return $this->errorResponse('Outlet harus dipilih untuk kasir');
+            }
+            
+            if ($request->role === 'supervisor' && !$request->outlet_id && !$request->outlet_ids) {
+                return $this->errorResponse('Minimal satu outlet harus dipilih untuk supervisor');
+            }
+            
             if ($request->filled('password')) {
                 $request->merge(['password' => Hash::make($request->password)]);
             }
 
-            $user->update($request->all());
+            $user->update($request->only(['name', 'email', 'password', 'role', 'outlet_id']));
+            
+            // Handle supervisor outlets
+            if ($request->role === 'supervisor') {
+                // Sync outlets for supervisor
+                if ($request->outlet_ids) {
+                    $user->outlets()->sync($request->outlet_ids);
+                } elseif ($request->outlet_id) {
+                    $user->outlets()->sync([$request->outlet_id]);
+                }
+            } else {
+                // For non-supervisors, remove all outlet associations
+                $user->outlets()->detach();
+            }
+            
+            // Update shifts
             $user->shifts()->update([
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
             ]);
+            
             DB::commit();
+            
+            // Load relationships for response
+            $user->load(['outlet', 'outlets']);
+            
             return $this->successResponse($user, 'User updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();

@@ -60,13 +60,28 @@
           </div>
         </div>
 
-        <!-- Outlet -->
-        <div>
-          <label class="block font-medium mb-1">Outlet <span class="text-red-500">*</span></label>
-          <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm" required>
-            <option value="" disabled selected>Memuat outlet...</option>
-          </select>
-          <p id="errorOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
+        <!-- Outlet Selection -->
+        <div id="outletSection">
+          <!-- Single Outlet for Kasir -->
+          <div id="singleOutletSection">
+            <label class="block font-medium mb-1">Outlet <span class="text-red-500">*</span></label>
+            <select id="outletStaff" data-url="{{ url('/api/outlets') }}" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+              <option value="" disabled selected>Memuat outlet...</option>
+            </select>
+            <p id="errorOutletStaff" class="text-red-500 text-xs mt-1 hidden">Outlet wajib dipilih</p>
+          </div>
+
+          <!-- Multiple Outlets for Supervisor -->
+          <div id="multipleOutletSection" class="hidden">
+            <label class="block font-medium mb-1">Outlet yang Diawasi <span class="text-red-500">*</span></label>
+            <div class="border rounded-lg p-3 max-h-48 overflow-y-auto bg-gray-50">
+              <div id="supervisorOutletsContainer" class="space-y-2">
+                <!-- Checkboxes will be populated here -->
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">Pilih satu atau lebih outlet yang akan diawasi supervisor</p>
+            <p id="errorSupervisorOutlets" class="text-red-500 text-xs mt-1 hidden">Minimal satu outlet harus dipilih</p>
+          </div>
         </div>
 
       </div>

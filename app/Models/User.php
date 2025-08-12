@@ -56,6 +56,54 @@ class User extends Authenticatable
         return $this->belongsTo(Outlet::class);
     }
 
+    /**
+     * Many-to-many relationship with outlets (for supervisors)
+     */
+    public function outlets()
+    {
+        return $this->belongsToMany(Outlet::class, 'user_outlets');
+    }
+
+    /**
+     * Get all outlets accessible by this user
+     * - Admin: all outlets
+     * - Supervisor: assigned outlets from pivot table 
+     * - Kasir: only their assigned outlet
+     */
+    public function getAccessibleOutlets()
+    {
+        switch ($this->role) {
+            case 'admin':
+                return Outlet::all();
+            case 'supervisor':
+                return $this->outlets; // Many-to-many relationship
+            case 'kasir':
+                return $this->outlet ? collect([$this->outlet]) : collect([]);
+            default:
+                return collect([]);
+        }
+    }
+
+    /**
+     * Check if user has access to specific outlet
+     */
+    public function canAccessOutlet($outletId)
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+        
+        if ($this->role === 'supervisor') {
+            return $this->outlets()->where('outlets.id', $outletId)->exists();
+        }
+        
+        if ($this->role === 'kasir') {
+            return $this->outlet_id == $outletId;
+        }
+        
+        return false;
+    }
+
     public function shifts()
     {
         return $this->hasMany(Shift::class);

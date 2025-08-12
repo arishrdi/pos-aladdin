@@ -160,7 +160,7 @@ class PrintTemplateController extends Controller
                 
                 $defaultData = [
                     'company_name' => $outlet ? $outlet->name : config('app.name', 'Kifa Bakery'),
-                    'company_slogan' => 'Rajanya Roti Hajatan',
+                    'company_slogan' => 'Jadikan Masjid kita senyaman Istana',
                     'footer_message' => 'Terima kasih telah berbelanja',
                     'logo' => null,
                     'logo_url' => null,

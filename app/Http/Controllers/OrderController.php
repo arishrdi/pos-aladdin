@@ -153,6 +153,7 @@ class OrderController extends Controller
             'items.*.discount' => 'required|numeric|min:0',
             'items.*.price' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,qris,transfer',
+            'transaction_category' => 'required|in:lunas,dp',
             'notes' => 'nullable|string',
             'total_paid' => 'nullable|numeric|min:0',
             'tax' => 'nullable|numeric|min:0',
@@ -228,6 +229,7 @@ class OrderController extends Controller
                 'status' => 'pending', // Status transaksi
                 'approval_status' => 'pending', // Status approval (default pending)
                 'payment_proof' => $paymentProofPath,
+                'transaction_category' => $request->transaction_category,
                 'notes' => $request->notes,
                 'member_id' => $request->member_id
             ]);
@@ -287,6 +289,7 @@ class OrderController extends Controller
                 'discount' => $order->discount,
                 'total_paid' => $order->total_paid,
                 'change' => $order->change,
+                'transaction_category' => $order->transaction_category,
 
                 'payment_method' => $order->payment_method,
                 'created_at' => $order->created_at->format('d/m/Y H:i'),
@@ -821,6 +824,7 @@ class OrderController extends Controller
                     'approved_at' => $order->approved_at ? $order->approved_at->format('d/m/Y H:i') : null,
                     'rejection_reason' => $order->rejection_reason,
                     'approval_notes' => $order->approval_notes,
+                    'transaction_category' => $order->transaction_category,
                     // Data untuk cancellation/refund approval system
                     'cancellation_status' => $order->cancellation_status,
                     'cancellation_reason' => $order->cancellation_reason,

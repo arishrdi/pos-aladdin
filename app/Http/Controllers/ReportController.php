@@ -946,10 +946,16 @@ class ReportController extends Controller
                 'end_date' => 'nullable|date_format:Y-m-d',
             ]);
 
-            // Set dates based on request or defaults
+            // Set dates based on request or defaults - use same as frontend (first day of month to today)
             $today = Carbon::today();
-            $startDate = $request->start_date ? Carbon::parse($request->start_date) : Carbon::today();
-            $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : Carbon::today()->endOfDay();
+            if ($request->start_date && $request->end_date) {
+                $startDate = Carbon::parse($request->start_date);
+                $endDate = Carbon::parse($request->end_date)->endOfDay();
+            } else {
+                // Default to first day of current month to today (same as frontend)
+                $startDate = Carbon::today()->startOfMonth();
+                $endDate = Carbon::today()->endOfDay();
+            }
             $yesterday = $startDate->copy()->subDay();
             $thisMonth = Carbon::now()->startOfMonth();
             $lastMonth = Carbon::now()->subMonth()->startOfMonth();
@@ -1198,6 +1204,217 @@ class ReportController extends Controller
         } catch (\Exception $e) {
             \Log::error('Daily sales error: ' . $e->getMessage());
             return $this->errorResponse('Error in data gathering', $e->getMessage());
+        }
+    }
+
+    /**
+     * Multi-outlet comparison API
+     * Komparasi data antar outlet
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function comparison(Request $request)
+    {
+        try {
+            // Validate request parameters
+            $request->validate([
+                'outlet_ids' => 'required|string', // comma-separated outlet IDs
+                'start_date' => 'nullable|date_format:Y-m-d',
+                'end_date' => 'nullable|date_format:Y-m-d',
+            ]);
+
+            // Parse outlet IDs
+            $outletIds = array_map('intval', explode(',', $request->outlet_ids));
+            \Log::info('Comparison request for outlets:', $outletIds);
+            
+            // Set dates based on request or defaults - use same default as dashboard (first day of month to today)
+            if ($request->start_date && $request->end_date) {
+                $startDate = Carbon::parse($request->start_date)->startOfDay();
+                $endDate = Carbon::parse($request->end_date)->endOfDay();
+            } else {
+                // Use same default as main dashboard - first day of current month to today
+                $startDate = Carbon::today()->startOfMonth()->startOfDay();
+                $endDate = Carbon::today()->endOfDay();
+            }
+            \Log::info('Comparison date range:', ['start' => $startDate->format('Y-m-d H:i:s'), 'end' => $endDate->format('Y-m-d H:i:s')]);
+
+            // Check user access to outlets - validate user can access these outlets
+            $user = $request->user();
+            $accessibleOutletIds = [];
+            
+            if ($user->role === 'admin') {
+                $accessibleOutletIds = $outletIds; // Admin can access all
+            } elseif ($user->role === 'supervisor') {
+                $accessibleOutletIds = $user->outlets()->whereIn('outlets.id', $outletIds)->pluck('outlets.id')->toArray();
+            } elseif ($user->role === 'kasir') {
+                $accessibleOutletIds = $user->outlet_id ? [$user->outlet_id] : [];
+                $accessibleOutletIds = array_intersect($accessibleOutletIds, $outletIds);
+            }
+            
+            \Log::info('User accessible outlets:', ['user_id' => $user->id, 'role' => $user->role, 'accessible' => $accessibleOutletIds]);
+
+            // Get outlets user can access
+            $outlets = Outlet::whereIn('id', $accessibleOutletIds)->get();
+            \Log::info('Found outlets for comparison:', ['count' => $outlets->count(), 'outlets' => $outlets->pluck('name')->toArray()]);
+            
+            if ($outlets->count() < 2) {
+                return $this->errorResponse('Minimum 2 accessible outlets required for comparison');
+            }
+
+            $comparisonData = [];
+
+            foreach ($outlets as $outlet) {
+                \Log::info('Processing outlet for comparison:', ['outlet_id' => $outlet->id, 'name' => $outlet->name]);
+                
+                // Get all orders for this outlet in date range - include all statuses initially
+                $allOrders = Order::where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+                
+                // Also check with debug query to see what dates are actually in database
+                $orderDates = Order::where('outlet_id', $outlet->id)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(5)
+                    ->pluck('created_at')
+                    ->toArray();
+                
+                // Check total orders in outlet regardless of date
+                $totalOrdersEver = Order::where('outlet_id', $outlet->id)->count();
+                    
+                \Log::info('Total orders found:', [
+                    'outlet_id' => $outlet->id, 
+                    'total_orders' => $allOrders->count(),
+                    'total_orders_ever' => $totalOrdersEver,
+                    'completed' => $allOrders->where('status', 'completed')->count(),
+                    'search_range' => ['start' => $startDate->format('Y-m-d H:i:s'), 'end' => $endDate->format('Y-m-d H:i:s')],
+                    'sample_order_dates' => $orderDates
+                ]);
+                
+                // Filter completed orders for sales calculation
+                $sales = $allOrders->where('status', 'completed');
+
+                $totalSales = $sales->sum('total');
+                $salesIds = $sales->pluck('id')->toArray();
+                $totalItems = !empty($salesIds) ? OrderItem::whereIn('order_id', $salesIds)->sum('quantity') : 0;
+                $totalOrders = $sales->count();
+                $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
+
+                \Log::info('Sales metrics calculated:', [
+                    'outlet_id' => $outlet->id, 
+                    'total_sales' => $totalSales,
+                    'total_orders' => $totalOrders,
+                    'total_items' => $totalItems,
+                    'average_order' => $averageOrderValue
+                ]);
+
+                // Calculate metrics
+                $totalDiscount = $sales->sum('discount') ?? 0;
+                
+                // Total bonus value dari bonus_items table - fix date range
+                $totalBonusValue = DB::table('bonus_items')
+                    ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
+                    ->where('bonus_transactions.outlet_id', $outlet->id)
+                    ->whereBetween('bonus_transactions.created_at', [$startDate, $endDate])
+                    ->whereIn('bonus_items.status', ['approved', 'used'])
+                    ->sum('bonus_items.bonus_value') ?? 0;
+                
+                // Get cancelled and refunded orders from already fetched data
+                $totalCancelledValue = $allOrders->where('status', 'cancelled')->sum('total') ?? 0;
+                $totalRefundedValue = $allOrders->where('status', 'refunded')->sum('total') ?? 0;
+
+                // Payment method breakdown
+                $paymentMethodSales = $sales->groupBy('payment_method')
+                    ->map(function ($items) {
+                        return [
+                            'count' => $items->count(),
+                            'total' => $items->sum('total'),
+                        ];
+                    });
+
+                // Top products for this outlet - use completed sales data
+                $topProducts = [];
+                if (!empty($salesIds)) {
+                    $topProducts = DB::table('order_items')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->join('products', 'order_items.product_id', '=', 'products.id')
+                        ->select(
+                            'products.name',
+                            DB::raw('SUM(order_items.quantity) as quantity'),
+                            DB::raw('SUM(order_items.subtotal) as total')
+                        )
+                        ->whereIn('order_items.order_id', $salesIds)
+                        ->groupBy('products.id', 'products.name')
+                        ->orderByDesc('quantity')
+                        ->limit(5)
+                        ->get();
+                }
+
+                \Log::info('Top products found:', ['outlet_id' => $outlet->id, 'count' => count($topProducts)]);
+
+                // Generate daily sales data for comparison chart
+                $dailySales = [];
+                $currentDate = $startDate->copy();
+                
+                while ($currentDate <= $endDate) {
+                    $dayStart = $currentDate->copy()->startOfDay();
+                    $dayEnd = $currentDate->copy()->endOfDay();
+                    
+                    $dailySalesAmount = Order::where('outlet_id', $outlet->id)
+                        ->whereBetween('created_at', [$dayStart, $dayEnd])
+                        ->where('status', 'completed')
+                        ->sum('total');
+                        
+                    $dailySales[$currentDate->format('Y-m-d')] = [
+                        'date' => $currentDate->format('Y-m-d'),
+                        'sales' => $dailySalesAmount
+                    ];
+                    
+                    $currentDate->addDay();
+                }
+
+                $outletData = [
+                    'outlet_id' => $outlet->id,
+                    'outlet_name' => $outlet->name,
+                    'outlet_location' => $outlet->address ?? '',
+                    'total_sales' => $totalSales,
+                    'total_orders' => $totalOrders,
+                    'total_items' => $totalItems,
+                    'average_order_value' => round($averageOrderValue, 2),
+                    'total_discount' => $totalDiscount,
+                    'total_bonus_value' => $totalBonusValue,
+                    'total_cancelled' => $totalCancelledValue,
+                    'total_refunded' => $totalRefundedValue,
+                    'payment_methods' => $paymentMethodSales,
+                    'top_products' => $topProducts,
+                    'daily_sales' => $dailySales,
+                    'period' => [
+                        'start_date' => $startDate->format('Y-m-d'),
+                        'end_date' => $endDate->format('Y-m-d'),
+                    ]
+                ];
+                
+                \Log::info('Outlet comparison data prepared:', ['outlet_id' => $outlet->id, 'data_keys' => array_keys($outletData)]);
+                $comparisonData[] = $outletData;
+            }
+
+            \Log::info('Final comparison data:', ['total_outlets' => count($comparisonData), 'outlet_names' => array_column($comparisonData, 'outlet_name')]);
+
+            // Sort by total sales descending
+            usort($comparisonData, function($a, $b) {
+                return $b['total_sales'] <=> $a['total_sales'];
+            });
+
+            // Add ranking
+            foreach ($comparisonData as $index => &$outlet) {
+                $outlet['ranking'] = $index + 1;
+            }
+
+            return $this->successResponse($comparisonData, 'Successfully retrieved outlet comparison data');
+
+        } catch (\Exception $e) {
+            \Log::error('Outlet comparison error: ' . $e->getMessage());
+            return $this->errorResponse('Error in outlet comparison', $e->getMessage());
         }
     }
 

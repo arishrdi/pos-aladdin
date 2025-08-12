@@ -507,8 +507,9 @@ class CartManager {
         const totalDiscount = this.cart.reduce((sum, item) => sum + (item.discount || 0), 0);
         const orderSubtotal = subtotal - totalDiscount;
         
-        // Hitung pajak berdasarkan tipe
-        const taxRate = this.taxType === 'pkp' ? 11 : 0;
+        // Hitung pajak berdasarkan pilihan kasir (transaction tax type)
+        const selectedTaxType = document.querySelector('input[name="transactionTaxType"]:checked')?.value || 'non_pkp';
+        const taxRate = selectedTaxType === 'pkp' ? 11 : 0;
         const tax = orderSubtotal * (taxRate / 100);
         const grandTotal = orderSubtotal + tax;
         

@@ -18,11 +18,20 @@ class OutletController extends Controller
     public function index(Request $request)
     {
         try {
-            $outlets = Outlet::all();
-
-            if ($request->user()->role === 'supervisor') {
-                $outlets = Outlet::where('id', $request->user()->outlet_id)->get();
+            $user = $request->user();
+            
+            if ($user->role === 'admin') {
+                $outlets = Outlet::all();
+            } elseif ($user->role === 'supervisor') {
+                // Get outlets assigned to supervisor via many-to-many relationship
+                $outlets = $user->outlets;
+            } elseif ($user->role === 'kasir') {
+                // Get only the outlet assigned to kasir
+                $outlets = $user->outlet ? collect([$user->outlet]) : collect([]);
+            } else {
+                $outlets = collect([]);
             }
+            
             return $this->successResponse($outlets, 'Outlets retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
@@ -41,10 +50,17 @@ class OutletController extends Controller
                 'phone' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255',
                 'tax' => 'nullable|numeric|min:0',
+                'tax_type' => 'required|in:pkp,non_pkp',
                 'qris' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
                 'atas_nama_bank' => 'nullable|string|max:255',
                 'nama_bank' => 'nullable|string|max:255',
                 'nomor_transaksi_bank' => 'nullable|integer',
+                'pkp_atas_nama_bank' => 'required|string|max:255',
+                'pkp_nama_bank' => 'required|string|max:255',
+                'pkp_nomor_transaksi_bank' => 'required|integer',
+                'non_pkp_atas_nama_bank' => 'required|string|max:255',
+                'non_pkp_nama_bank' => 'required|string|max:255',
+                'non_pkp_nomor_transaksi_bank' => 'required|integer',
             ]);
     
             DB::beginTransaction();
@@ -55,9 +71,16 @@ class OutletController extends Controller
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'tax' => $request->tax,
+                'tax_type' => $request->tax_type,
                 'atas_nama_bank' => $request->atas_nama_bank,
                 'nama_bank' => $request->nama_bank,
                 'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
+                'pkp_atas_nama_bank' => $request->pkp_atas_nama_bank,
+                'pkp_nama_bank' => $request->pkp_nama_bank,
+                'pkp_nomor_transaksi_bank' => $request->pkp_nomor_transaksi_bank,
+                'non_pkp_atas_nama_bank' => $request->non_pkp_atas_nama_bank,
+                'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
+                'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
             ];
     
             // Hanya tambahkan qris jika ada file
@@ -119,10 +142,17 @@ class OutletController extends Controller
                 'email' => 'nullable|string|email|max:255',
                 'is_active' => 'required|boolean',
                 'tax' => 'nullable|numeric|min:0',
+                'tax_type' => 'required|in:pkp,non_pkp',
                 'qris' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
                 'atas_nama_bank' => 'nullable|string|max:255',
                 'nama_bank' => 'nullable|string|max:255',
                 'nomor_transaksi_bank' => 'nullable|integer',
+                'pkp_atas_nama_bank' => 'required|string|max:255',
+                'pkp_nama_bank' => 'required|string|max:255',
+                'pkp_nomor_transaksi_bank' => 'required|integer',
+                'non_pkp_atas_nama_bank' => 'required|string|max:255',
+                'non_pkp_nama_bank' => 'required|string|max:255',
+                'non_pkp_nomor_transaksi_bank' => 'required|integer',
             ]);
     
             $updateData = [
@@ -131,10 +161,17 @@ class OutletController extends Controller
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'tax' => $request->tax,
+                'tax_type' => $request->tax_type,
                 'is_active' => $request->is_active,
                 'atas_nama_bank' => $request->atas_nama_bank,
                 'nama_bank' => $request->nama_bank,
                 'nomor_transaksi_bank' => $request->nomor_transaksi_bank,
+                'pkp_atas_nama_bank' => $request->pkp_atas_nama_bank,
+                'pkp_nama_bank' => $request->pkp_nama_bank,
+                'pkp_nomor_transaksi_bank' => $request->pkp_nomor_transaksi_bank,
+                'non_pkp_atas_nama_bank' => $request->non_pkp_atas_nama_bank,
+                'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
+                'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
             ];
     
             // Hanya update qris jika ada file baru

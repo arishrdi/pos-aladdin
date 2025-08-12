@@ -5,7 +5,7 @@
 @section('content')
 <!-- Outlet Info -->
 <div class="mb-6">
-    <div class="bg-white rounded-lg p-4 card-shadow flex items-center justify-between">
+    <div class="mb-6 bg-white rounded-lg p-4 card-shadow flex items-center justify-between">
         <!-- Left side - Outlet info with icon -->
         <div class="flex items-center space-x-4">
             <!-- Store icon -->
@@ -23,9 +23,20 @@
             </div>
         </div>
         
-        <!-- Right side - Date range picker -->
-        <div class="relative">
-            <button id="dateRangeButton" class="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
+        <!-- Right side - Controls -->
+        <div class="flex items-center space-x-4">
+            <!-- Comparison Mode Toggle -->
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">Mode Komparasi</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="comparisonMode" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+            </div>
+            
+            <!-- Date range picker -->
+            <div class="relative">
+                <button id="dateRangeButton" class="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days">
                     <path d="M8 2v4"/>
                     <path d="M16 2v4"/>
@@ -76,12 +87,55 @@
                 
                 <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
                     <button id="cancelDateRange" class="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded">Batal</button>
-                    <button id="applyDateRange" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Terapkan</button>
+                    <button id="applyDateRange" class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">Terapkan</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Outlet Comparison Selector (Hidden by default) -->
+<div id="outletComparisonSection" class="hidden mb-6">
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Pilih Outlet untuk Komparasi</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <p class="block text-sm font-medium text-gray-700 mb-2">Outlet yang ingin dibandingkan:</p>
+                <div id="outletCheckboxContainer" class="space-y-2 max-h-48 overflow-y-auto">
+                    <!-- Outlet checkboxes will be populated here -->
+                </div>
+            </div>
+            <div class="md:col-span-2 lg:col-span-2">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex items-start space-x-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 mt-0.5 flex-shrink-0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-green-800">Cara menggunakan mode komparasi:</p>
+                            <ul class="text-sm text-green-700 mt-1 space-y-1">
+                                <li>• Pilih minimal 2 outlet untuk mulai komparasi</li>
+                                <li>• Data akan ditampilkan dalam bentuk tabel dan chart</li>
+                                <li>• Gunakan date range picker untuk mengatur periode komparasi</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 flex justify-between items-center">
+            <p class="text-sm text-gray-600">
+                <span id="selectedOutletsCount">0</span> outlet dipilih
+            </p>
+            <button id="startComparison" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Mulai Komparasi
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Stats Cards - Row 1 -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
     <!-- Total Penjualan -->
@@ -108,8 +162,8 @@
                 <p class="text-sm text-gray-500">Transaksi</p>
                 <p class="text-xl font-bold" id="totalOrders">Loading...</p>
             </div>
-            <div class="bg-blue-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+            <div class="bg-green-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                     <line x1="1" y1="10" x2="23" y2="10"></line>
                 </svg>
@@ -231,8 +285,18 @@
     <!-- Overview with Bar Chart -->
     <div class="bg-white rounded-lg p-4 card-shadow mb-6">
         <h3 class="font-semibold text-gray-800 mb-4">Overview</h3>
-        <p class="text-sm text-gray-600 mb-2">Data penjualan untuk <span class="outlet-name">loading</span></p>
-        <p class="text-xl font-bold text-green-500 mb-4" id="totalSalesOverview">Loading...</p>
+        
+        <!-- Single Outlet View -->
+        <div id="singleOutletOverview">
+            <p class="text-sm text-gray-600 mb-2">Data penjualan untuk <span class="outlet-name">loading</span></p>
+            <p class="text-xl font-bold text-green-500 mb-4" id="totalSalesOverview">Loading...</p>
+        </div>
+        
+        <!-- Comparison Mode View -->
+        <div id="comparisonOverview" class="hidden">
+            <p class="text-sm text-gray-600 mb-2">Perbandingan penjualan harian antar outlet</p>
+            <p class="text-xl font-bold text-green-500 mb-4" id="comparisonTotalSales">Pilih outlet untuk melihat perbandingan</p>
+        </div>
         
         <!-- Bar Chart Container -->
         <div class="relative h-64">
@@ -282,6 +346,82 @@
         </div>
     </div>
 </div>
+
+<!-- Outlet Comparison Results (Hidden by default) -->
+<div id="comparisonResults" class="hidden mb-6">
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Komparasi Antar Outlet</h3>
+            <button id="closeComparison" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Comparison Table -->
+        <div class="overflow-x-auto mb-6">
+            <table class="min-w-full divide-y divide-gray-200" id="comparisonTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Outlet</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaksi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Terjual</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Diskon</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Bonus</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaksi Cancel</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaksi Refund</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Table rows will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Comparison Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Sales Comparison Chart -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-800 mb-4">Perbandingan Total Penjualan</h4>
+                <div class="relative h-64">
+                    <canvas id="comparisonSalesChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Transactions Comparison Chart -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-800 mb-4">Perbandingan Jumlah Transaksi</h4>
+                <div class="relative h-64">
+                    <canvas id="comparisonTransactionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Comparison Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Cancel Transactions Comparison Chart -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-800 mb-4">Perbandingan Transaksi Cancel</h4>
+                <div class="relative h-64">
+                    <canvas id="comparisonCancelChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Refund Transactions Comparison Chart -->
+            <div>
+                <h4 class="text-md font-semibold text-gray-800 mb-4">Perbandingan Transaksi Refund</h4>
+                <div class="relative h-64">
+                    <canvas id="comparisonRefundChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -309,6 +449,9 @@
         
         // Date Range Picker Functionality
         initDatePicker();
+        
+        // Initialize comparison functionality
+        initializeComparison();
     });
         
         // Function to fetch dashboard data
@@ -772,5 +915,634 @@
         // Initial date display update
         updateDateDisplay(formatYMD(startDate), formatYMD(endDate));
     }
+
+    // Outlet Comparison Functionality
+    let comparisonMode = false;
+    let selectedOutlets = [];
+    let comparisonSalesChart = null;
+    let comparisonTransactionsChart = null;
+    let comparisonCancelChart = null;
+    let comparisonRefundChart = null;
+
+    // Initialize comparison functionality
+    function initializeComparison() {
+        const comparisonToggle = document.getElementById('comparisonMode');
+        const comparisonSection = document.getElementById('outletComparisonSection');
+        const startComparisonBtn = document.getElementById('startComparison');
+        const closeComparisonBtn = document.getElementById('closeComparison');
+
+        // Toggle comparison mode
+        comparisonToggle.addEventListener('change', function() {
+            comparisonMode = this.checked;
+            if (comparisonMode) {
+                comparisonSection.classList.remove('hidden');
+                loadOutletsForComparison();
+                hideSingleOutletView();
+                switchToComparisonOverview();
+            } else {
+                comparisonSection.classList.add('hidden');
+                document.getElementById('comparisonResults').classList.add('hidden');
+                showSingleOutletView();
+                switchToSingleOutletOverview();
+                resetComparison();
+            }
+        });
+
+        // Start comparison button
+        startComparisonBtn.addEventListener('click', function() {
+            if (selectedOutlets.length >= 2) {
+                fetchComparisonData();
+            }
+        });
+
+        // Close comparison results
+        closeComparisonBtn.addEventListener('click', function() {
+            document.getElementById('comparisonResults').classList.add('hidden');
+        });
+    }
+
+    function getTokenFromStorage() {
+        return localStorage.getItem('token')
+    }
+
+    // Load outlets for comparison
+    async function loadOutletsForComparison() {
+        try {
+            // Get token with fallback
+            let token = '';
+            if (typeof getTokenFromStorage === 'function') {
+                token = getTokenFromStorage();
+            } else if (localStorage.getItem('token')) {
+                token = localStorage.getItem('token');
+            }
+            
+            console.log('Using token for outlets API:', token ? 'Token present' : 'No token'); // Debug log
+            
+            const headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch('/api/outlets', { headers });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch outlets');
+            }
+
+            const result = await response.json();
+            console.log('Outlets API response:', result); // Debug log
+            
+            // Handle different possible response structures
+            let outletsData = [];
+            if (result.data) {
+                outletsData = result.data;
+            } else if (result.outlets) {
+                outletsData = result.outlets;
+            } else if (Array.isArray(result)) {
+                outletsData = result;
+            }
+            
+            console.log('Outlets data to populate:', outletsData); // Debug log
+            populateOutletCheckboxes(outletsData);
+        } catch (error) {
+            console.error('Error loading outlets for comparison:', error);
+            alert('Gagal memuat data outlet: ' + error.message);
+        }
+    }
+
+    // Populate outlet checkboxes
+    function populateOutletCheckboxes(outlets) {
+        const container = document.getElementById('outletCheckboxContainer');
+        container.innerHTML = '';
+
+        console.log('Populating checkboxes with outlets:', outlets); // Debug log
+        
+        if (!outlets || outlets.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-sm">Tidak ada outlet tersedia</p>';
+            return;
+        }
+
+        outlets.forEach(outlet => {
+            console.log('Processing outlet:', outlet); // Debug log
+            
+            if (!outlet.id || !outlet.name) {
+                console.warn('Invalid outlet data:', outlet);
+                return;
+            }
+            
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'flex items-center py-1';
+            checkboxDiv.innerHTML = `
+                <input type="checkbox" id="outlet_${outlet.id}" value="${outlet.id}" 
+                       class="outlet-checkbox h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                <label for="outlet_${outlet.id}" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                    ${outlet.name}
+                </label>
+            `;
+            container.appendChild(checkboxDiv);
+            console.log("Container with checkbox outlet", container)
+        });
+
+        console.log('Checkboxes created. Total:', outlets.length); // Debug log
+
+        // Add event listeners to checkboxes
+        document.querySelectorAll('.outlet-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedOutlets);
+        });
+        
+        // Initialize counter
+        updateSelectedOutlets();
+    }
+
+    // Update selected outlets
+    function updateSelectedOutlets() {
+        selectedOutlets = [];
+        const checkedBoxes = document.querySelectorAll('.outlet-checkbox:checked');
+        console.log('Checked checkboxes found:', checkedBoxes.length); // Debug log
+        
+        checkedBoxes.forEach(checkbox => {
+            const outletId = parseInt(checkbox.value);
+            console.log('Adding outlet ID to selection:', outletId); // Debug log
+            selectedOutlets.push(outletId);
+        });
+
+        console.log('Selected outlets:', selectedOutlets); // Debug log
+        
+        const countElement = document.getElementById('selectedOutletsCount');
+        const buttonElement = document.getElementById('startComparison');
+        
+        if (countElement) {
+            countElement.textContent = selectedOutlets.length;
+        }
+        
+        if (buttonElement) {
+            buttonElement.disabled = selectedOutlets.length < 2;
+        }
+    }
+
+    // Hide single outlet view
+    function hideSingleOutletView() {
+        const elementsToHide = [
+            'div.grid.grid-cols-1.md\\:grid-cols-4.gap-4.mb-4', // Stats cards row 1
+            'div.grid.grid-cols-1.md\\:grid-cols-4.gap-4.mb-6', // Stats cards row 2
+            'div.grid.grid-cols-1.md\\:grid-cols-2.gap-6.mb-6', // Products and charts
+        ];
+        
+        // Hide main dashboard sections (this is simplified, you may need to adjust selectors)
+        document.querySelectorAll('.grid').forEach(grid => {
+            if (grid.classList.contains('md:grid-cols-4') || grid.classList.contains('md:grid-cols-2')) {
+                // grid.style.display = 'none';
+            }
+        });
+    }
+
+    // Show single outlet view
+    function showSingleOutletView() {
+        document.querySelectorAll('.grid').forEach(grid => {
+            if (grid.classList.contains('md:grid-cols-4') || grid.classList.contains('md:grid-cols-2')) {
+                grid.style.display = 'grid';
+            }
+        });
+    }
+
+    // Reset comparison
+    function resetComparison() {
+        selectedOutlets = [];
+        document.querySelectorAll('.outlet-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateSelectedOutlets();
+        
+        if (comparisonSalesChart) {
+            comparisonSalesChart.destroy();
+            comparisonSalesChart = null;
+        }
+        if (comparisonTransactionsChart) {
+            comparisonTransactionsChart.destroy();
+            comparisonTransactionsChart = null;
+        }
+        if (comparisonCancelChart) {
+            comparisonCancelChart.destroy();
+            comparisonCancelChart = null;
+        }
+        if (comparisonRefundChart) {
+            comparisonRefundChart.destroy();
+            comparisonRefundChart = null;
+        }
+    }
+    
+    // Switch to comparison overview
+    function switchToComparisonOverview() {
+        document.getElementById('singleOutletOverview').classList.add('hidden');
+        document.getElementById('comparisonOverview').classList.remove('hidden');
+        
+        // Clear the existing chart for comparison view
+        if (window.salesChartInstance) {
+            window.salesChartInstance.destroy();
+            window.salesChartInstance = null;
+        }
+    }
+    
+    // Switch to single outlet overview
+    function switchToSingleOutletOverview() {
+        document.getElementById('comparisonOverview').classList.add('hidden');
+        document.getElementById('singleOutletOverview').classList.remove('hidden');
+        
+        // Refresh single outlet data
+        fetchDashboardData();
+    }
+
+    // Fetch comparison data
+    async function fetchComparisonData() {
+        if (selectedOutlets.length < 2) {
+            alert('Pilih minimal 2 outlet untuk komparasi');
+            return;
+        }
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Use same default date range as main dashboard - first day of current month to today
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            const formatYMD = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const startDate = urlParams.get('start_date') || formatYMD(firstDayOfMonth);
+            const endDate = urlParams.get('end_date') || formatYMD(today);
+
+            const queryParams = new URLSearchParams({
+                outlet_ids: selectedOutlets.join(','),
+                start_date: startDate,
+                end_date: endDate
+            });
+
+            console.log('Fetching comparison data with params:', {
+                outlet_ids: selectedOutlets.join(','),
+                start_date: startDate,
+                end_date: endDate
+            });
+
+            const response = await fetch(`/api/reports/comparison?${queryParams}`, {
+                headers: {
+                    'Authorization': `Bearer ${getTokenFromStorage()}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API response error:', response.status, errorText);
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
+            }
+
+            const result = await response.json();
+            console.log('Comparison API response:', result);
+            
+            if (result.success && result.data) {
+                displayComparisonResults(result.data);
+            } else {
+                console.error('API returned unsuccessful response:', result);
+                alert('API mengembalikan respons tidak berhasil: ' + (result.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error fetching comparison data:', error);
+            alert('Gagal memuat data komparasi: ' + error.message);
+        }
+    }
+
+    // Display comparison results
+    function displayComparisonResults(data) {
+        console.log('Displaying comparison results:', data);
+        document.getElementById('comparisonResults').classList.remove('hidden');
+        
+        // Update Overview section with comparison data
+        updateComparisonOverview(data);
+        
+        // Update Overview chart with comparison data
+        updateOverviewComparisonChart(data);
+        
+        // Populate comparison table
+        populateComparisonTable(data);
+        
+        // Create comparison charts
+        createComparisonCharts(data);
+    }
+
+    // Populate comparison table
+    function populateComparisonTable(data) {
+        const tbody = document.getElementById('comparisonTableBody');
+        tbody.innerHTML = '';
+
+        console.log('Populating comparison table with data:', data);
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Tidak ada data untuk ditampilkan</td></tr>';
+            return;
+        }
+
+        data.forEach((outlet, index) => {
+            console.log(`Processing outlet ${index + 1}:`, outlet);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${outlet.outlet_name || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.total_sales || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${outlet.total_orders || 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${outlet.total_items || 0}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.average_order_value || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.total_discount || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.total_bonus_value || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">${formatCurrency(outlet.total_cancelled || 0)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600 font-medium">${formatCurrency(outlet.total_refunded || 0)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Create comparison charts
+    function createComparisonCharts(data) {
+        const outlets = data.map(d => d.outlet_name);
+        const salesData = data.map(d => d.total_sales);
+        const transactionsData = data.map(d => d.total_orders);
+        const cancelData = data.map(d => d.total_cancelled || 0);
+        const refundData = data.map(d => d.total_refunded || 0);
+
+        // Destroy existing charts
+        if (comparisonSalesChart) comparisonSalesChart.destroy();
+        if (comparisonTransactionsChart) comparisonTransactionsChart.destroy();
+        if (comparisonCancelChart) comparisonCancelChart.destroy();
+        if (comparisonRefundChart) comparisonRefundChart.destroy();
+
+        // Sales comparison chart
+        const salesCtx = document.getElementById('comparisonSalesChart').getContext('2d');
+        comparisonSalesChart = new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+                labels: outlets,
+                datasets: [{
+                    label: 'Total Penjualan',
+                    data: salesData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Transactions comparison chart
+        const transactionsCtx = document.getElementById('comparisonTransactionsChart').getContext('2d');
+        comparisonTransactionsChart = new Chart(transactionsCtx, {
+            type: 'bar',
+            data: {
+                labels: outlets,
+                datasets: [{
+                    label: 'Jumlah Transaksi',
+                    data: transactionsData,
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Cancel transactions comparison chart
+        const cancelCtx = document.getElementById('comparisonCancelChart').getContext('2d');
+        comparisonCancelChart = new Chart(cancelCtx, {
+            type: 'bar',
+            data: {
+                labels: outlets,
+                datasets: [{
+                    label: 'Transaksi Cancel',
+                    data: cancelData,
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Refund transactions comparison chart
+        const refundCtx = document.getElementById('comparisonRefundChart').getContext('2d');
+        comparisonRefundChart = new Chart(refundCtx, {
+            type: 'bar',
+            data: {
+                labels: outlets,
+                datasets: [{
+                    label: 'Transaksi Refund',
+                    data: refundData,
+                    backgroundColor: 'rgba(249, 115, 22, 0.8)',
+                    borderColor: 'rgba(249, 115, 22, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Update comparison overview section
+    function updateComparisonOverview(data) {
+        const totalSalesAllOutlets = data.reduce((sum, outlet) => sum + (outlet.total_sales || 0), 0);
+        const comparisonTotalSales = document.getElementById('comparisonTotalSales');
+        
+        if (comparisonTotalSales) {
+            comparisonTotalSales.textContent = `Total Gabungan: ${formatCurrency(totalSalesAllOutlets)}`;
+        }
+    }
+    
+    // Update overview chart with comparison data - daily comparison
+    function updateOverviewComparisonChart(data) {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        
+        // Destroy existing chart
+        if (window.salesChartInstance) {
+            window.salesChartInstance.destroy();
+        }
+        
+        // Get all unique dates from all outlets
+        const allDates = new Set();
+        data.forEach(outlet => {
+            if (outlet.daily_sales) {
+                Object.keys(outlet.daily_sales).forEach(date => allDates.add(date));
+            }
+        });
+        
+        // Sort dates
+        const sortedDates = Array.from(allDates).sort();
+        
+        // Format dates for display
+        const formattedDates = sortedDates.map(date => {
+            const d = new Date(date);
+            const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+            return dayNames[d.getDay()] + ', ' + d.getDate();
+        });
+        
+        // Define colors for different outlets
+        const colors = [
+            { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgba(59, 130, 246, 1)' },   // green
+            { bg: 'rgba(16, 185, 129, 0.8)', border: 'rgba(16, 185, 129, 1)' },   // Green  
+            { bg: 'rgba(249, 115, 22, 0.8)', border: 'rgba(249, 115, 22, 1)' },   // Orange
+            { bg: 'rgba(139, 92, 246, 0.8)', border: 'rgba(139, 92, 246, 1)' },   // Purple
+            { bg: 'rgba(236, 72, 153, 0.8)', border: 'rgba(236, 72, 153, 1)' },   // Pink
+            { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },     // Emerald
+        ];
+        
+        // Create datasets for each outlet
+        const datasets = data.map((outlet, index) => {
+            const outletDailySales = sortedDates.map(date => {
+                return outlet.daily_sales && outlet.daily_sales[date] ? outlet.daily_sales[date].sales : 0;
+            });
+            
+            const color = colors[index % colors.length];
+            
+            return {
+                label: outlet.outlet_name || `Outlet ${outlet.outlet_id}`,
+                data: outletDailySales,
+                backgroundColor: color.bg,
+                borderColor: color.border,
+                borderWidth: 1
+            };
+        });
+        
+        // Create daily comparison chart
+        window.salesChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: formattedDates,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000) {
+                                    return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return 'Rp ' + (value / 1000).toFixed(0) + 'k';
+                                }
+                                return 'Rp ' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Tanggal'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Perbandingan Penjualan Harian Antar Outlet',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
+    }
+
 </script>
 @endsection

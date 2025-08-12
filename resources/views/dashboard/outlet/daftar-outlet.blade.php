@@ -429,10 +429,21 @@
             formData.append('address', document.getElementById('alamatOutlet').value);
             formData.append('email', document.getElementById('emailOutlet').value);
             formData.append('tax', document.getElementById('pajakOutlet').value || '0.00');
+            formData.append('tax_type', document.getElementById('taxType').value);
             formData.append('nomor_transaksi_bank', document.getElementById('nomorTransaksi').value);
             formData.append('nama_bank', document.getElementById('namaBank').value);
             formData.append('atas_nama_bank', document.getElementById('atasNama').value);
             formData.append('is_active', document.getElementById('statusAktif').checked ? '1' : '0');
+            
+            // Add PKP banking fields
+            formData.append('pkp_atas_nama_bank', document.getElementById('pkpAtasNama').value);
+            formData.append('pkp_nama_bank', document.getElementById('pkpNamaBank').value);
+            formData.append('pkp_nomor_transaksi_bank', document.getElementById('pkpNomorTransaksi').value);
+            
+            // Add NonPKP banking fields
+            formData.append('non_pkp_atas_nama_bank', document.getElementById('nonPkpAtasNama').value);
+            formData.append('non_pkp_nama_bank', document.getElementById('nonPkpNamaBank').value);
+            formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('nonPkpNomorTransaksi').value);
             
             const fileInput = document.getElementById('fotoOutlet');
             if (fileInput.files[0]) {
@@ -508,10 +519,21 @@
         formData.append('address', document.getElementById('editAlamatLengkap').value);
         formData.append('email', document.getElementById('editEmail').value);
         formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
+        formData.append('tax_type', document.getElementById('editTaxType').value);
         formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
         formData.append('nama_bank', document.getElementById('editNamaBank').value);
         formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
         formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
+        
+        // Add PKP banking fields
+        formData.append('pkp_atas_nama_bank', document.getElementById('editPkpAtasNama').value);
+        formData.append('pkp_nama_bank', document.getElementById('editPkpNamaBank').value);
+        formData.append('pkp_nomor_transaksi_bank', document.getElementById('editPkpNomorTransaksi').value);
+        
+        // Add NonPKP banking fields
+        formData.append('non_pkp_atas_nama_bank', document.getElementById('editNonPkpAtasNama').value);
+        formData.append('non_pkp_nama_bank', document.getElementById('editNonPkpNamaBank').value);
+        formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('editNonPkpNomorTransaksi').value);
         
         // Tambahkan file jika ada
         const fileInput = document.getElementById('editFotoOutlet');
@@ -594,10 +616,21 @@
             document.getElementById('editAlamatLengkap').value = outlet.address;
             document.getElementById('editEmail').value = outlet.email;
             document.getElementById('editPersentasePajak').value = outlet.tax;
+            document.getElementById('editTaxType').value = outlet.tax_type || 'non_pkp';
             document.getElementById('editNoTransaksi').value = outlet.nomor_transaksi_bank || '';
             document.getElementById('editNamaBank').value = outlet.nama_bank || '';
             document.getElementById('editAtasNama').value = outlet.atas_nama_bank || '';
             document.getElementById('editStatusAktif').checked = outlet.is_active;
+            
+            // Load PKP banking fields
+            document.getElementById('editPkpAtasNama').value = outlet.pkp_atas_nama_bank || '';
+            document.getElementById('editPkpNamaBank').value = outlet.pkp_nama_bank || '';
+            document.getElementById('editPkpNomorTransaksi').value = outlet.pkp_nomor_transaksi_bank || '';
+            
+            // Load NonPKP banking fields
+            document.getElementById('editNonPkpAtasNama').value = outlet.non_pkp_atas_nama_bank || '';
+            document.getElementById('editNonPkpNamaBank').value = outlet.non_pkp_nama_bank || '';
+            document.getElementById('editNonPkpNomorTransaksi').value = outlet.non_pkp_nomor_transaksi_bank || '';
 
             // Set preview foto
             const preview = document.getElementById('editCurrentFoto');
@@ -662,6 +695,57 @@
                 emailOutlet.classList.remove('border-red-500');
             }
             
+            const taxType = document.getElementById('taxType');
+            const errorTaxType = document.getElementById('errorTaxType');
+            if (!taxType.value.trim()) {
+                errorTaxType.classList.remove('hidden');
+                taxType.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorTaxType.classList.add('hidden');
+                taxType.classList.remove('border-red-500');
+            }
+            
+            // Validasi PKP banking fields (always validate)
+            const pkpFields = [
+                { id: 'pkpNomorTransaksi', error: 'errorPkpNomor' },
+                { id: 'pkpNamaBank', error: 'errorPkpBank' },
+                { id: 'pkpAtasNama', error: 'errorPkpAtasNama' }
+            ];
+            
+            pkpFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.error);
+                if (!input.value.trim()) {
+                    error.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    error.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                }
+            });
+            
+            // Validasi Non-PKP banking fields (always validate)
+            const nonPkpFields = [
+                { id: 'nonPkpNomorTransaksi', error: 'errorNonPkpNomor' },
+                { id: 'nonPkpNamaBank', error: 'errorNonPkpBank' },
+                { id: 'nonPkpAtasNama', error: 'errorNonPkpAtasNama' }
+            ];
+            
+            nonPkpFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.error);
+                if (!input.value.trim()) {
+                    error.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    error.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                }
+            });
+            
             return isValid;
         }
 
@@ -713,6 +797,57 @@
                 emailOutlet.classList.remove('border-red-500');
             }
             
+            const taxType = document.getElementById('editTaxType');
+            const errorTaxType = document.getElementById('errorEditTaxType');
+            if (!taxType.value.trim()) {
+                errorTaxType.classList.remove('hidden');
+                taxType.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorTaxType.classList.add('hidden');
+                taxType.classList.remove('border-red-500');
+            }
+            
+            // Validasi PKP banking fields (always validate)
+            const pkpFields = [
+                { id: 'editPkpNomorTransaksi', error: 'errorEditPkpNomor' },
+                { id: 'editPkpNamaBank', error: 'errorEditPkpBank' },
+                { id: 'editPkpAtasNama', error: 'errorEditPkpAtasNama' }
+            ];
+            
+            pkpFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.error);
+                if (!input.value.trim()) {
+                    error.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    error.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                }
+            });
+            
+            // Validasi Non-PKP banking fields (always validate)
+            const nonPkpFields = [
+                { id: 'editNonPkpNomorTransaksi', error: 'errorEditNonPkpNomor' },
+                { id: 'editNonPkpNamaBank', error: 'errorEditNonPkpBank' },
+                { id: 'editNonPkpAtasNama', error: 'errorEditNonPkpAtasNama' }
+            ];
+            
+            nonPkpFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const error = document.getElementById(field.error);
+                if (!input.value.trim()) {
+                    error.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    error.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                }
+            });
+            
             return isValid;
         }
 
@@ -723,11 +858,22 @@
             document.getElementById('alamatOutlet').value = '';
             document.getElementById('emailOutlet').value = '';
             document.getElementById('pajakOutlet').value = '';
+            document.getElementById('taxType').value = '';
             document.getElementById('nomorTransaksi').value = '';
             document.getElementById('namaBank').value = '';
             document.getElementById('atasNama').value = '';
             document.getElementById('fotoOutlet').value = '';
             document.getElementById('statusAktif').checked = true;
+            
+            // Reset PKP banking fields
+            document.getElementById('pkpAtasNama').value = '';
+            document.getElementById('pkpNamaBank').value = '';
+            document.getElementById('pkpNomorTransaksi').value = '';
+            
+            // Reset NonPKP banking fields
+            document.getElementById('nonPkpAtasNama').value = '';
+            document.getElementById('nonPkpNamaBank').value = '';
+            document.getElementById('nonPkpNomorTransaksi').value = '';
             
             document.getElementById('currentFotoOutlet').src = '#';
             document.getElementById('currentFotoOutlet').classList.add('hidden');

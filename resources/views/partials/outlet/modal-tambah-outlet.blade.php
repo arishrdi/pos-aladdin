@@ -45,6 +45,16 @@
             <label class="block font-medium mb-1">Persentase Pajak (%)</label>
             <input type="number" id="pajakOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="0%">
           </div>
+          <div>
+            <label class="block font-medium mb-1">Jenis Pajak Default <span class="text-red-500">*</span></label>
+            <select id="taxType" class="w-full border rounded-lg px-4 py-2 text-sm" onchange="updateDefaultTaxPercentage()" required>
+              <option value="">Pilih jenis pajak default</option>
+              <option value="pkp">PKP (11%)</option>
+              <option value="non_pkp">Non-PKP (0%)</option>
+            </select>
+            <p id="errorTaxType" class="text-red-500 text-xs mt-1 hidden">Jenis pajak default wajib dipilih</p>
+            <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
+          </div>
         </div>
       </div>
 
@@ -63,6 +73,50 @@
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Atas Nama</label>
             <input type="text" id="atasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening">
+          </div>
+        </div>
+      </div>
+
+      <!-- PKP Banking Info -->
+      <div id="pkpBankingSection" class="p-5 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-4 text-blue-700">Informasi Bank PKP (11%)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium mb-1">Nomor Rekening PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="pkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nomor rekening PKP">
+            <p id="errorPkpNomor" class="text-red-500 text-xs mt-1 hidden">Nomor rekening PKP wajib diisi</p>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Nama Bank PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="pkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
+            <p id="errorPkpBank" class="text-red-500 text-xs mt-1 hidden">Nama bank PKP wajib diisi</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1">Atas Nama PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="pkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening PKP">
+            <p id="errorPkpAtasNama" class="text-red-500 text-xs mt-1 hidden">Atas nama PKP wajib diisi</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Non-PKP Banking Info -->
+      <div id="nonPkpBankingSection" class="p-5 bg-green-50 border border-green-200 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-4 text-green-700">Informasi Bank Non-PKP (0%)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-medium mb-1">Nomor Rekening Non-PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="nonPkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nomor rekening Non-PKP">
+            <p id="errorNonPkpNomor" class="text-red-500 text-xs mt-1 hidden">Nomor rekening Non-PKP wajib diisi</p>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Nama Bank Non-PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="nonPkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
+            <p id="errorNonPkpBank" class="text-red-500 text-xs mt-1 hidden">Nama bank Non-PKP wajib diisi</p>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1">Atas Nama Non-PKP <span class="text-red-500">*</span></label>
+            <input type="text" id="nonPkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening Non-PKP">
+            <p id="errorNonPkpAtasNama" class="text-red-500 text-xs mt-1 hidden">Atas nama Non-PKP wajib diisi</p>
           </div>
         </div>
       </div>
@@ -145,6 +199,20 @@ function previewFotoOutlet(input) {
   }
 }
 
+// Fungsi untuk update tax percentage berdasarkan default selection
+function updateDefaultTaxPercentage() {
+  const taxType = document.getElementById('taxType').value;
+  const pajakOutlet = document.getElementById('pajakOutlet');
+  
+  if (taxType === 'pkp') {
+    pajakOutlet.value = 11;
+  } else if (taxType === 'non_pkp') {
+    pajakOutlet.value = 0;
+  } else {
+    pajakOutlet.value = '';
+  }
+}
+
 // Fungsi untuk validasi form
 function validateForm() {
   let isValid = true;
@@ -197,6 +265,58 @@ function validateForm() {
     emailOutlet.classList.remove('border-red-500');
   }
   
+  // Validasi tax type
+  const taxType = document.getElementById('taxType');
+  const errorTaxType = document.getElementById('errorTaxType');
+  if (!taxType.value.trim()) {
+    errorTaxType.classList.remove('hidden');
+    taxType.classList.add('border-red-500');
+    isValid = false;
+  } else {
+    errorTaxType.classList.add('hidden');
+    taxType.classList.remove('border-red-500');
+  }
+  
+  // Validasi PKP banking fields (always validate)
+  const pkpFields = [
+    { id: 'pkpNomorTransaksi', error: 'errorPkpNomor' },
+    { id: 'pkpNamaBank', error: 'errorPkpBank' },
+    { id: 'pkpAtasNama', error: 'errorPkpAtasNama' }
+  ];
+  
+  pkpFields.forEach(field => {
+    const input = document.getElementById(field.id);
+    const error = document.getElementById(field.error);
+    if (!input.value.trim()) {
+      error.classList.remove('hidden');
+      input.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      error.classList.add('hidden');
+      input.classList.remove('border-red-500');
+    }
+  });
+  
+  // Validasi Non-PKP banking fields (always validate)
+  const nonPkpFields = [
+    { id: 'nonPkpNomorTransaksi', error: 'errorNonPkpNomor' },
+    { id: 'nonPkpNamaBank', error: 'errorNonPkpBank' },
+    { id: 'nonPkpAtasNama', error: 'errorNonPkpAtasNama' }
+  ];
+  
+  nonPkpFields.forEach(field => {
+    const input = document.getElementById(field.id);
+    const error = document.getElementById(field.error);
+    if (!input.value.trim()) {
+      error.classList.remove('hidden');
+      input.classList.add('border-red-500');
+      isValid = false;
+    } else {
+      error.classList.add('hidden');
+      input.classList.remove('border-red-500');
+    }
+  });
+  
   return isValid;
 }
 
@@ -209,11 +329,24 @@ function resetForm() {
   document.getElementById('alamatOutlet').value = '';
   document.getElementById('emailOutlet').value = '';
   document.getElementById('pajakOutlet').value = '';
+  document.getElementById('taxType').value = '';
   document.getElementById('nomorTransaksi').value = '';
   document.getElementById('namaBank').value = '';
   document.getElementById('atasNama').value = '';
+  document.getElementById('pkpNomorTransaksi').value = '';
+  document.getElementById('pkpNamaBank').value = '';
+  document.getElementById('pkpAtasNama').value = '';
+  document.getElementById('nonPkpNomorTransaksi').value = '';
+  document.getElementById('nonPkpNamaBank').value = '';
+  document.getElementById('nonPkpAtasNama').value = '';
   document.getElementById('fotoOutlet').value = '';
   document.getElementById('statusAktif').checked = true;
+  
+  // Banking sections remain visible (no hiding needed)
+  
+  // Reset pajak field to editable
+  const pajakOutlet = document.getElementById('pajakOutlet');
+  pajakOutlet.readOnly = false;
   
   // Reset preview foto
   document.getElementById('currentFotoOutlet').src = '#';
@@ -246,18 +379,28 @@ function submitForm() {
   // Simulasi AJAX request (di production, ganti dengan fetch/axios)
   setTimeout(() => {
     // Ambil nilai dari form
+    const taxType = document.getElementById('taxType').value;
     const formData = {
       nama: document.getElementById('namaOutlet').value,
       telepon: document.getElementById('teleponOutlet').value,
       alamat: document.getElementById('alamatOutlet').value,
       email: document.getElementById('emailOutlet').value,
       pajak: document.getElementById('pajakOutlet').value || 0,
+      tax_type: taxType,
       nomorTransaksi: document.getElementById('nomorTransaksi').value,
       namaBank: document.getElementById('namaBank').value,
       atasNama: document.getElementById('atasNama').value,
       status: document.getElementById('statusAktif').checked ? 'Aktif' : 'Tidak Aktif',
       foto: document.getElementById('fotoOutlet').files[0]?.name || null
     };
+    
+    // Add both PKP and NonPKP banking fields
+    formData.pkp_atas_nama_bank = document.getElementById('pkpAtasNama').value;
+    formData.pkp_nama_bank = document.getElementById('pkpNamaBank').value;
+    formData.pkp_nomor_transaksi_bank = document.getElementById('pkpNomorTransaksi').value;
+    formData.non_pkp_atas_nama_bank = document.getElementById('nonPkpAtasNama').value;
+    formData.non_pkp_nama_bank = document.getElementById('nonPkpNamaBank').value;
+    formData.non_pkp_nomor_transaksi_bank = document.getElementById('nonPkpNomorTransaksi').value;
     
     console.log('Data yang akan dikirim:', formData);
     

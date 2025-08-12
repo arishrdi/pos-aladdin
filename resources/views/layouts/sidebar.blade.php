@@ -652,27 +652,8 @@ async function loadOutletsFromAPI() {
             return;
         }
 
-        // Jika role supervisor, langsung pilih outlet pertama yang aktif
-        if (userRole === 'supervisor') {
-            const activeOutlets = result.data.filter(o => o.is_active);
-            if (activeOutlets.length > 0) {
-                const defaultOutlet = activeOutlets[0];
-                if (outletNameDisplay) {
-                    outletNameDisplay.textContent = defaultOutlet.name;
-                }
-                localStorage.setItem('selectedOutletId', defaultOutlet.id);
-                
-                // Nonaktifkan dropdown untuk supervisor
-                if (outletDropdownButton) {
-                    outletDropdownButton.style.pointerEvents = 'none';
-                    outletDropdownButton.style.cursor = 'default';
-                }
-                if (outletDropdownArrow) {
-                    outletDropdownArrow.style.display = 'none';
-                }
-            }
-            return; // Keluar dari fungsi setelah memilih outlet untuk supervisor
-        }
+        // Supervisor sekarang bisa mengakses multiple outlets, tampilkan dropdown seperti admin
+        // Remove the supervisor-specific logic that disabled the dropdown
 
         // Untuk role selain supervisor, tampilkan dropdown seperti biasa
         result.data.forEach(outlet => {

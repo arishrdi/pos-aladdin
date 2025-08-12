@@ -84,22 +84,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::controller(InventoryController::class)->group(function () {
             Route::get('/inventories', 'index');
-            Route::post('/inventories/transfer', 'transferStock')->middleware('role:admin');
+            Route::post('/inventories/transfer', 'transferStock');
             Route::get('/inventories/listAll', 'listAllInventories');
-            Route::post('/inventories', 'store')->middleware('role:admin');
+            Route::post('/inventories', 'store');
             Route::get('/inventories/{inventory}', 'show');
-            Route::put('/inventories/{inventory}', 'update')->middleware('role:admin');
-            Route::delete('/inventories/{inventory}', 'destroy')->middleware('role:admin');
+            Route::put('/inventories/{inventory}', 'update');
+            Route::delete('/inventories/{inventory}', 'destroy');
         });
 
         Route::controller(InventoryHistoryController::class)->group(function () {
             Route::get('/inventory-histories', 'index');
-            Route::post('/inventory-histories', 'store')->middleware('role:admin');
-            Route::post('/inventory-histories/approval', 'adminApprovStock')->middleware('role:admin');
-            Route::post('/inventory-histories/reject', 'adminRejectStock')->middleware('role:admin');
+            Route::post('/inventory-histories', 'store');
+            Route::post('/inventory-histories/approval', 'adminApprovStock');
+            Route::post('/inventory-histories/reject', 'adminRejectStock');
             Route::get('/inventory-histories/{inventoryHistory}', 'show');
-            Route::put('/inventory-histories/{inventoryHistory}', 'update')->middleware('role:admin');
-            Route::delete('/inventory-histories/{inventoryHistory}', 'destroy')->middleware('role:admin');
+            Route::put('/inventory-histories/{inventoryHistory}', 'update');
+            Route::delete('/inventory-histories/{inventoryHistory}', 'destroy');
             Route::get('/inventory-histories/stock/{outletId}', 'getStock');
             Route::get('/inventory-histories/outlet/{outletId}', 'getHistoryByOutlet');
             Route::get('/inventory-histories/type/{outletId}', 'getInventoryHistoryByType');
@@ -124,6 +124,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/sales-by-category/{outlet}', 'salesByCategory');
             Route::get('/inventory-approvals/{outlet}',  'inventoryApprovals');
             Route::get('/sales-by-member/{outlet}', 'listProductByMember');
+            
+            // Multi-outlet comparison
+            Route::get('/comparison', 'comparison');
         });
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);
@@ -187,6 +190,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
+        Route::post('/members', [MemberController::class, 'store']); // Allow kasir to add members
         Route::post('/print-receipt', [PrintController::class, 'printReceipt']);
         Route::post('/test-printer', [PrintController::class, 'testPrinter']);
 

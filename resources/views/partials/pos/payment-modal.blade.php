@@ -74,6 +74,17 @@
                         </div>
                     </div>
 
+                    <!-- Tax Type Display (Read-only) -->
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Jenis Pajak Transaksi
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <span id="modalTaxTypeDisplay" class="text-sm px-2 py-1 rounded-full bg-green-100 text-green-600">Non-PKP (0%)</span>
+                            <span class="text-xs text-gray-500">- Sesuai pilihan di keranjang</span>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="paymentMethod">
                             Metode Pembayaran
@@ -92,10 +103,18 @@
                         </div>
                         <div id="transferDetails" class="hidden mt-4">
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <h3 class="font-medium mb-2">Informasi Rekening Bank</h3>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-medium">Informasi Rekening Bank</h3>
+                                    <span id="bankTaxTypeIndicator" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">-</span>
+                                </div>
                                 <p class="text-sm">Nama Pemilik: <span id="bankAccountName">-</span></p>
                                 <p class="text-sm">Nama Bank: <span id="bankName">-</span></p>
                                 <p class="text-sm">Nomor Rekening: <span id="bankAccountNumber">-</span></p>
+                                {{-- <div class="mt-2 p-2 bg-green-50 rounded text-xs">
+                                    <p class="text-green-600">
+                                        <span id="taxInfoText">Transfer ke rekening sesuai dengan jenis pajak outlet</span>
+                                    </p>
+                                </div> --}}
                             </div>
                         </div>
 
@@ -105,7 +124,7 @@
                                 <!-- Cash Proof Upload -->
                                 <div id="cashProofUploadSection" class="hidden">
                                     <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Upload Bukti Pembayaran Cash (Opsional)
+                                        Upload Bukti Pembayaran Cash
                                     </label>
                                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
                                         <input type="file" id="cashProofUpload" multiple accept="image/*,.pdf" class="hidden">
@@ -141,7 +160,7 @@
                                 <!-- QRIS Proof Upload -->
                                 <div id="qrisProofUploadSection" class="hidden">
                                     <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Upload Bukti Pembayaran QRIS (Opsional)
+                                        Upload Bukti Pembayaran QRIS
                                     </label>
                                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
                                         <input type="file" id="qrisProofUpload" multiple accept="image/*,.pdf" class="hidden">
@@ -177,9 +196,16 @@
 
                     <!-- Member Search -->
                     <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="memberDropdown">
-                            Member
-                        </label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-gray-700 text-sm font-bold" for="memberDropdown">
+                                Member
+                            </label>
+                            <button type="button" onclick="openAddMemberModal()" 
+                                class="text-xs text-green-600 hover:text-green-700 font-medium flex items-center">
+                                <i class="fas fa-plus mr-1"></i>
+                                Tambah Member
+                            </button>
+                        </div>
                         <div class="member-dropdown-container relative">
                             <div class="flex items-center relative">
                                 <input
@@ -197,11 +223,22 @@
                                 <div id="memberResults" class="max-h-48 overflow-y-auto p-1">
                                     <!-- Results will appear here -->
                                 </div>
+                                <!-- Add member button in dropdown -->
+                                <div class="border-t border-gray-200 p-2">
+                                    <button type="button" onclick="openAddMemberModal()" 
+                                        class="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded flex items-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Tambah Member Baru
+                                    </button>
+                                </div>
                             </div>
                             <div id="selectedMember" class="mt-2 hidden">
                                 <div class="flex justify-between items-center bg-green-50 p-2 rounded">
-                                    <span id="memberName" class="font-medium"></span>
-                                    <button id="removeMember" class="text-red-500">
+                                    <div class="flex flex-col">
+                                        <span id="memberName" class="font-medium text-sm"></span>
+                                        <span id="memberCode" class="text-xs text-gray-500"></span>
+                                    </div>
+                                    <button id="removeMember" class="text-red-500 hover:text-red-700">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>

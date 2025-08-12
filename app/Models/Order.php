@@ -24,6 +24,7 @@ class Order extends Model
         'member_id',
         'approval_status',
         'payment_proof',
+        'transaction_category',
         'approval_notes',
         'approved_by',
         'approved_at',

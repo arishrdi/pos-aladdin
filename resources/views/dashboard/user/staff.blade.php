@@ -466,6 +466,15 @@
                 `${staff.last_shift.start_time || '--:--'} - ${staff.last_shift.end_time || '--:--'}` : 
                 '--:-- - --:--';
             
+            // Build outlets display
+            let outletsDisplay = '';
+            if (staff.role === 'supervisor' && staff.outlets && staff.outlets.length > 0) {
+                const outletNames = staff.outlets.map(o => o.name).join(', ');
+                outletsDisplay = `<div class="text-xs text-gray-400">Outlets: ${outletNames}</div>`;
+            } else if (staff.outlet) {
+                outletsDisplay = `<div class="text-xs text-gray-400">Outlet: ${staff.outlet.name}</div>`;
+            }
+
             staffTableBody.innerHTML += `
                 <tr data-id="${staff.id}" class="border-b hover:bg-gray-50 transition-colors">
                     <td class="py-4">
@@ -476,12 +485,13 @@
                             <div>
                                 <div class="font-semibold text-base text-gray-900">${staff.name}</div>
                                 <div class="text-sm text-gray-500">${staff.email}</div>
-                                ${staff.outlet ? `<div class="text-xs text-gray-400">Outlet: ${staff.outlet.name}</div>` : ''}
+                                ${outletsDisplay}
                             </div>
                         </div>
                     </td>
                     <td class="py-4">
                         <span class="px-3 py-1.5 text-sm font-medium ${roleClass} rounded-full capitalize">${staff.role}</span>
+                        ${staff.role === 'supervisor' && staff.outlets ? `<div class="text-xs text-gray-400 mt-1">${staff.outlets.length} outlet(s)</div>` : ''}
                     </td>
                     <td class="py-4">
                         <span class="text-sm text-gray-600">${shiftTime}</span>
@@ -639,6 +649,7 @@
         document.getElementById('modalTambahStaff').classList.add('flex');
 
         loadOutlets();
+        setupRoleChangeHandler();
     }
 
     function closeModalTambahStaff() {
@@ -667,47 +678,60 @@
     }
 
     function openModalEditStaff(id) {
-    currentEditStaffId = id;
-    
-    // Load outlets first
-    loadOutletsForEdit().then(() => {
-        // Then fetch staff data
-        fetch(`/api/user/all/${currentOutletId}`, {
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-        })
-        .then(response => response.json())
-        .then(data => {
-        if (data.success) {
-            const staff = data.data.find(s => s.id == id);
-            if (staff) {
-            document.getElementById('editNamaStaff').value = staff.name;
-            document.getElementById('editEmailStaff').value = staff.email;
-            document.getElementById('editPeranStaff').value = staff.role;
-            document.getElementById('editOutletStaff').value = staff.outlet_id;
-            
-            if (staff.last_shift) {
-                const startTime = staff.last_shift.start_time ? 
-                staff.last_shift.start_time.substring(0, 5) : '';
-                const endTime = staff.last_shift.end_time ? 
-                staff.last_shift.end_time.substring(0, 5) : '';
+        currentEditStaffId = id;
+        
+        // Setup role change handler and load outlets first
+        setupRoleChangeHandler();
+        loadOutletsForEdit().then(() => {
+            // Then fetch staff data
+            fetch(`/api/user/all/${currentOutletId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+            })
+            .then(response => response.json())
+            .then(data => {
+            if (data.success) {
+                const staff = data.data.find(s => s.id == id);
+                if (staff) {
+                document.getElementById('editNamaStaff').value = staff.name;
+                document.getElementById('editEmailStaff').value = staff.email;
+                document.getElementById('editPeranStaff').value = staff.role;
                 
-                document.getElementById('editWaktuMulai').value = startTime;
-                document.getElementById('editWaktuSelesai').value = endTime;
+                // Handle outlet selection based on role
+                if (staff.role === 'supervisor') {
+                    // Load supervisor outlets and set selected ones
+                    loadOutletsForEditSupervisor().then(() => {
+                        const supervisorOutletIds = staff.outlets ? staff.outlets.map(o => o.id) : [];
+                        setSelectedEditSupervisorOutlets(supervisorOutletIds);
+                        handleEditRoleChange(); // Show the correct section
+                    });
+                } else {
+                    document.getElementById('editOutletStaff').value = staff.outlet_id;
+                    handleEditRoleChange(); // Show the correct section
+                }
+                
+                if (staff.last_shift) {
+                    const startTime = staff.last_shift.start_time ? 
+                    staff.last_shift.start_time.substring(0, 5) : '';
+                    const endTime = staff.last_shift.end_time ? 
+                    staff.last_shift.end_time.substring(0, 5) : '';
+                    
+                    document.getElementById('editWaktuMulai').value = startTime;
+                    document.getElementById('editWaktuSelesai').value = endTime;
+                }
+                
+                document.getElementById('modalEditStaff').classList.remove('hidden');
+                document.getElementById('modalEditStaff').classList.add('flex');
+                }
             }
-            
-            document.getElementById('modalEditStaff').classList.remove('hidden');
-            document.getElementById('modalEditStaff').classList.add('flex');
-            }
-        }
-        })
-        .catch(error => {
-        console.error('Error fetching staff data:', error);
-        showAlert('error', 'Gagal memuat data staff');
+            })
+            .catch(error => {
+            console.error('Error fetching staff data:', error);
+            showAlert('error', 'Gagal memuat data staff');
+            });
         });
-    });
     }
 
     function closeModalEditStaff() {
@@ -780,16 +804,33 @@
             peranStaff.classList.remove('border-red-500');
         }
 
-        //validate outlet
-        const outletStaff = document.getElementById('outletStaff');
-        const errorOutletStaff = document.getElementById('errorOutletStaff');
-        if (!outletStaff.value) {
-            errorOutletStaff.classList.remove('hidden');
-            outletStaff.classList.add('border-red-500');
-            isValid = false;
+        // Validate outlet based on role
+        const role = document.getElementById('peranStaff').value;
+        
+        if (role === 'supervisor') {
+            // Validate supervisor outlets
+            const selectedOutlets = getSelectedSupervisorOutlets();
+            const errorSupervisorOutlets = document.getElementById('errorSupervisorOutlets');
+            
+            if (selectedOutlets.length === 0) {
+                errorSupervisorOutlets.classList.remove('hidden');
+                isValid = false;
+            } else {
+                errorSupervisorOutlets.classList.add('hidden');
+            }
         } else {
-            errorOutletStaff.classList.add('hidden');
-            outletStaff.classList.remove('border-red-500');
+            // Validate single outlet for kasir/admin
+            const outletStaff = document.getElementById('outletStaff');
+            const errorOutletStaff = document.getElementById('errorOutletStaff');
+            
+            if (!outletStaff.value) {
+                errorOutletStaff.classList.remove('hidden');
+                outletStaff.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorOutletStaff.classList.add('hidden');
+                outletStaff.classList.remove('border-red-500');
+            }
         }
         
         return isValid;
@@ -846,16 +887,33 @@
             peranStaff.classList.remove('border-red-500');
         }
 
-        // Validate outlet
-        const outletStaff = document.getElementById('editOutletStaff');
-        const errorOutletStaff = document.getElementById('errorEditOutletStaff');
-        if (!outletStaff.value) {
-            errorOutletStaff.classList.remove('hidden');
-            outletStaff.classList.add('border-red-500');
-            isValid = false;
+        // Validate outlet based on role
+        const role = document.getElementById('editPeranStaff').value;
+        
+        if (role === 'supervisor') {
+            // Validate supervisor outlets
+            const selectedOutlets = getSelectedEditSupervisorOutlets();
+            const errorSupervisorOutlets = document.getElementById('errorEditSupervisorOutlets');
+            
+            if (selectedOutlets.length === 0) {
+                errorSupervisorOutlets.classList.remove('hidden');
+                isValid = false;
+            } else {
+                errorSupervisorOutlets.classList.add('hidden');
+            }
         } else {
-            errorOutletStaff.classList.add('hidden');
-            outletStaff.classList.remove('border-red-500');
+            // Validate single outlet for kasir/admin
+            const outletStaff = document.getElementById('editOutletStaff');
+            const errorOutletStaff = document.getElementById('errorEditOutletStaff');
+            
+            if (!outletStaff.value) {
+                errorOutletStaff.classList.remove('hidden');
+                outletStaff.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                errorOutletStaff.classList.add('hidden');
+                outletStaff.classList.remove('border-red-500');
+            }
         }
         
         return isValid;
@@ -878,15 +936,26 @@
         `;
         btnTambah.disabled = true;
 
+        const role = document.getElementById('peranStaff').value;
         const formData = {
             name: document.getElementById('namaStaff').value,
             email: document.getElementById('emailStaff').value,
             password: document.getElementById('passwordStaff').value,
-            role: document.getElementById('peranStaff').value,
-            outlet_id: document.getElementById('outletStaff').value,
+            role: role,
             start_time: document.getElementById('waktuMulai').value,
             end_time: document.getElementById('waktuSelesai').value
         };
+
+        // Handle outlets based on role
+        if (role === 'supervisor') {
+            const selectedOutlets = getSelectedSupervisorOutlets();
+            if (selectedOutlets.length > 0) {
+                formData.outlet_ids = selectedOutlets;
+                formData.outlet_id = selectedOutlets[0]; // Primary outlet
+            }
+        } else {
+            formData.outlet_id = document.getElementById('outletStaff').value;
+        }
 
         fetch('/api/user/register', {
             method: 'POST',
@@ -922,8 +991,6 @@
 
         const btnEdit = document.getElementById('btnSimpanEditStaff');
         const originalText = btnEdit.innerHTML;
-        // const startTime = formatTime(document.getElementById('editWaktuMulai').value);
-        // const endTime = formatTime(document.getElementById('editWaktuSelesai').value);
         
         // Show loading state
         btnEdit.innerHTML = `
@@ -935,14 +1002,25 @@
         `;
         btnEdit.disabled = true;
 
+        const role = document.getElementById('editPeranStaff').value;
         const formData = {
             name: document.getElementById('editNamaStaff').value,
             email: document.getElementById('editEmailStaff').value,
-            role: document.getElementById('editPeranStaff').value,
-            outlet_id: document.getElementById('editOutletStaff').value,
+            role: role,
             start_time: document.getElementById('editWaktuMulai').value,
             end_time: document.getElementById('editWaktuSelesai').value
         };
+
+        // Handle outlets based on role
+        if (role === 'supervisor') {
+            const selectedOutlets = getSelectedEditSupervisorOutlets();
+            if (selectedOutlets.length > 0) {
+                formData.outlet_ids = selectedOutlets;
+                formData.outlet_id = selectedOutlets[0]; // Primary outlet
+            }
+        } else {
+            formData.outlet_id = document.getElementById('editOutletStaff').value;
+        }
 
         // Only include password if it's not empty
         const password = document.getElementById('editPasswordStaff').value;
@@ -1087,6 +1165,161 @@ function closeModalEditStaff() {
         }
     `;
     document.head.appendChild(styleElement);
+
+    // Multiple outlets functionality for supervisors
+    function setupRoleChangeHandler() {
+        const roleSelect = document.getElementById('peranStaff');
+        const editRoleSelect = document.getElementById('editPeranStaff');
+        
+        if (roleSelect) {
+            roleSelect.addEventListener('change', handleRoleChange);
+        }
+        
+        if (editRoleSelect) {
+            editRoleSelect.addEventListener('change', handleEditRoleChange);
+        }
+    }
+
+    function handleRoleChange() {
+        const role = document.getElementById('peranStaff').value;
+        const singleOutletSection = document.getElementById('singleOutletSection');
+        const multipleOutletSection = document.getElementById('multipleOutletSection');
+
+        if (role === 'supervisor') {
+            singleOutletSection.classList.add('hidden');
+            multipleOutletSection.classList.remove('hidden');
+            loadOutletsForSupervisor();
+        } else {
+            singleOutletSection.classList.remove('hidden');
+            multipleOutletSection.classList.add('hidden');
+            clearSupervisorOutlets();
+        }
+    }
+
+    function handleEditRoleChange() {
+        const role = document.getElementById('editPeranStaff').value;
+        const singleOutletSection = document.getElementById('editSingleOutletSection');
+        const multipleOutletSection = document.getElementById('editMultipleOutletSection');
+
+        if (role === 'supervisor') {
+            singleOutletSection.classList.add('hidden');
+            multipleOutletSection.classList.remove('hidden');
+            loadOutletsForEditSupervisor();
+        } else {
+            singleOutletSection.classList.remove('hidden');
+            multipleOutletSection.classList.add('hidden');
+            clearEditSupervisorOutlets();
+        }
+    }
+
+    async function loadOutletsForSupervisor() {
+        try {
+            const response = await fetch('/api/outlets', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Gagal memuat outlet');
+
+            const data = await response.json();
+            populateSupervisorOutlets(data.data || []);
+        } catch (error) {
+            console.error('Error loading outlets for supervisor:', error);
+            showAlert('error', 'Gagal memuat daftar outlet untuk supervisor');
+        }
+    }
+
+    async function loadOutletsForEditSupervisor() {
+        try {
+            const response = await fetch('/api/outlets', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) throw new Error('Gagal memuat outlet');
+
+            const data = await response.json();
+            populateEditSupervisorOutlets(data.data || []);
+        } catch (error) {
+            console.error('Error loading outlets for edit supervisor:', error);
+            showAlert('error', 'Gagal memuat daftar outlet untuk supervisor');
+        }
+    }
+
+    function populateSupervisorOutlets(outlets) {
+        const container = document.getElementById('supervisorOutletsContainer');
+        container.innerHTML = '';
+
+        outlets.forEach(outlet => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'flex items-center';
+            checkboxDiv.innerHTML = `
+                <input type="checkbox" id="supervisor_outlet_${outlet.id}" value="${outlet.id}" 
+                       class="supervisor-outlet-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="supervisor_outlet_${outlet.id}" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                    ${outlet.name}
+                </label>
+            `;
+            container.appendChild(checkboxDiv);
+        });
+    }
+
+    function populateEditSupervisorOutlets(outlets) {
+        const container = document.getElementById('editSupervisorOutletsContainer');
+        container.innerHTML = '';
+
+        outlets.forEach(outlet => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'flex items-center';
+            checkboxDiv.innerHTML = `
+                <input type="checkbox" id="edit_supervisor_outlet_${outlet.id}" value="${outlet.id}" 
+                       class="edit-supervisor-outlet-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="edit_supervisor_outlet_${outlet.id}" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                    ${outlet.name}
+                </label>
+            `;
+            container.appendChild(checkboxDiv);
+        });
+    }
+
+    function clearSupervisorOutlets() {
+        const container = document.getElementById('supervisorOutletsContainer');
+        if (container) container.innerHTML = '';
+    }
+
+    function clearEditSupervisorOutlets() {
+        const container = document.getElementById('editSupervisorOutletsContainer');
+        if (container) container.innerHTML = '';
+    }
+
+    function getSelectedSupervisorOutlets() {
+        const checkboxes = document.querySelectorAll('.supervisor-outlet-checkbox:checked');
+        return Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
+    }
+
+    function getSelectedEditSupervisorOutlets() {
+        const checkboxes = document.querySelectorAll('.edit-supervisor-outlet-checkbox:checked');
+        return Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
+    }
+
+    function setSelectedEditSupervisorOutlets(outletIds) {
+        // Clear all checkboxes first
+        document.querySelectorAll('.edit-supervisor-outlet-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Check the selected outlets
+        outletIds.forEach(outletId => {
+            const checkbox = document.getElementById(`edit_supervisor_outlet_${outletId}`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
 </script>
 
 @endsection

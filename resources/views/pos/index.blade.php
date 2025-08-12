@@ -405,6 +405,21 @@
 
                 <!-- Payment Section - Now sticks to bottom -->
                 <div class="payment-section p-5 border-t border-green-200">
+                    <!-- Tax Type Selection -->
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Pajak Transaksi</label>
+                        <div class="flex space-x-3">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="transactionTaxType" value="non_pkp" class="mr-2 text-green-600" checked>
+                                <span class="text-sm font-medium text-green-600">Non-PKP (0%)</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="radio" name="transactionTaxType" value="pkp" class="mr-2 text-blue-600">
+                                <span class="text-sm font-medium text-blue-600">PKP (11%)</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="flex justify-between mb-1">
                         <div class="summary-item text-base text-gray-700">Subtotal</div>
                         <div id="subtotal" class="summary-item text-base text-gray-700">Rp 0</div>
@@ -418,7 +433,10 @@
                         <div id="totalQty" class="summary-item text-base text-gray-700">0</div>
                     </div>
                     <div class="flex justify-between mb-3">
-                        <div class="summary-item text-base text-gray-500">Pajak (0%)</div>
+                        <div class="summary-item text-base text-gray-500">
+                            <span id="taxLabel">Pajak (0%)</span>
+                            <span id="taxTypeIndicator" class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"></span>
+                        </div>
                         <div id="taxAmount" class="summary-item text-base text-gray-500">Rp 0</div>
                     </div>
 
@@ -452,6 +470,7 @@
 
     <!-- Include other modals -->
     @include('partials.pos.payment-modal')
+    @include('partials.pos.add-member-modal')
     @include('partials.pos.cashier-modal')
     @include('partials.pos.history-modal')
     @include('partials.pos.income-modal')
@@ -548,16 +567,41 @@ async function loadOutletInfo() {
         const data = await response.json();
         if (data.success) {
             outletInfo.tax = data.data.tax || 0;
+            outletInfo.tax_type = data.data.tax_type || 'non_pkp';
             outletInfo.qris = data.data.qris_url;
+            
+            // Store both PKP and NonPKP banking info
+            outletInfo.pkp_banking = {
+                atas_nama: data.data.pkp_atas_nama_bank,
+                bank: data.data.pkp_nama_bank,
+                nomor: data.data.pkp_nomor_transaksi_bank
+            };
+            
+            outletInfo.non_pkp_banking = {
+                atas_nama: data.data.non_pkp_atas_nama_bank,
+                bank: data.data.non_pkp_nama_bank,
+                nomor: data.data.non_pkp_nomor_transaksi_bank
+            };
+            
+            // Set default bank account (for fallback)
             outletInfo.bank_account = {
                 atas_nama: data.data.atas_nama_bank,
                 bank: data.data.nama_bank,
                 nomor: data.data.nomor_transaksi_bank
             };
+            
+            // Update tax display
+            updateTaxDisplay();
         }
     } catch (error) {
         console.error('Error loading outlet info:', error);
     }
+}
+
+// Update tax display based on outlet tax type (initial load)
+function updateTaxDisplay() {
+    // Set initial tax display based on default selection (Non-PKP)
+    updateTaxDisplayFromSelection();
 }
 
 // Load products
@@ -783,6 +827,38 @@ function attachEventListeners() {
     const btnIncomeModal = document.getElementById('btnIncomeModal');
     if (btnIncomeModal) {
         btnIncomeModal.addEventListener('click', () => openModal('incomeModal'));
+    }
+
+    // Tax type selection
+    document.querySelectorAll('input[name="transactionTaxType"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            updateTaxDisplayFromSelection();
+            if (window.cartManager) {
+                window.cartManager.updateCartDisplay();
+            }
+        });
+    });
+}
+
+// Update tax display based on selected tax type
+function updateTaxDisplayFromSelection() {
+    const taxLabel = document.getElementById('taxLabel');
+    const taxTypeIndicator = document.getElementById('taxTypeIndicator');
+    
+    if (taxLabel && taxTypeIndicator) {
+        const selectedTaxType = document.querySelector('input[name="transactionTaxType"]:checked')?.value || 'non_pkp';
+        const taxRate = selectedTaxType === 'pkp' ? 11 : 0;
+        const taxTypeName = selectedTaxType === 'pkp' ? 'PKP' : 'Non-PKP';
+        
+        taxLabel.textContent = `Pajak (${taxRate}%)`;
+        taxTypeIndicator.textContent = taxTypeName;
+        
+        // Color coding for tax type
+        if (selectedTaxType === 'pkp') {
+            taxTypeIndicator.className = 'ml-1 text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600';
+        } else {
+            taxTypeIndicator.className = 'ml-1 text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-600';
+        }
     }
 }
     </script>
