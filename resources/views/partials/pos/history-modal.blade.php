@@ -70,12 +70,13 @@
                             <th class="p-3">Pembayaran</th>
                             <th class="p-3">Status</th>
                             <th class="p-3">Total</th>
+                            <th class="p-3">Sisa Bayar</th>
                             <th class="p-3">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="transactionTable">
                         <tr class="border-t border-gray-200">
-                            <td colspan="9" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
+                            <td colspan="10" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -92,7 +93,7 @@
         @include('partials.pos.modal.modal-history-transaksi')
         
         <!-- Modal Refund Confirmation -->
-        <div id="refundModal" class="fixed inset-0 z-60 hidden">
+        <div id="refundModal" class="fixed inset-0 z-50 hidden">
             <!-- Overlay -->
             <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('refundModal')"></div>
             
@@ -117,12 +118,6 @@
                             Permintaan untuk transaksi <span id="refundInvoice" class="font-mono font-bold"></span> 
                             dengan total <span id="refundTotal" class="font-bold text-red-600"></span>
                         </p>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-blue-700">
-                                <strong>Info:</strong> Permintaan ini akan dikirim ke admin untuk persetujuan. 
-                                Anda akan mendapat notifikasi ketika permintaan sudah diproses.
-                            </p>
-                        </div>
                     </div>
                     
                     <!-- Alasan Refund -->
@@ -130,7 +125,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Alasan Refund <span class="text-red-500">*</span>
                         </label>
-                        <select id="refundReason" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <select id="refundReason" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="">Pilih alasan...</option>
                             <option value="customer_request">Permintaan Pelanggan</option>
                             <option value="defective_product">Produk Rusak/Cacat</option>
@@ -145,7 +140,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Catatan Tambahan (Opsional)
                         </label>
-                        <textarea id="refundNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        <textarea id="refundNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
                                   placeholder="Masukkan catatan tambahan jika diperlukan..."></textarea>
                     </div>
                 </div>
@@ -158,8 +153,113 @@
                             Batal
                         </button>
                         <button onclick="prosesRefund()" 
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                             Ajukan Permintaan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Pelunasan DP -->
+        <div id="pelunasanModal" class="fixed inset-0 z-50 hidden">
+            <!-- Overlay -->
+            <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('pelunasanModal')"></div>
+            
+            <!-- Modal Box -->
+            <div class="bg-white w-[90%] md:w-1/2 max-w-lg mx-auto rounded shadow-lg z-60 relative mt-20">
+                <!-- Header -->
+                <div class="p-4 border-b">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-green-600">Pelunasan DP</h3>
+                        <button onclick="tutupModal('pelunasanModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+                    </div>
+                </div>
+                
+                <!-- Body -->
+                <div class="p-6">
+                    <div class="mb-4">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-600">Invoice:</span>
+                                    <span id="pelunasanInvoice" class="font-mono font-bold block">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Total:</span>
+                                    <span id="pelunasanTotal" class="font-bold text-green-600 block">Rp -</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Sudah Dibayar:</span>
+                                    <span id="pelunasanPaid" class="font-bold block">Rp -</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-600">Sisa Bayar:</span>
+                                    <span id="pelunasanRemaining" class="font-bold text-red-600 block">Rp -</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Pelunasan -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Jumlah Pelunasan <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" id="jumlahPelunasan" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="Masukkan jumlah pelunasan..."
+                               min="1" step="1000">
+                        <p class="text-xs text-gray-500 mt-1">Masukkan jumlah yang akan dibayar (maksimal sisa bayar)</p>
+                    </div>
+                    
+                    <!-- Metode Pembayaran -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Metode Pembayaran <span class="text-red-500">*</span>
+                        </label>
+                        <select id="metodePembayaranPelunasan" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Pilih metode pembayaran...</option>
+                            <option value="cash">Tunai</option>
+                            <option value="transfer">Transfer Bank</option>
+                            <option value="qris">QRIS</option>
+                            <option value="debit">Kartu Debit</option>
+                            <option value="credit">Kartu Kredit</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Upload Bukti Pembayaran (required) -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Bukti Pembayaran <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" id="buktiPembayaranPelunasan" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                               accept="image/*,.pdf" required>
+                        <p class="text-xs text-gray-500 mt-1">Upload foto atau scan bukti pembayaran (jpg, png, pdf) - maksimal 5MB</p>
+                    </div>
+                    
+                    <!-- Catatan -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Catatan (Opsional)
+                        </label>
+                        <textarea id="catatanPelunasan" rows="3" 
+                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                                  placeholder="Catatan tambahan untuk pelunasan..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="border-t p-4 bg-gray-50 rounded-b">
+                    <div class="flex justify-end gap-3">
+                        <button onclick="tutupModal('pelunasanModal')" 
+                                class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                            Batal
+                        </button>
+                        <button onclick="prosesPelunasan()" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                            Proses Pelunasan
                         </button>
                     </div>
                 </div>
@@ -277,6 +377,7 @@
                     tax: parseFloat(transaksi.tax || 0),
                     discount: parseFloat(transaksi.discount || 0),
                     total_paid: parseFloat(transaksi.total_paid || 0),
+                    remaining_balance: parseFloat(transaksi.remaining_balance || 0),
                     change: parseFloat(transaksi.change || 0),
                 }));
                 
@@ -345,9 +446,12 @@
                         </span>
                     </td>
                     <td class="p-2 border font-medium">Rp ${formatUang(transaksi.total)}</td>
+                    <td class="p-2 border font-medium ${transaksi.remaining_balance > 0 ? 'text-red-600' : 'text-green-600'}">
+                        ${transaksi.remaining_balance > 0 ? `Rp ${formatUang(transaksi.remaining_balance)}` : 'Lunas'}
+                    </td>
                     <td class="p-2 border">
                         <div class="flex gap-2 justify-center">
-                            <button onclick="lihatDetail('${transaksi.invoice}')" class="text-blue-500 hover:text-blue-700" title="Lihat Detail">
+                            <button onclick="lihatDetail('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Lihat Detail">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -372,11 +476,18 @@
                                 </svg>
                             </button>
                             ` : ''}
+                            ${transaksi.transaction_category === 'dp' && transaksi.remaining_balance > 0 ? `
+                            <button onclick="bukaModalPelunasan('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Lunasi DP">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                </svg>
+                            </button>
+                            ` : ''}
                         </div>
                     </td>
                 </tr>
             `).join("")
-            : `<tr><td colspan="8" class="text-center py-4 text-gray-500">Tidak ada transaksi yang sesuai.</td>`;
+            : `<tr><td colspan="10" class="text-center py-4 text-gray-500">Tidak ada transaksi yang sesuai.</td></tr>`;
     }
 
     // Fungsi untuk mencetak struk
@@ -1401,6 +1512,178 @@
             if (refundButton) {
                 refundButton.disabled = false;
                 refundButton.textContent = 'Ajukan Permintaan';
+            }
+        }
+    }
+
+    // Variabel global untuk menyimpan data transaksi DP yang akan dilunasi
+    let transaksiPelunasan = null;
+
+    // Fungsi untuk membuka modal pelunasan DP
+    function bukaModalPelunasan(nomorInvoice) {
+        const transaksi = semuaTransaksi.find(t => t.invoice === nomorInvoice);
+        if (!transaksi) {
+            alert('Transaksi tidak ditemukan');
+            return;
+        }
+
+        // Validasi apakah transaksi DP dan masih ada sisa bayar
+        if (transaksi.transaction_category !== 'dp') {
+            alert('Hanya transaksi DP yang dapat dilunasi');
+            return;
+        }
+
+        if (transaksi.remaining_balance <= 0) {
+            alert('Transaksi DP ini sudah lunas');
+            return;
+        }
+
+        // Simpan data transaksi untuk diproses
+        transaksiPelunasan = transaksi;
+
+        // Isi data ke modal
+        document.getElementById('pelunasanInvoice').textContent = transaksi.invoice;
+        document.getElementById('pelunasanTotal').textContent = `Rp ${formatUang(transaksi.total)}`;
+        document.getElementById('pelunasanPaid').textContent = `Rp ${formatUang(transaksi.total_paid)}`;
+        document.getElementById('pelunasanRemaining').textContent = `Rp ${formatUang(transaksi.remaining_balance)}`;
+        
+        // Set nilai default jumlah pelunasan ke sisa bayar
+        document.getElementById('jumlahPelunasan').value = transaksi.remaining_balance;
+        document.getElementById('jumlahPelunasan').max = transaksi.remaining_balance;
+        
+        // Reset form
+        document.getElementById('metodePembayaranPelunasan').value = '';
+        document.getElementById('buktiPembayaranPelunasan').value = '';
+        document.getElementById('catatanPelunasan').value = '';
+
+        // Buka modal
+        bukaModal('pelunasanModal');
+    }
+
+    // Fungsi untuk memproses pelunasan DP
+    async function prosesPelunasan() {
+        if (!transaksiPelunasan) {
+            alert('Data transaksi tidak ditemukan');
+            return;
+        }
+
+        // Validasi input
+        const jumlahPelunasan = parseFloat(document.getElementById('jumlahPelunasan').value);
+        const metodePembayaran = document.getElementById('metodePembayaranPelunasan').value;
+        const buktiPembayaran = document.getElementById('buktiPembayaranPelunasan').files[0];
+        const catatan = document.getElementById('catatanPelunasan').value;
+
+        // Validasi jumlah pelunasan
+        if (!jumlahPelunasan || jumlahPelunasan <= 0) {
+            alert('Silakan masukkan jumlah pelunasan yang valid');
+            document.getElementById('jumlahPelunasan').focus();
+            return;
+        }
+
+        if (jumlahPelunasan > transaksiPelunasan.remaining_balance) {
+            alert(`Jumlah pelunasan tidak boleh melebihi sisa bayar (Rp ${formatUang(transaksiPelunasan.remaining_balance)})`);
+            document.getElementById('jumlahPelunasan').focus();
+            return;
+        }
+
+        // Validasi metode pembayaran
+        if (!metodePembayaran) {
+            alert('Silakan pilih metode pembayaran');
+            document.getElementById('metodePembayaranPelunasan').focus();
+            return;
+        }
+
+        // Validasi bukti pembayaran (required)
+        if (!buktiPembayaran) {
+            alert('Silakan upload bukti pembayaran');
+            document.getElementById('buktiPembayaranPelunasan').focus();
+            return;
+        }
+
+        // Konfirmasi pelunasan
+        const confirmMessage = `Anda akan melakukan pelunasan DP:\\n\\n` +
+                               `Invoice: ${transaksiPelunasan.invoice}\\n` +
+                               `Jumlah Pelunasan: Rp ${formatUang(jumlahPelunasan)}\\n` +
+                               `Metode Pembayaran: ${metodePembayaran.toUpperCase()}\\n` +
+                               `Sisa setelah pelunasan: Rp ${formatUang(transaksiPelunasan.remaining_balance - jumlahPelunasan)}\\n\\n` +
+                               `Apakah Anda yakin ingin melanjutkan?`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        try {
+            // Disable tombol untuk mencegah double click
+            const pelunasanButton = document.querySelector('#pelunasanModal button[onclick="prosesPelunasan()"]');
+            const originalText = pelunasanButton.textContent;
+            pelunasanButton.disabled = true;
+            pelunasanButton.textContent = 'Memproses...';
+
+            // Ambil token dari localStorage
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan. Silakan login ulang.');
+            }
+
+            // Siapkan FormData untuk upload file
+            const formData = new FormData();
+            formData.append('amount_received', jumlahPelunasan);
+            formData.append('payment_method', metodePembayaran);
+            formData.append('payment_proof', buktiPembayaran);
+            if (catatan) {
+                formData.append('notes', catatan);
+            }
+
+            // Kirim request ke backend
+            const response = await fetch(`/api/orders/${transaksiPelunasan.id}/settle`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || `HTTP Error: ${response.status}`);
+            }
+
+            if (result.success) {
+                // Tutup modal
+                tutupModal('pelunasanModal');
+                
+                // Tampilkan pesan sukses
+                const sisaBayar = transaksiPelunasan.remaining_balance - jumlahPelunasan;
+                const statusLunas = sisaBayar <= 0 ? 'LUNAS' : `Sisa: Rp ${formatUang(sisaBayar)}`;
+                
+                alert(`Pelunasan DP berhasil!\\n\\n` +
+                      `Invoice: ${transaksiPelunasan.invoice}\\n` +
+                      `Jumlah Dibayar: Rp ${formatUang(jumlahPelunasan)}\\n` +
+                      `Status: ${statusLunas}\\n\\n` +
+                      `Terima kasih!`);
+                
+                // Refresh data transaksi
+                const hariIni = new Date();
+                await ambilDataTransaksi(hariIni, hariIni);
+                
+                // Reset data transaksi
+                transaksiPelunasan = null;
+            } else {
+                throw new Error(result.message || 'Gagal memproses pelunasan');
+            }
+
+        } catch (error) {
+            console.error('Error processing settlement:', error);
+            alert(`Gagal memproses pelunasan: ${error.message}`);
+        } finally {
+            // Restore tombol
+            const pelunasanButton = document.querySelector('#pelunasanModal button[onclick="prosesPelunasan()"]');
+            if (pelunasanButton) {
+                pelunasanButton.disabled = false;
+                pelunasanButton.textContent = 'Proses Pelunasan';
             }
         }
     }

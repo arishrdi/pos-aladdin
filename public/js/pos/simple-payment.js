@@ -485,6 +485,12 @@ class SimplePaymentManager {
         formData.append('shift_id', outletInfo.shift_id);
         formData.append('items', JSON.stringify(cartData.items));
         formData.append('bonus_items', JSON.stringify(cartData.bonus_items));
+        
+        // Add order_id to bonus items for tracking
+        if (cartData.bonus_items.length > 0) {
+            // Will be filled after order creation
+            formData.append('should_link_bonus_to_order', 'true');
+        }
         formData.append('payment_method', paymentMethod);
         formData.append('transaction_category', this.transactionCategory);
         // Get selected tax type from cart

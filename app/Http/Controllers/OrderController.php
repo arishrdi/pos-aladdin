@@ -46,89 +46,6 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function storeOld(Request $request)
-    {
-        $request->validate([
-            'outlet_id' => 'required|exists:outlets,id',
-            'shift_id' => 'required|exists:shifts,id',
-            'items' => 'required|array', // Array of items
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,card,transfer,other',
-            'notes' => 'nullable|string',
-            'total_paid' => 'nullable|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-        ]);
-
-
-        try {
-            DB::beginTransaction();
-            $subtotal = collect($request->items)->sum(function ($item) {
-                return $item['quantity'] * $item['price'];
-            });
-
-            // Hitung total (subtotal + tax - discount)
-            $tax = $request->tax ?? 0;
-            $discount = $request->discount ?? 0;
-            $total = $subtotal + $tax - $discount;
-            $change = $request->total_paid - $total;
-            // Buat order
-            $order = Order::create([
-                'order_number' => 'INV-' . time() . '-' . Str::random(6),
-                'outlet_id' => $request->outlet_id,
-                'user_id' => $request->user()->id,
-                'shift_id' => $request->shift_id,
-                'subtotal' => $subtotal,
-                'tax' => $tax,
-                'discount' => $discount,
-                'total' => $total,
-                'total_paid' => $request->total_paid ?? $total,
-                'change' => $change,
-                'payment_method' => $request->payment_method,
-                'status' => 'pending',
-                'notes' => $request->notes,
-            ]);
-
-            foreach ($request->items as $item) {
-                $order->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-
-                $inventory = Inventory::where('outlet_id', $request->outlet_id)
-                    ->where('product_id', $item['product_id'])
-                    ->first();
-
-                if ($inventory) {
-                    $quantityBefore = $inventory->quantity;
-                    $inventory->quantity -= $item['quantity']; // Kurangi stok
-                    $inventory->save();
-
-                    InventoryHistory::create([
-                        'outlet_id' => $request->outlet_id,
-                        'product_id' => $item['product_id'],
-                        'quantity_before' => $quantityBefore,
-                        'quantity_after' => $inventory->quantity,
-                        'quantity_change' => -$item['quantity'], // Nilai minus karena pengurangan
-                        'type' => 'sale',
-                        'notes' => 'Penjualan melalui POS, Invoice #' . $order->order_number,
-                        'user_id' => $request->user()->id,
-                    ]);
-                }
-            }
-
-            $order->update(['status' => 'completed']);
-
-            DB::commit();
-
-            return $this->successResponse($order, 'Order berhasil dibuat');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
 
     public function store(Request $request)
     {
@@ -138,7 +55,6 @@ class OrderController extends Controller
         $items = json_decode($request->input('items'), true);
         $bonus_items = json_decode($request->input('bonus_items'), true);
 
-        // Replace the request values with decoded arrays
         $request->merge([
             'items' => $items,
             'bonus_items' => $bonus_items,
@@ -234,8 +150,8 @@ class OrderController extends Controller
                 'remaining_balance' => $remainingBalance,
                 'change' => $change,
                 'payment_method' => $request->payment_method,
-                'status' => 'pending', // Status transaksi
-                'approval_status' => 'pending', // Status approval (default pending)
+                'status' => 'pending', 
+                'approval_status' => 'pending',
                 'payment_proof' => $paymentProofPath,
                 'transaction_category' => $request->transaction_category,
                 'notes' => $request->notes,
@@ -253,11 +169,10 @@ class OrderController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                     'discount' => $itemDiscount,
-                    'subtotal' => $subtotal, // Ini HARUS positif
+                    'subtotal' => $subtotal, 
                 ]);
 
 
-                // Update inventory (tidak diubah)
                 $inventory = Inventory::where('outlet_id', $request->outlet_id)
                     ->where('product_id', $item['product_id'])
                     ->first();
@@ -276,6 +191,19 @@ class OrderController extends Controller
                         'notes' => 'Penjualan POS, Invoice #' . $order->order_number,
                         'user_id' => $request->user()->id,
                     ]);
+                }
+            }
+
+            // Handle bonus items if present and should be linked to order
+            if ($request->has('bonus_items') && $request->has('should_link_bonus_to_order')) {
+                $bonusItems = $request->bonus_items;
+                if (is_array($bonusItems) && !empty($bonusItems)) {
+                    // Update existing unlinked bonus transactions to link them to this order
+                    \App\Models\BonusTransaction::where('cashier_id', $request->user()->id)
+                        ->where('outlet_id', $request->outlet_id)
+                        ->whereNull('order_id')
+                        ->where('created_at', '>=', now()->subMinutes(5)) // Recent bonuses within 5 minutes
+                        ->update(['order_id' => $order->id ]);
                 }
             }
 
@@ -1114,8 +1042,8 @@ class OrderController extends Controller
     {
         $request->validate([
             'amount_received' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|in:cash,qris,transfer',
-            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'payment_method' => 'required|in:cash,qris,transfer,debit,credit',
+            'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'notes' => 'nullable|string|max:500'
         ]);
 

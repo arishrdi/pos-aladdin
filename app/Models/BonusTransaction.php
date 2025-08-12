@@ -210,12 +210,17 @@ class BonusTransaction extends Model
             return false;
         }
 
-        $this->update([
-            'status' => 'approved',
-            'approved_at' => now(),
-            'approved_by' => $approver->id,
-            'approval_notes' => $notes
-        ]);
+        \DB::transaction(function () use ($approver, $notes) {
+            $this->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => $approver->id,
+                'approval_notes' => $notes
+            ]);
+
+            // Reduce stock from inventory when approved
+            $this->reduceInventoryStock();
+        });
 
         return true;
     }
@@ -261,6 +266,39 @@ class BonusTransaction extends Model
             'total_value' => $this->calculateTotalValue(),
             'total_items' => $this->bonusItems()->count()
         ]);
+    }
+
+    /**
+     * Reduce inventory stock when bonus is approved
+     */
+    public function reduceInventoryStock(): void
+    {
+        $user = auth()->user();
+
+        foreach ($this->bonusItems as $bonusItem) {
+            $inventory = \App\Models\Inventory::where('product_id', $bonusItem->product_id)
+                                             ->where('outlet_id', $this->outlet_id)
+                                             ->first();
+            
+            if ($inventory && $inventory->quantity >= $bonusItem->quantity) {
+                $inventory->decrement('quantity', $bonusItem->quantity);
+                
+                // Log inventory history
+                \App\Models\InventoryHistory::create([
+                    'inventory_id' => $inventory->id,
+                    'product_id' => $bonusItem->product_id,
+                    'outlet_id' => $this->outlet_id,
+                    'user_id' => $user->id,
+                    'type' => 'outbound',
+                    'subtype' => 'bonus',
+                    'quantity_before' => $inventory->quantity + $bonusItem->quantity,
+                    'quantity_change' => -$bonusItem->quantity,
+                    'quantity_after' => $inventory->quantity,
+                    'notes' => "Bonus: {$this->bonus_number} - {$this->reason}",
+                    'created_by' => $this->approved_by
+                ]);
+            }
+        }
     }
 
     // Static methods

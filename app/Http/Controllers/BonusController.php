@@ -63,25 +63,28 @@ class BonusController extends Controller
      */
     public function createManualBonus(Request $request): JsonResponse
     {
+
+        // dd($request->all());
         try {
             // Log the incoming request for debugging
-            \Log::info('Manual bonus request data:', $request->all());
+            // \Log::info('Manual bonus request data:', $request->all());
             
             $validator = Validator::make($request->all(), [
                 'outlet_id' => 'required|exists:outlets,id',
                 'items' => 'required|array|min:1',
                 'items.*.product_id' => 'required|exists:products,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
-                'reason' => 'required|string|max:500',
+                'reason' => 'nullable|string|max:500',
                 'member_id' => 'nullable|exists:members,id',
-                'bonus_rule_id' => 'nullable|exists:bonus_rules,id'
+                'bonus_rule_id' => 'nullable|exists:bonus_rules,id',
+                'order_id' => 'nullable|exists:orders,id'
             ]);
 
             if ($validator->fails()) {
-                \Log::error('Manual bonus validation failed:', [
-                    'errors' => $validator->errors(),
-                    'input' => $request->all()
-                ]);
+                // \Log::error('Manual bonus validation failed:', [
+                //     'errors' => $validator->errors(),
+                //     'input' => $request->all()
+                // ]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Validasi gagal',
@@ -93,7 +96,7 @@ class BonusController extends Controller
             $data = $validator->validated();
 
             // Log the validated data
-            \Log::info('Validated bonus data:', $data);
+            // \Log::info('Validated bonus data:', $data);
 
             // Check stock availability for all items
             if (!isset($data['items']) || !is_array($data['items'])) {
@@ -136,12 +139,13 @@ class BonusController extends Controller
             $bonusTransaction = BonusTransaction::create([
                 'bonus_rule_id' => $bonusRule?->id,
                 'outlet_id' => $data['outlet_id'],
+                'order_id' => $data['order_id'] ?? null,
                 'member_id' => $data['member_id'] ?? null,
                 'cashier_id' => $user->id,
                 'authorized_by' => $user->id,
                 'type' => 'manual',
                 'status' => ($bonusRule && $bonusRule->requires_approval) ? 'pending' : 'approved',
-                'reason' => $data['reason'],
+                'reason' => $data['reason'] ?? 'Manual bonus',
                 'expired_at' => $bonusRule?->valid_until
             ]);
 
@@ -167,6 +171,11 @@ class BonusController extends Controller
                 'total_value' => $totalValue,
                 'total_items' => count($data['items'])
             ]);
+
+            // Reduce stock if auto-approved
+            if ($bonusTransaction->status === 'approved') {
+                $bonusTransaction->reduceInventoryStock();
+            }
 
             DB::commit();
 

@@ -150,13 +150,13 @@ class CartManager {
             if (existingIndex >= 0) {
                 const newQty = this.bonusItems[existingIndex].quantity + qty;
                 if (qty > availableStock) {
-                    showNotification('Stok tidak mencukupi', 'error');
+                    showNotification(`Stok tidak mencukupi. Tersedia: ${formatQuantity(availableStock)}`, 'error');
                     return false;
                 }
                 this.bonusItems[existingIndex].quantity = newQty;
             } else {
                 if (qty > availableStock) {
-                    showNotification('Stok tidak mencukupi', 'error');
+                    showNotification(`Stok tidak mencukupi. Tersedia: ${formatQuantity(availableStock)}`, 'error');
                     return false;
                 }
                 
@@ -322,9 +322,9 @@ class CartManager {
             return false;
         }
 
-        if (!reason || reason.trim() === '') {
-            showNotification('Alasan bonus harus diisi', 'error');
-            return false;
+        // Reason is now optional
+        if (!reason) {
+            reason = 'Manual bonus';
         }
 
         const outletId = localStorage.getItem('outlet_id');
@@ -602,15 +602,16 @@ class CartManager {
                                 <!-- Quantity Control (col-span-2) -->
                                 <div class="col-span-2">
                                     <div class="flex items-center justify-center space-x-1">
-                                        <button class="btn-decrease-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}">
-                                            <i data-lucide="minus" class="w-3 h-3"></i>
-                                        </button>
-                                        <input type="text" class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" value="${formatQuantity(bonus.quantity)}" data-index="${index}">
-                                        <button class="btn-increase-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}">
-                                            <i data-lucide="plus" class="w-3 h-3"></i>
-                                        </button>
+                                        <!-- <button class="btn-decrease-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}"> -->
+                                        <!--     <i data-lucide="minus" class="w-3 h-3"></i> -->
+                                        <!-- </button> -->
+                                        <input type="text" class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" value="${formatQuantity(bonus.quantity)}" data-index="${index}" readonly> 
+                                        <!-- <span class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" data-index="${index}">${formatQuantity(bonus.quantity)}</span> -->
+                                        <!-- <button class="btn-increase-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}"> -->
+                                        <!--     <i data-lucide="plus" class="w-3 h-3"></i> -->
+                                        <!-- </button> -->
                                     </div>
-                                    <div class="text-xs text-center text-green-500 mt-1">Stok: ${formatQuantity(bonus.stock)}</div>
+                                    <!-- <div class="text-xs text-center text-green-500 mt-1">Stok: ${formatQuantity(bonus.stock)}</div> -->
                                 </div>
 
                                 <div class="col-span-3">
@@ -873,7 +874,7 @@ class CartManager {
                             placeholder="Cari produk bonus...">
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Bonus <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Bonus (Opsional)</label>
                         <select id="bonusReasonSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             <option value="">Pilih alasan...</option>
                             <option value="customer_complaint">Keluhan Pelanggan</option>
@@ -974,7 +975,7 @@ class CartManager {
                         </div>
                         <div class="flex items-center space-x-2">
                             <input type="number" class="bonus-qty-select w-20 px-2 py-1 text-sm border border-gray-300 rounded text-center" 
-                                   min="0.1" step="0.1" max="${availableStock}" value="1" placeholder="Qty">
+                                   min="0.01" step="0.01" max="${availableStock}" value="1" placeholder="Qty">
                             <button class="btn-add-bonus-product px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm" 
                                     data-product-id="${product.id}" ${availableStock <= 0 ? 'disabled' : ''}>
                                 ${availableStock <= 0 ? 'Habis' : 'Tambah'}
@@ -1001,9 +1002,7 @@ class CartManager {
                 
                 let reason = reasonSelect.value;
                 if (!reason) {
-                    showNotification('Silakan pilih alasan bonus', 'error');
-                    reasonSelect.focus();
-                    return;
+                    reason = 'Manual bonus'; // Default reason if not selected
                 }
                 
                 if (reason === 'other') {

@@ -6,8 +6,8 @@
 
 `resources/views/pos/index.blade.php`
 
-- Saat berhasil melakukan transaksi, stok (qty) salah. misal stoknya saat ini adalah 10, dikeranjang 2 jadi stoknya sekarang 8. tetapi ketika berhasil melakukan transaksi, stoknya kembali ke 10. ketika di refresh baru akan tampil stok aktual (8)
-- bonus tidak mampu mengurangi stok pada daftar produk dan real stok (cuma mampu mengurangi 1)
+- Saat berhasil melakukan transaksi, stok (qty) salah. misal stoknya saat ini adalah 10, dikeranjang 2 jadi stoknya sekarang 8. tetapi ketika berhasil melakukan transaksi, stoknya kembali ke 10. ketika di refresh baru akan tampil stok aktual (8). hal yang sama terjadi pada bonus
+- bonus tidak mampu mengurangi stok pada daftar produk dan real stok (cuma mampu mengurangi 1), payload sudah mengirim qty yang benar **(skip)**
 
 ### Modal Pembayaran **(medium)**
 
@@ -105,4 +105,4 @@ Inventory::where('product_id', $product->id)
 
 - Bisa di tambahkan polling pada beberapa bagian agar user tidak perlu refresh untuk melihat data terbaru
 
-## *File ini akan terus diupdate jika ada bug*
+#### *File ini akan terus diupdate jika ada bug, jangan dibenerin list yang di skip*

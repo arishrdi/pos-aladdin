@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Transaksi')
+@section('title', 'Riwayat Bonus')
 
 @section('content')
 
@@ -10,7 +10,7 @@
 <!-- title Page -->
 <div class="mb-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 class="text-3xl font-bold text-gray-800">Riwayat Transaksi</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Riwayat Bonus</h1>
     </div>
 </div>
 
@@ -19,8 +19,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Menampilkan riwayat transaksi: <span class="outlet-name">Loading...</span></h2>
-            <p class="text-sm text-gray-600">Data riwayat transaksi untuk <span class=" outlet-name"></span></p>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Menampilkan riwayat bonus: <span class="outlet-name">Loading...</span></h2>
+            <p class="text-sm text-gray-600">Data riwayat bonus untuk <span class=" outlet-name"></span></p>
         </div>
     </div>
 </div>
@@ -31,7 +31,7 @@
     <div class="flex flex-col mb-4">
         <!-- Title and Date Filter Row -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-            <h3 class="text-2xl font-bold text-gray-800">Riwayat Transaksi</h3>
+            <h3 class="text-2xl font-bold text-gray-800">Riwayat Bonus</h3>
             
             <div class="relative mt-2 sm:mt-0">
                 <input id="transDateInput" type="text"
@@ -47,9 +47,9 @@
         <div class="flex flex-col sm:flex-row gap-3">
             <!-- Search Bar -->
             <div class="flex-1 relative">
-                <input type="text" id="searchInvoice"
+                <input type="text" id="searchMember"
                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Cari Invoice..." />
+                    placeholder="Cari member atau kasir..." />
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                     <i data-lucide="search" class="w-4 h-4"></i>
                 </span>
@@ -59,19 +59,19 @@
             <div class="relative">
                 <select id="statusFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
                     <option value="">Semua Status</option>
-                    <option value="pending">Menunggu</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Disetujui</option>
+                    <option value="rejected">Ditolak</option>
                     <option value="completed">Selesai</option>
-                    <option value="cancelled">Dibatalkan</option>
                 </select>
             </div>
             
-            <!-- Approval Filter -->
+            <!-- Type Filter -->
             <div class="relative">
-                <select id="approvalFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Approval</option>
-                    <option value="pending">Menunggu Approval</option>
-                    <option value="approved">Disetujui</option>
-                    <option value="rejected">Ditolak</option>
+                <select id="typeFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
+                    <option value="">Semua Tipe</option>
+                    <option value="automatic">Otomatis</option>
+                    <option value="manual">Manual</option>
                 </select>
             </div>
         </div>
@@ -82,13 +82,13 @@
         <table class="w-full text-base">
             <thead class="text-left text-gray-700 border-b-2">
                 <tr>
-                    <th class="py-3 font-bold">Invoice</th>
-                    <th class="py-3 font-bold">Waktu</th>
+                    <th class="py-3 font-bold">Tanggal</th>
+                    <th class="py-3 font-bold">Member</th>
                     <th class="py-3 font-bold">Kasir</th>
-                    <th class="py-3 font-bold">Pembayaran</th>
+                    <th class="py-3 font-bold">Tipe</th>
+                    <th class="py-3 font-bold">Produk Bonus</th>
+                    <th class="py-3 font-bold">Jumlah</th>
                     <th class="py-3 font-bold">Status</th>
-                    <th class="py-3 font-bold">Approval</th>
-                    <th class="py-3 font-bold">Total</th>
                     <th class="py-3 font-bold text-left">Aksi</th>
                 </tr>
             </thead>
@@ -102,7 +102,7 @@
                                  class="animate-spin text-green-500">
                                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
                             </svg>
-                            <span class="text-gray-500">Memuat data transaksi...</span>
+                            <span class="text-gray-500">Memuat data bonus...</span>
                         </div>
                     </td>
                 </tr>
@@ -111,12 +111,12 @@
     </div>
 </div>
 
-<!-- Modal Detail Transaksi -->
+<!-- Modal Detail Bonus -->
 <div id="modalDetail" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Detail Transaksi</h3>
+                <h3 class="text-xl font-bold">Detail Bonus</h3>
                 <button onclick="closeDetailModal()" class="text-gray-500 hover:text-gray-700">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -124,24 +124,28 @@
             
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <p class="text-gray-500">No. Invoice</p>
-                    <p id="detailInvoice" class="font-medium"></p>
+                    <p class="text-gray-500">Member</p>
+                    <p id="detailMember" class="font-medium"></p>
                 </div>
                 <div>
                     <p class="text-gray-500">Tanggal/Waktu</p>
                     <p id="detailDateTime" class="font-medium"></p>
                 </div>
                 <div>
-                    <p class="text-gray-500">Metode Pembayaran</p>
-                    <p id="detailPaymentMethod" class="font-medium"></p>
+                    <p class="text-gray-500">Kasir</p>
+                    <p id="detailCashier" class="font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Tipe Bonus</p>
+                    <p id="detailType" class="font-medium"></p>
                 </div>
                 <div>
                     <p class="text-gray-500">Status</p>
                     <p id="detailStatus" class="font-medium"></p>
                 </div>
                 <div>
-                    <p class="text-gray-500">Status Approval</p>
-                    <p id="detailApprovalStatus" class="font-medium"></p>
+                    <p class="text-gray-500">Total Nilai</p>
+                    <p id="detailTotalValue" class="font-medium"></p>
                 </div>
             </div>
             
@@ -173,34 +177,22 @@
             </div>
             
             <div class="mb-4">
-                <h4 class="font-medium mb-2">Item Pembelian</h4>
-                <div id="detailItems"></div>
+                <h4 class="font-medium mb-2">Item Bonus</h4>
+                <div id="detailBonusItems"></div>
             </div>
             
             <div class="border-t pt-4 space-y-2">
                 <div class="flex justify-between">
-                    <span>Subtotal</span>
-                    <span id="detailSubtotal" class="font-medium"></span>
+                    <span>Aturan Bonus</span>
+                    <span id="detailBonusRule" class="font-medium"></span>
                 </div>
                 <div class="flex justify-between">
-                    <span>Pajak</span>
-                    <span id="detailTax" class="font-medium"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Diskon</span>
-                    <span id="detailDiscount" class="font-medium"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Total Dibayar</span>
-                    <span id="detailTotalPaid" class="font-medium"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Kembalian</span>
-                    <span id="detailChange" class="font-medium"></span>
+                    <span>Keterangan</span>
+                    <span id="detailDescription" class="font-medium"></span>
                 </div>
                 <div class="flex justify-between border-t pt-2 font-bold text-lg">
-                    <span>Total</span>
-                    <span id="detailTotal" class="text-green-600"></span>
+                    <span>Total Nilai Bonus</span>
+                    <span id="detailTotalValueMain" class="text-green-600"></span>
                 </div>
             </div>
         </div>
@@ -354,8 +346,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
-    let transactionsCache = [];
-    // Script utama untuk halaman Riwayat Transaksi
+    let bonusCache = [];
+    // Script utama untuk halaman Riwayat Bonus
     document.addEventListener('DOMContentLoaded', () => {
         // Cek jika token ada di localStorage
         if (!localStorage.getItem('token')) {
@@ -372,23 +364,23 @@
                 if (selectedDates.length > 0) {
                     // Pastikan tanggal dikirim dalam format YYYY-MM-DD dengan timezone yang benar
                     const date = formatDateForAPI(selectedDates[0]);
-                    fetchTransactionHistory(date);
+                    fetchBonusHistory(date);
                 } else {
-                    // Jika tidak ada tanggal terpilih, tampilkan semua transaksi
-                    fetchTransactionHistory(null);
+                    // Jika tidak ada tanggal terpilih, tampilkan semua bonus
+                    fetchBonusHistory(null);
                 }
             }
         });
 
         // Load data awal
-        fetchTransactionHistory();
+        fetchBonusHistory();
         
         // Pencarian dan Filter
-        document.getElementById('searchInvoice').addEventListener('input', applyFilters);
+        document.getElementById('searchMember').addEventListener('input', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('approvalFilter').addEventListener('change', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
 
-        // Connect outlet selection to transaction history updates
+        // Connect outlet selection to bonus history updates
         connectOutletSelectionToHistory();
 
         // Refresh Lucide icons
@@ -429,7 +421,7 @@
                 }
                 
                 // Reload history with new outlet
-                fetchTransactionHistory(date);
+                fetchBonusHistory(date);
             }
         });
         
@@ -453,7 +445,7 @@
                             date = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
                         }
                         
-                        fetchTransactionHistory(date);
+                        fetchBonusHistory(date);
                     }, 100);
                 }
             });
@@ -507,8 +499,8 @@
         }
     }
 
-    // Fungsi untuk fetch data transaksi - dimodifikasi untuk menyertakan outlet_id
-    async function fetchTransactionHistory(date = null) {
+    // Fungsi untuk fetch data bonus - dimodifikasi untuk menyertakan outlet_id
+    async function fetchBonusHistory(date = null) {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -519,11 +511,11 @@
             // Get the current outlet ID
             const outletId = getSelectedOutletId();
             
-            // Format parameter tanggal seperti di versi lama
+            // Format parameter tanggal
             const params = new URLSearchParams();
             if (date) {
                 // Gunakan tanggal yang sama untuk date_from dan date_to
-                // untuk menampilkan transaksi pada hari yang dipilih saja
+                // untuk menampilkan bonus pada hari yang dipilih saja
                 params.append('date_from', date);
                 params.append('date_to', date);
             }
@@ -531,8 +523,8 @@
             // Tambahkan outlet_id ke parameters
             params.append('outlet_id', outletId);
             
-            // Fetch data dari endpoint dengan token authorization
-            const response = await fetch(`/api/orders/history?${params.toString()}`, {
+            // Fetch data dari endpoint bonus dengan token authorization
+            const response = await fetch(`/api/bonus/history?${params.toString()}`, {
                 headers: {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -546,31 +538,27 @@
                     window.location.href = '/login';
                     return;
                 }
-                throw new Error('Gagal mengambil data');
+                throw new Error('Gagal mengambil data bonus');
             }
             
             const result = await response.json();
             
             // Update outlet info if available
-            if (result.data && result.data.outlet) {
-                updateOutletInfo(result.data);
-            } else {
-                updateOutletInfoFromSelection();
-            }
+            updateOutletInfoFromSelection();
             
-            // Pastikan kita mengakses data.orders dari response
-            if (result.data && Array.isArray(result.data.orders)) {
+            // Pastikan kita mengakses data dari response
+            if (result.data && result.data.data) {
                 // Store in global cache
-                transactionsCache = result.data.orders;
-                renderTransactionData(result.data.orders);
-            } else if (result.orders) {
+                bonusCache = result.data.data;
+                renderBonusData(result.data.data);
+            } else if (result.data && Array.isArray(result.data)) {
                 // Alternatif jika struktur data berbeda
-                transactionsCache = result.orders;
-                renderTransactionData(result.orders);
+                bonusCache = result.data;
+                renderBonusData(result.data);
             } else {
                 // Jika tidak ada data
-                transactionsCache = [];
-                renderTransactionData([]);
+                bonusCache = [];
+                renderBonusData([]);
             }
             
         } catch (error) {
@@ -580,74 +568,74 @@
     }
 
 
-    // Fungsi untuk render data ke tabel
-    function renderTransactionData(transactions) {
+    // Fungsi untuk render data bonus ke tabel
+    function renderBonusData(bonusTransactions) {
         const tbody = document.querySelector('tbody');
         tbody.innerHTML = '';
         
-        console.log("Data transaksi untuk dirender:", transactions); // Untuk debugging
+        console.log("Data bonus untuk dirender:", bonusTransactions); // Untuk debugging
         
-        if (!transactions || transactions.length === 0) {
+        if (!bonusTransactions || bonusTransactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="8" class="py-4 text-center text-gray-500">
-                        Tidak ada transaksi pada tanggal ini.
+                        Tidak ada data bonus pada tanggal ini.
                     </td>
                 </tr>
             `;
             return;
         }
         
-        transactions.forEach(transaction => {
+        bonusTransactions.forEach(bonus => {
             const row = document.createElement('tr');
             row.className = 'border-b hover:bg-gray-50';
-            row.dataset.transactionId = transaction.id; // Add transaction ID for filtering
+            row.dataset.bonusId = bonus.id; // Add bonus ID for filtering
+            
+            // Calculate total bonus items and value
+            let totalItems = 0;
+            let totalValue = 0;
+            let bonusProducts = [];
+            
+            if (bonus.bonus_items && Array.isArray(bonus.bonus_items)) {
+                bonus.bonus_items.forEach(item => {
+                    totalItems += item.quantity || 0;
+                    totalValue += (item.quantity || 0) * (item.product?.price || 0);
+                    bonusProducts.push(item.product?.name || 'Produk');
+                });
+            }
+            
             row.innerHTML = `
-                <td class="py-4">${transaction.order_number}</td>
-                <td class="py-4">${formatDateTime(transaction.created_at)}</td>
-                <td class="py-4">${transaction.user || 'Kasir'}</td>
+                <td class="py-4">${formatDateTime(bonus.created_at)}</td>
+                <td class="py-4">${bonus.member?.name || 'Guest'}</td>
+                <td class="py-4">${bonus.cashier?.name || 'Kasir'}</td>
                 <td class="py-4">
-                    <span class="px-2 py-1 ${getPaymentBadgeClass(transaction.payment_method)} rounded-full text-xs">
-                        ${getPaymentMethodText(transaction.payment_method)}
+                    <span class="px-2 py-1 ${getBonusTypeBadgeClass(bonus.type)} rounded-full text-xs font-medium">
+                        ${getBonusTypeText(bonus.type)}
                     </span>
                 </td>
                 <td class="py-4">
-                    <span class="px-2 py-1 ${getStatusBadgeClass(transaction.status)} rounded-full text-xs font-medium">
-                        ${getStatusText(transaction.status)}
-                    </span>
+                    <div class="max-w-xs">
+                        <p class="text-sm font-medium truncate">${bonusProducts.slice(0, 2).join(', ')}</p>
+                        ${bonusProducts.length > 2 ? `<p class="text-xs text-gray-500">+${bonusProducts.length - 2} lainnya</p>` : ''}
+                    </div>
                 </td>
+                <td class="py-4 font-medium">${totalItems} item</td>
                 <td class="py-4">
-                    <span class="px-2 py-1 ${getApprovalBadgeClass(transaction.approval_status)} rounded-full text-xs font-medium">
-                        ${getApprovalStatusText(transaction.approval_status)}
+                    <span class="px-2 py-1 ${getBonusStatusBadgeClass(bonus.status)} rounded-full text-xs font-medium">
+                        ${getBonusStatusText(bonus.status)}
                     </span>
                 </td>
-                <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
                 <td class="py-4">
                     <div class="flex space-x-2">
-                        <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Lihat Detail">
+                        <a href="#" onclick="openBonusDetailModal('${bonus.id}')" class="text-gray-600 hover:text-blue-600" title="Lihat Detail">
                             <i data-lucide="eye" class="w-4 h-4"></i>
                         </a>
-                        ${transaction.payment_proof_url ? `
-                        <a href="#" onclick="openPaymentProofModal('${transaction.payment_proof_url}')" class="text-gray-600 hover:text-purple-600" title="Lihat Bukti Pembayaran">
-                            <i data-lucide="image" class="w-4 h-4"></i>
-                        </a>
-                        ` : ''}
-                        ${transaction.approval_status === 'pending' ? `
-                        <a href="#" onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-green-600" title="Setujui">
+                        ${bonus.status === 'pending' ? `
+                        <a href="#" onclick="openApproveBonusModal('${bonus.id}')" class="text-gray-600 hover:text-green-600" title="Setujui">
                             <i data-lucide="check-circle" class="w-4 h-4"></i>
                         </a>
-                        <a href="#" onclick="openRejectModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-red-600" title="Tolak">
+                        <a href="#" onclick="openRejectBonusModal('${bonus.id}')" class="text-gray-600 hover:text-red-600" title="Tolak">
                             <i data-lucide="x-circle" class="w-4 h-4"></i>
-                        </a>
-                        ` : ''}
-                        ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
-                        <a href="#" onclick="openCancellationRequestModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-orange-600" title="${transaction.status === 'pending' ? 'Minta Pembatalan' : 'Minta Refund'}">
-                            <i data-lucide="clock" class="w-4 h-4"></i>
-                        </a>
-                        ` : ''}
-                        ${transaction.cancellation_status === 'requested' ? `
-                        <a href="#" onclick="openCancellationApprovalModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Review Permintaan">
-                            <i data-lucide="eye" class="w-4 h-4"></i>
                         </a>
                         ` : ''}
                     </div>
@@ -1179,9 +1167,9 @@
 
     // Function untuk apply filters
     function applyFilters() {
-        const searchTerm = document.getElementById('searchInvoice').value.toLowerCase();
+        const searchTerm = document.getElementById('searchMember').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value;
-        const approvalFilter = document.getElementById('approvalFilter').value;
+        const typeFilter = document.getElementById('typeFilter').value;
         const rows = document.querySelectorAll('tbody tr');
         
         rows.forEach(row => {
@@ -1190,38 +1178,39 @@
                 return;
             }
             
-            const invoice = row.cells[0]?.textContent?.toLowerCase() || '';
-            const statusText = row.cells[4]?.textContent?.toLowerCase() || '';
-            const approvalText = row.cells[5]?.textContent?.toLowerCase() || '';
+            const member = row.cells[1]?.textContent?.toLowerCase() || '';
+            const cashier = row.cells[2]?.textContent?.toLowerCase() || '';
+            const statusText = row.cells[6]?.textContent?.toLowerCase() || '';
+            const typeText = row.cells[3]?.textContent?.toLowerCase() || '';
             
-            // Get actual status values from the data
+            // Get actual values from the data
             let actualStatus = '';
-            let actualApprovalStatus = '';
+            let actualType = '';
             
-            // Extract status from transaction data if available
-            if (row.dataset && row.dataset.transactionId) {
-                const transaction = transactionsCache.find(t => t.id == row.dataset.transactionId);
-                if (transaction) {
-                    actualStatus = transaction.status;
-                    actualApprovalStatus = transaction.approval_status;
+            // Extract values from bonus data if available
+            if (row.dataset && row.dataset.bonusId) {
+                const bonus = bonusCache.find(b => b.id == row.dataset.bonusId);
+                if (bonus) {
+                    actualStatus = bonus.status;
+                    actualType = bonus.type;
                 }
             } else {
                 // Fallback: derive from display text
-                if (statusText.includes('selesai')) actualStatus = 'completed';
-                else if (statusText.includes('menunggu')) actualStatus = 'pending';
-                else if (statusText.includes('dibatalkan')) actualStatus = 'cancelled';
+                if (statusText.includes('pending')) actualStatus = 'pending';
+                else if (statusText.includes('disetujui')) actualStatus = 'approved';
+                else if (statusText.includes('ditolak')) actualStatus = 'rejected';
+                else if (statusText.includes('selesai')) actualStatus = 'completed';
                 
-                if (approvalText.includes('disetujui')) actualApprovalStatus = 'approved';
-                else if (approvalText.includes('menunggu')) actualApprovalStatus = 'pending';
-                else if (approvalText.includes('ditolak')) actualApprovalStatus = 'rejected';
+                if (typeText.includes('otomatis')) actualType = 'automatic';
+                else if (typeText.includes('manual')) actualType = 'manual';
             }
             
             // Apply filters
-            const matchesSearch = invoice.includes(searchTerm);
+            const matchesSearch = member.includes(searchTerm) || cashier.includes(searchTerm);
             const matchesStatus = !statusFilter || actualStatus === statusFilter;
-            const matchesApproval = !approvalFilter || actualApprovalStatus === approvalFilter;
+            const matchesType = !typeFilter || actualType === typeFilter;
             
-            const shouldShow = matchesSearch && matchesStatus && matchesApproval;
+            const shouldShow = matchesSearch && matchesStatus && matchesType;
             row.style.display = shouldShow ? '' : 'none';
         });
     }
@@ -1521,6 +1510,130 @@
         const modal = document.getElementById('modalPaymentProof');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+
+    // Helper functions untuk bonus
+    function getBonusTypeText(type) {
+        const typeMap = {
+            'automatic': 'Otomatis',
+            'manual': 'Manual'
+        };
+        return typeMap[type] || type || 'Tidak diketahui';
+    }
+
+    function getBonusTypeBadgeClass(type) {
+        const classMap = {
+            'automatic': 'bg-blue-100 text-blue-800 border-blue-200',
+            'manual': 'bg-purple-100 text-purple-800 border-purple-200'
+        };
+        return classMap[type] || 'bg-gray-100 text-gray-800';
+    }
+
+    function getBonusStatusText(status) {
+        const statusMap = {
+            'pending': 'Pending',
+            'approved': 'Disetujui',
+            'rejected': 'Ditolak',
+            'completed': 'Selesai'
+        };
+        return statusMap[status] || status || 'Tidak diketahui';
+    }
+
+    function getBonusStatusBadgeClass(status) {
+        const classMap = {
+            'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'approved': 'bg-green-100 text-green-800 border-green-200',
+            'rejected': 'bg-red-100 text-red-800 border-red-200',
+            'completed': 'bg-green-100 text-green-800 border-green-200'
+        };
+        return classMap[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Function untuk modal detail bonus
+    function openBonusDetailModal(bonusId) {
+        try {
+            console.log(`Opening bonus detail modal for ID: ${bonusId}`);
+            
+            const bonus = bonusCache.find(b => b.id == bonusId);
+            if (!bonus) {
+                showAlert('error', 'Detail bonus tidak ditemukan');
+                return;
+            }
+
+            // Fill modal with bonus data
+            document.getElementById('detailMember').textContent = bonus.member?.name || 'Guest';
+            document.getElementById('detailDateTime').textContent = formatDateTime(bonus.created_at);
+            document.getElementById('detailCashier').textContent = bonus.cashier?.name || 'Kasir';
+            document.getElementById('detailType').textContent = getBonusTypeText(bonus.type);
+            document.getElementById('detailStatus').textContent = getBonusStatusText(bonus.status);
+            
+            // Calculate total value
+            let totalValue = 0;
+            if (bonus.bonus_items && Array.isArray(bonus.bonus_items)) {
+                bonus.bonus_items.forEach(item => {
+                    totalValue += (item.quantity || 0) * (item.product?.price || 0);
+                });
+            }
+            
+            document.getElementById('detailTotalValue').textContent = formatCurrency(totalValue);
+            document.getElementById('detailTotalValueMain').textContent = formatCurrency(totalValue);
+
+            // Fill bonus items
+            const bonusItemsEl = document.getElementById('detailBonusItems');
+            bonusItemsEl.innerHTML = '';
+            
+            if (bonus.bonus_items && bonus.bonus_items.length > 0) {
+                bonus.bonus_items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'border-b py-2';
+                    itemElement.innerHTML = `
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="font-medium">${item.product?.name || 'Produk'}</p>
+                                <p class="text-sm text-gray-500">${item.quantity || 0} × ${formatCurrency(item.product?.price || 0)}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium">${formatCurrency((item.quantity || 0) * (item.product?.price || 0))}</p>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">BONUS</span>
+                            </div>
+                        </div>
+                    `;
+                    bonusItemsEl.appendChild(itemElement);
+                });
+            } else {
+                bonusItemsEl.innerHTML = '<p class="text-gray-500 py-4">Tidak ada item bonus</p>';
+            }
+
+            // Fill bonus rule and description
+            document.getElementById('detailBonusRule').textContent = bonus.bonus_rule?.name || 'Manual Bonus';
+            document.getElementById('detailDescription').textContent = bonus.description || '-';
+
+            // Show modal
+            const modal = document.getElementById('modalDetail');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+
+        } catch (error) {
+            console.error('Error in openBonusDetailModal:', error);
+            showAlert('error', 'Gagal memuat detail bonus: ' + error.message);
+        }
+    }
+
+    // Placeholder functions for bonus approval/rejection (to be implemented if needed)
+    function openApproveBonusModal(bonusId) {
+        // Implementation for approving bonus
+        console.log('Approve bonus:', bonusId);
+        // You can implement this similar to order approval
+    }
+
+    function openRejectBonusModal(bonusId) {
+        // Implementation for rejecting bonus
+        console.log('Reject bonus:', bonusId);
+        // You can implement this similar to order rejection
     }
 </script>
 
