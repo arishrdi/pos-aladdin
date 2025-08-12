@@ -35,7 +35,8 @@
 
 - Email tidak terkirim walau pada Log, informasi nya terkirim
 
-``` [2025-08-12 13:44:41] local.INFO: Sending email to supervisor: ini.alternatif.email@gmail.com for PEMBATALAN TRANSAKSI of order INV-1754974211-LDFSI0
+``` Laravel Log
+[2025-08-12 13:44:41] local.INFO: Sending email to supervisor: ini.alternatif.email@gmail.com for PEMBATALAN TRANSAKSI of order INV-1754974211-LDFSI0
 [2025-08-12 13:44:41] local.DEBUG: From: POS Aladdin Karpet <no-reply@demowebjalan.com>
 To: ini.alternatif.email@gmail.com
 Subject: Permintaan Persetujuan POS Aladdin
@@ -50,7 +51,37 @@ Content-Transfer-Encoding: quoted-printable
 
 `resources/views/dashboard/closing/approval-kas.blade.php`
 
-- Pada riwayat kas, saldo akhir yang tidak menghitung dari penjualan sehingga nilainya beda dengan kas yang sebenarya
+- Pada riwayat kas, saldo akhir yang tidak menghitung dari penjualan sehingga nilainya beda dengan kas yang sebenarnya
+
+### Produk
+
+`app/Http/Controllers/ProductController.php`
+
+- Jika saya punya produk dengan distribusi outlet: 1, 2, 3. Lalu saya mengedit distribusi Outlet ke 2 dan 3. dan mengembalikan lagi distribusinya ke 1, 2, 3 maka stok yang ada pada outlet 1 jadi 0. Padahal stok sebelum di edit distribusinya bukan 0
+```Mungkin pada kode ini
+foreach ($request->outlet_ids as $outletId) {
+
+                $currentQuantity = Inventory::where('product_id', $product->id)
+                    ->where('outlet_id', $outletId)
+                    ->value('quantity') ?? 0;
+
+                Inventory::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'outlet_id' => $outletId
+                    ],
+                    [
+                        'quantity' => $currentQuantity,
+                        'min_stock' => $request->min_stock
+                    ]
+                );
+            }
+
+            Inventory::where('product_id', $product->id)
+                ->whereNotIn('outlet_id', $request->outlet_ids)
+                ->delete();
+```
+
 
 ### Sidebar
 
