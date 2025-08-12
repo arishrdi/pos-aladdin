@@ -35,7 +35,7 @@
 
 - Email tidak terkirim walau pada Log, informasi nya terkirim
 
-``` Laravel Log
+``` log
 [2025-08-12 13:44:41] local.INFO: Sending email to supervisor: ini.alternatif.email@gmail.com for PEMBATALAN TRANSAKSI of order INV-1754974211-LDFSI0
 [2025-08-12 13:44:41] local.DEBUG: From: POS Aladdin Karpet <no-reply@demowebjalan.com>
 To: ini.alternatif.email@gmail.com
