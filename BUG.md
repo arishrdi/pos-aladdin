@@ -58,30 +58,27 @@ Content-Transfer-Encoding: quoted-printable
 `app/Http/Controllers/ProductController.php`
 
 - Jika saya punya produk dengan distribusi outlet: 1, 2, 3. Lalu saya mengedit distribusi Outlet ke 2 dan 3. dan mengembalikan lagi distribusinya ke 1, 2, 3 maka stok yang ada pada outlet 1 jadi 0. Padahal stok sebelum di edit distribusinya bukan 0
-```Mungkin pada kode ini
+
+```php
 foreach ($request->outlet_ids as $outletId) {
-
-                $currentQuantity = Inventory::where('product_id', $product->id)
-                    ->where('outlet_id', $outletId)
-                    ->value('quantity') ?? 0;
-
-                Inventory::updateOrCreate(
-                    [
-                        'product_id' => $product->id,
-                        'outlet_id' => $outletId
-                    ],
-                    [
-                        'quantity' => $currentQuantity,
-                        'min_stock' => $request->min_stock
-                    ]
-                );
-            }
-
-            Inventory::where('product_id', $product->id)
-                ->whereNotIn('outlet_id', $request->outlet_ids)
-                ->delete();
+    $currentQuantity = Inventory::where('product_id', $product->id)
+        ->where('outlet_id', $outletId)
+        ->value('quantity') ?? 0;
+    Inventory::updateOrCreate(
+        [
+            'product_id' => $product->id,
+            'outlet_id' => $outletId
+        ],
+        [
+            'quantity' => $currentQuantity,
+            'min_stock' => $request->min_stock
+        ]
+    );
+}
+Inventory::where('product_id', $product->id)
+    ->whereNotIn('outlet_id', $request->outlet_ids)
+    ->delete();
 ```
-
 
 ### Sidebar
 

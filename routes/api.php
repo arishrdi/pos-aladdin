@@ -217,6 +217,10 @@ Route::middleware('auth:sanctum')->group(function () {
             
             // Cancellation request route (for cashiers)
             Route::post('/orders/cancellation/request/{id}', 'requestCancellation'); // Request cancellation/refund
+            
+            // DP Settlement routes
+            Route::post('/orders/{id}/settle', 'settleOrder'); // Settlement DP
+            Route::get('/dashboard/dp-summary', 'getDpSummary'); // DP summary for dashboard
         });
 
         Route::controller(CashRegisterController::class)->group(function () {

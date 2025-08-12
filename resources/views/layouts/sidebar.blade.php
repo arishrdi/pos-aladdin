@@ -204,6 +204,10 @@
                     <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Transaksi</span>
                 </a>
+                <a href="/riwayat-bonus" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Bonus</span>
+                </a>
             </div>
         </div>
 

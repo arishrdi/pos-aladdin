@@ -66,6 +66,7 @@
                             <th class="p-3">Invoice</th>
                             <th class="p-3">Waktu</th>
                             <th class="p-3">Kasir</th>
+                            <th class="p-3">Kategori</th>
                             <th class="p-3">Pembayaran</th>
                             <th class="p-3">Status</th>
                             <th class="p-3">Total</th>
@@ -74,7 +75,7 @@
                     </thead>
                     <tbody id="transactionTable">
                         <tr class="border-t border-gray-200">
-                            <td colspan="8" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
+                            <td colspan="9" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -207,7 +208,7 @@
             sedangMemuat = true;
             document.getElementById("transactionTable").innerHTML = `
                 <tr class="border-t border-gray-200">
-                    <td colspan="8" class="text-center py-6 text-gray-500">Sedang memuat data...</td>
+                    <td colspan="9" class="text-center py-6 text-gray-500">Sedang memuat data...</td>
                 </tr>
             `;
 
@@ -297,7 +298,7 @@
             console.error('Error:', error);
             document.getElementById("transactionTable").innerHTML = `
                 <tr class="border-t border-gray-200">
-                    <td colspan="8" class="text-center py-6 text-red-500">${error.message}</td>
+                    <td colspan="9" class="text-center py-6 text-red-500">${error.message}</td>
                 </tr>
             `;
             document.getElementById("summaryText").innerHTML = `
@@ -336,6 +337,7 @@
                     <td class="p-2 border font-mono">${transaksi.invoice}</td>
                     <td class="p-2 border">${formatWaktu(transaksi.waktu)}</td>
                     <td class="p-2 border">${transaksi.kasir}</td>
+                    <td class="p-2 border">${transaksi.transaction_category}</td>
                     <td class="p-2 border">${transaksi.pembayaran}</td>
                     <td class="p-2 border">
                         <span class="px-2 py-1 rounded-full text-xs ${getClassStatus(transaksi.status)}">

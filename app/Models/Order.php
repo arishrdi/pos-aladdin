@@ -17,6 +17,7 @@ class Order extends Model
         'discount',
         'total',
         'total_paid',
+        'remaining_balance',
         'change',
         'payment_method',
         'status',
@@ -281,5 +282,72 @@ class Order extends Model
     public function getPaymentProofUrlAttribute(): ?string
     {
         return $this->payment_proof ? asset('uploads/' . $this->payment_proof) : null;
+    }
+
+    // DP/Settlement Methods
+    public function getRemainingBalance(): float
+    {
+        return (float) $this->remaining_balance;
+    }
+
+    public function isFullyPaid(): bool
+    {
+        return $this->remaining_balance <= 0;
+    }
+
+    public function needsSettlement(): bool
+    {
+        return $this->transaction_category === 'dp' && $this->remaining_balance > 0;
+    }
+
+    public function canSettle(): bool
+    {
+        return $this->needsSettlement() && in_array($this->status, ['pending', 'completed']);
+    }
+
+    public function settle(float $amount, array $data = []): bool
+    {
+        if (!$this->canSettle()) {
+            return false;
+        }
+
+        if ($amount <= 0 || $amount > $this->remaining_balance) {
+            return false;
+        }
+
+        $newTotalPaid = $this->total_paid + $amount;
+        $newRemainingBalance = $this->total - $newTotalPaid;
+
+        $updateData = [
+            'total_paid' => $newTotalPaid,
+            'remaining_balance' => max(0, $newRemainingBalance)
+        ];
+
+        // Jika fully paid, ubah category ke lunas
+        if ($newRemainingBalance <= 0) {
+            $updateData['transaction_category'] = 'lunas';
+        }
+
+        // Merge dengan data tambahan (payment proof, notes, dll)
+        $updateData = array_merge($updateData, $data);
+
+        $this->update($updateData);
+        return true;
+    }
+
+    // Scopes untuk DP
+    public function scopeWithBalance($query)
+    {
+        return $query->where('remaining_balance', '>', 0);
+    }
+
+    public function scopeDpPending($query)
+    {
+        return $query->where('transaction_category', 'dp')->where('remaining_balance', '>', 0);
+    }
+
+    public function scopeByCategory($query, $category)
+    {
+        return $query->where('transaction_category', $category);
     }
 }

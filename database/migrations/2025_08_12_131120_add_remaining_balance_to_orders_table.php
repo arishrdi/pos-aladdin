@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->string('member_code')->unique()->after('name');
-            $table->date('birth_date')->nullable()->after('address');
+        Schema::table('orders', function (Blueprint $table) {
+            $table->decimal('remaining_balance', 10, 2)->default(0)->after('total_paid');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->dropColumn(['member_code', 'birth_date']);
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropColumn('remaining_balance');
         });
     }
 };

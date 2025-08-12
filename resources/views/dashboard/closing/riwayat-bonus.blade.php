@@ -74,24 +74,6 @@
                     <option value="rejected">Ditolak</option>
                 </select>
             </div>
-            
-            <!-- Category Filter -->
-            <div class="relative">
-                <select id="categoryFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Kategori</option>
-                    <option value="lunas">Lunas</option>
-                    <option value="dp">DP</option>
-                </select>
-            </div>
-            
-            <!-- DP Status Filter -->
-            <div class="relative">
-                <select id="dpStatusFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Status DP</option>
-                    <option value="pending">DP Belum Lunas</option>
-                    <option value="completed">DP Sudah Lunas</option>
-                </select>
-            </div>
         </div>
     </div>
     
@@ -103,19 +85,17 @@
                     <th class="py-3 font-bold">Invoice</th>
                     <th class="py-3 font-bold">Waktu</th>
                     <th class="py-3 font-bold">Kasir</th>
-                    <th class="py-3 font-bold">Kategori</th>
                     <th class="py-3 font-bold">Pembayaran</th>
                     <th class="py-3 font-bold">Status</th>
                     <th class="py-3 font-bold">Approval</th>
                     <th class="py-3 font-bold">Total</th>
-                    <th class="py-3 font-bold">Sisa Bayar</th>
                     <th class="py-3 font-bold text-left">Aksi</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y">
                 <!-- Data akan diisi secara dinamis -->
                 <tr>
-                    <td colspan="10" class="py-8 text-center">
+                    <td colspan="8" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2 mx-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
@@ -213,10 +193,6 @@
                 <div class="flex justify-between">
                     <span>Total Dibayar</span>
                     <span id="detailTotalPaid" class="font-medium"></span>
-                </div>
-                <div id="detailRemainingBalanceRow" class="hidden flex justify-between">
-                    <span>Sisa Pembayaran</span>
-                    <span id="detailRemainingBalance" class="font-bold text-red-600"></span>
                 </div>
                 <div class="flex justify-between">
                     <span>Kembalian</span>
@@ -375,87 +351,6 @@
     </div>
 </div>
 
-<!-- Modal Settlement DP -->
-<div id="modalSettlement" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-gray-900">Pelunasan DP</h3>
-            <button onclick="closeSettlementModal()" class="text-gray-500 hover:text-gray-700">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        
-        <!-- Order Details -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 class="font-semibold text-gray-800 mb-3">Detail Order</h4>
-            <div class="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                    <span class="text-gray-600">No. Invoice:</span>
-                    <span id="settlementInvoice" class="font-medium ml-1"></span>
-                </div>
-                <div>
-                    <span class="text-gray-600">Tanggal:</span>
-                    <span id="settlementDate" class="font-medium ml-1"></span>
-                </div>
-                <div>
-                    <span class="text-gray-600">Total:</span>
-                    <span id="settlementTotal" class="font-medium ml-1 text-green-600"></span>
-                </div>
-                <div>
-                    <span class="text-gray-600">Sudah Dibayar:</span>
-                    <span id="settlementPaid" class="font-medium ml-1"></span>
-                </div>
-                <div class="col-span-2">
-                    <span class="text-gray-600">Sisa Pembayaran:</span>
-                    <span id="settlementRemaining" class="font-bold ml-1 text-red-600 text-lg"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Settlement Form -->
-        <form id="settlementForm" enctype="multipart/form-data">
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pelunasan *</label>
-                <input type="number" id="settlementAmount" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Masukkan jumlah pelunasan" required>
-                <div class="mt-2 flex gap-2">
-                    <button type="button" onclick="setSettlementAmount('full')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Lunas Penuh</button>
-                    <button type="button" onclick="setSettlementAmount('half')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">Setengah</button>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran *</label>
-                <select id="settlementPaymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                    <option value="">Pilih metode pembayaran</option>
-                    <option value="cash">Tunai</option>
-                    <option value="transfer">Transfer Bank</option>
-                    <option value="qris">QRIS</option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran</label>
-                <input type="file" id="settlementPaymentProof" accept="image/*,application/pdf" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG, PDF. Maksimal 5MB.</p>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                <textarea id="settlementNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tambahkan catatan jika diperlukan"></textarea>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeSettlementModal()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                    Batal
-                </button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                    Proses Pelunasan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
@@ -492,8 +387,6 @@
         document.getElementById('searchInvoice').addEventListener('input', applyFilters);
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('approvalFilter').addEventListener('change', applyFilters);
-        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-        document.getElementById('dpStatusFilter').addEventListener('change', applyFilters);
 
         // Connect outlet selection to transaction history updates
         connectOutletSelectionToHistory();
@@ -697,7 +590,7 @@
         if (!transactions || transactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="10" class="py-4 text-center text-gray-500">
+                    <td colspan="8" class="py-4 text-center text-gray-500">
                         Tidak ada transaksi pada tanggal ini.
                     </td>
                 </tr>
@@ -713,11 +606,6 @@
                 <td class="py-4">${transaction.order_number}</td>
                 <td class="py-4">${formatDateTime(transaction.created_at)}</td>
                 <td class="py-4">${transaction.user || 'Kasir'}</td>
-                <td class="py-4">
-                    <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium">
-                        ${getCategoryText(transaction.transaction_category)}
-                    </span>
-                </td>
                 <td class="py-4">
                     <span class="px-2 py-1 ${getPaymentBadgeClass(transaction.payment_method)} rounded-full text-xs">
                         ${getPaymentMethodText(transaction.payment_method)}
@@ -735,12 +623,6 @@
                 </td>
                 <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
                 <td class="py-4">
-                    ${transaction.remaining_balance > 0 ? 
-                        `<span class="font-semibold text-red-600">${formatCurrency(transaction.remaining_balance)}</span>` : 
-                        `<span class="text-gray-400">-</span>`
-                    }
-                </td>
-                <td class="py-4">
                     <div class="flex space-x-2">
                         <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Lihat Detail">
                             <i data-lucide="eye" class="w-4 h-4"></i>
@@ -748,11 +630,6 @@
                         ${transaction.payment_proof_url ? `
                         <a href="#" onclick="openPaymentProofModal('${transaction.payment_proof_url}')" class="text-gray-600 hover:text-purple-600" title="Lihat Bukti Pembayaran">
                             <i data-lucide="image" class="w-4 h-4"></i>
-                        </a>
-                        ` : ''}
-                        ${transaction.can_settle ? `
-                        <a href="#" onclick="openSettlementModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-green-600" title="Lunasi DP">
-                            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
                         </a>
                         ` : ''}
                         ${transaction.approval_status === 'pending' ? `
@@ -841,17 +718,6 @@
             elements.discount.textContent = formatCurrency(transaction.discount);
             elements.totalPaid.textContent = formatCurrency(transaction.total_paid);
             elements.change.textContent = formatCurrency(transaction.change);
-
-            // Handle remaining balance display for DP transactions
-            const remainingBalanceRow = document.getElementById('detailRemainingBalanceRow');
-            const remainingBalanceElement = document.getElementById('detailRemainingBalance');
-            
-            if (transaction.remaining_balance && transaction.remaining_balance > 0) {
-                remainingBalanceElement.textContent = formatCurrency(transaction.remaining_balance);
-                remainingBalanceRow.classList.remove('hidden');
-            } else {
-                remainingBalanceRow.classList.add('hidden');
-            }
 
             // Handle approval information
             const approvalSection = document.getElementById('approvalInfoSection');
@@ -1316,55 +1182,46 @@
         const searchTerm = document.getElementById('searchInvoice').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value;
         const approvalFilter = document.getElementById('approvalFilter').value;
-        const categoryFilter = document.getElementById('categoryFilter').value;
-        const dpStatusFilter = document.getElementById('dpStatusFilter').value;
         const rows = document.querySelectorAll('tbody tr');
         
         rows.forEach(row => {
             // Skip loading/empty state rows
-            if (row.cells.length < 10) {
+            if (row.cells.length < 8) {
                 return;
             }
             
             const invoice = row.cells[0]?.textContent?.toLowerCase() || '';
+            const statusText = row.cells[4]?.textContent?.toLowerCase() || '';
+            const approvalText = row.cells[5]?.textContent?.toLowerCase() || '';
             
-            // Get actual values from transaction data
+            // Get actual status values from the data
             let actualStatus = '';
             let actualApprovalStatus = '';
-            let actualCategory = '';
-            let actualRemainingBalance = 0;
             
-            // Extract values from transaction data if available
+            // Extract status from transaction data if available
             if (row.dataset && row.dataset.transactionId) {
                 const transaction = transactionsCache.find(t => t.id == row.dataset.transactionId);
                 if (transaction) {
                     actualStatus = transaction.status;
                     actualApprovalStatus = transaction.approval_status;
-                    actualCategory = transaction.transaction_category;
-                    actualRemainingBalance = parseFloat(transaction.remaining_balance || 0);
                 }
+            } else {
+                // Fallback: derive from display text
+                if (statusText.includes('selesai')) actualStatus = 'completed';
+                else if (statusText.includes('menunggu')) actualStatus = 'pending';
+                else if (statusText.includes('dibatalkan')) actualStatus = 'cancelled';
+                
+                if (approvalText.includes('disetujui')) actualApprovalStatus = 'approved';
+                else if (approvalText.includes('menunggu')) actualApprovalStatus = 'pending';
+                else if (approvalText.includes('ditolak')) actualApprovalStatus = 'rejected';
             }
             
             // Apply filters
             const matchesSearch = invoice.includes(searchTerm);
             const matchesStatus = !statusFilter || actualStatus === statusFilter;
             const matchesApproval = !approvalFilter || actualApprovalStatus === approvalFilter;
-            const matchesCategory = !categoryFilter || actualCategory === categoryFilter;
             
-            // DP Status Filter Logic
-            let matchesDpStatus = true;
-            if (dpStatusFilter) {
-                if (dpStatusFilter === 'pending') {
-                    // DP belum lunas = category DP dan remaining balance > 0
-                    matchesDpStatus = actualCategory === 'dp' && actualRemainingBalance > 0;
-                } else if (dpStatusFilter === 'completed') {
-                    // DP sudah lunas = category sudah berubah jadi lunas ATAU remaining balance = 0
-                    matchesDpStatus = (actualCategory === 'lunas' && actualRemainingBalance === 0) || 
-                                     (actualCategory === 'dp' && actualRemainingBalance === 0);
-                }
-            }
-            
-            const shouldShow = matchesSearch && matchesStatus && matchesApproval && matchesCategory && matchesDpStatus;
+            const shouldShow = matchesSearch && matchesStatus && matchesApproval;
             row.style.display = shouldShow ? '' : 'none';
         });
     }
@@ -1665,162 +1522,6 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
-
-    // Helper functions untuk kategori transaksi
-    function getCategoryText(category) {
-        const categories = {
-            'lunas': 'Lunas',
-            'dp': 'DP'
-        };
-        return categories[category] || category || 'Tidak diketahui';
-    }
-
-    function getCategoryBadgeClass(category) {
-        const classes = {
-            'lunas': 'bg-green-100 text-green-800 border-green-200',
-            'dp': 'bg-orange-100 text-orange-800 border-orange-200'
-        };
-        return classes[category] || 'bg-gray-100 text-gray-800';
-    }
-
-    // Settlement Modal Functions
-    function openSettlementModal(orderNumber, orderId) {
-        try {
-            const transaction = transactionsCache.find(t => t.id == orderId);
-            if (!transaction) {
-                showAlert('error', 'Data transaksi tidak ditemukan');
-                return;
-            }
-
-            // Check if can settle
-            if (!transaction.can_settle) {
-                showAlert('error', 'Transaksi ini tidak dapat dilunasi');
-                return;
-            }
-
-            const modal = document.getElementById('modalSettlement');
-            
-            // Fill order details
-            document.getElementById('settlementInvoice').textContent = orderNumber;
-            document.getElementById('settlementDate').textContent = formatDateTime(transaction.created_at);
-            document.getElementById('settlementTotal').textContent = formatCurrency(transaction.total);
-            document.getElementById('settlementPaid').textContent = formatCurrency(transaction.total_paid);
-            document.getElementById('settlementRemaining').textContent = formatCurrency(transaction.remaining_balance);
-
-            // Reset form
-            document.getElementById('settlementForm').reset();
-            document.getElementById('settlementAmount').max = transaction.remaining_balance;
-
-            // Store transaction data
-            modal.dataset.orderId = orderId;
-            modal.dataset.remainingBalance = transaction.remaining_balance;
-
-            // Show modal
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-        } catch (error) {
-            console.error('Error in openSettlementModal:', error);
-            showAlert('error', 'Gagal membuka modal pelunasan: ' + error.message);
-        }
-    }
-
-    function closeSettlementModal() {
-        const modal = document.getElementById('modalSettlement');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    function setSettlementAmount(type) {
-        const modal = document.getElementById('modalSettlement');
-        const remainingBalance = parseFloat(modal.dataset.remainingBalance || 0);
-        const amountInput = document.getElementById('settlementAmount');
-
-        if (type === 'full') {
-            amountInput.value = remainingBalance;
-        } else if (type === 'half') {
-            amountInput.value = (remainingBalance / 2).toFixed(2);
-        }
-    }
-
-    // Settlement form submission
-    document.getElementById('settlementForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const modal = document.getElementById('modalSettlement');
-        const orderId = modal.dataset.orderId;
-        const remainingBalance = parseFloat(modal.dataset.remainingBalance || 0);
-
-        const formData = new FormData();
-        formData.append('amount_received', document.getElementById('settlementAmount').value);
-        formData.append('payment_method', document.getElementById('settlementPaymentMethod').value);
-        formData.append('notes', document.getElementById('settlementNotes').value);
-
-        const paymentProofFile = document.getElementById('settlementPaymentProof').files[0];
-        if (paymentProofFile) {
-            formData.append('payment_proof', paymentProofFile);
-        }
-
-        // Validasi
-        const amount = parseFloat(document.getElementById('settlementAmount').value);
-        if (amount <= 0) {
-            showAlert('error', 'Jumlah pelunasan harus lebih dari 0');
-            return;
-        }
-        
-        if (amount > remainingBalance) {
-            showAlert('error', 'Jumlah pelunasan melebihi sisa pembayaran');
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/login';
-                return;
-            }
-
-            // Show loading state
-            const submitButton = modal.querySelector('button[type="submit"]');
-            const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Memproses...
-            `;
-            submitButton.disabled = true;
-
-            const response = await fetch(`/api/orders/${orderId}/settle`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Gagal memproses pelunasan');
-            }
-
-            const result = await response.json();
-            showAlert('success', result.message || 'Pelunasan berhasil diproses');
-            closeSettlementModal();
-            fetchTransactionHistory(); // Refresh data
-
-        } catch (error) {
-            console.error('Error processing settlement:', error);
-            showAlert('error', error.message);
-        } finally {
-            // Reset button
-            const submitButton = modal.querySelector('button[type="submit"]');
-            submitButton.innerHTML = 'Proses Pelunasan';
-            submitButton.disabled = false;
-        }
-    });
 </script>
 
 <style>

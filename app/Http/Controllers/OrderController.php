@@ -204,13 +204,20 @@ class OrderController extends Controller
             // 6. Hitung total akhir (tidak boleh negatif)
             $total = max(0, $orderSubtotal + $tax);
 
-            // 7. Hitung kembalian
+            // 7. Hitung kembalian dan remaining balance
             $totalPaid = floatval($request->total_paid ?? 0);
             if ($request->payment_method === 'qris' || $request->payment_method === 'transfer') {
                 $totalPaid = $total;
                 $change = 0;
             } else {
                 $change = $totalPaid - $total;
+            }
+
+            // 8. Hitung remaining balance untuk DP
+            $remainingBalance = 0;
+            if ($request->transaction_category === 'dp') {
+                $remainingBalance = $total - $totalPaid;
+                $change = 0; // DP tidak ada kembalian
             }
 
             // Buat order dengan status pending untuk approval
@@ -224,6 +231,7 @@ class OrderController extends Controller
                 'discount' => $totalDiscount,
                 'total' => $total,
                 'total_paid' => $totalPaid,
+                'remaining_balance' => $remainingBalance,
                 'change' => $change,
                 'payment_method' => $request->payment_method,
                 'status' => 'pending', // Status transaksi
@@ -288,6 +296,7 @@ class OrderController extends Controller
                 'tax' => $order->tax,
                 'discount' => $order->discount,
                 'total_paid' => $order->total_paid,
+                'remaining_balance' => $order->remaining_balance,
                 'change' => $order->change,
                 'transaction_category' => $order->transaction_category,
 
@@ -799,6 +808,7 @@ class OrderController extends Controller
                     'tax' => $order->tax,
                     'discount' => $order->discount,
                     'total_paid' => $order->total_paid,
+                    'remaining_balance' => $order->remaining_balance,
                     'change' => $order->change,
                     'payment_method' => $order->payment_method,
                     'created_at' => $order->created_at->format('d/m/Y H:i'),
@@ -825,6 +835,10 @@ class OrderController extends Controller
                     'rejection_reason' => $order->rejection_reason,
                     'approval_notes' => $order->approval_notes,
                     'transaction_category' => $order->transaction_category,
+                    // DP Helper flags
+                    'needs_settlement' => $order->needsSettlement(),
+                    'can_settle' => $order->canSettle(),
+                    'is_fully_paid' => $order->isFullyPaid(),
                     // Data untuk cancellation/refund approval system
                     'cancellation_status' => $order->cancellation_status,
                     'cancellation_reason' => $order->cancellation_reason,
@@ -1090,6 +1104,140 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->errorResponse('Gagal menolak order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Settlement DP - Pelunasan order DP
+     */
+    public function settleOrder(Request $request, $orderId)
+    {
+        $request->validate([
+            'amount_received' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|in:cash,qris,transfer',
+            'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'notes' => 'nullable|string|max:500'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail($orderId);
+            $user = auth()->user();
+
+            // Validasi apakah order bisa di-settle
+            if (!$order->canSettle()) {
+                return $this->errorResponse('Order ini tidak dapat dilunasi', 400);
+            }
+
+            $amountReceived = floatval($request->amount_received);
+
+            // Validasi amount
+            if ($amountReceived > $order->remaining_balance) {
+                return $this->errorResponse('Jumlah pelunasan melebihi sisa pembayaran', 400);
+            }
+
+            // Handle payment proof upload
+            $paymentProofPath = null;
+            if ($request->hasFile('payment_proof')) {
+                $file = $request->file('payment_proof');
+                $fileName = time() . '_settlement_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+                $uploadDir = public_path('uploads/payment_proofs');
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $file->move($uploadDir, $fileName);
+                $paymentProofPath = 'payment_proofs/' . $fileName;
+            }
+
+            // Data untuk settlement
+            $settlementData = [
+                'notes' => $request->notes
+            ];
+
+            if ($paymentProofPath) {
+                $settlementData['payment_proof'] = $paymentProofPath;
+            }
+
+            // Proses settlement menggunakan method dari model
+            $success = $order->settle($amountReceived, $settlementData);
+
+            if (!$success) {
+                throw new \Exception('Gagal memproses pelunasan');
+            }
+
+            // Jika sudah fully paid dan approved, record cash transaction
+            if ($order->isFullyPaid() && $order->approval_status === 'approved') {
+                $this->cashBalanceService->recordDailySalesTransaction($order);
+            }
+
+            DB::commit();
+
+            // Prepare response data
+            $order->refresh();
+            $responseData = [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'total' => $order->total,
+                'total_paid' => $order->total_paid,
+                'remaining_balance' => $order->remaining_balance,
+                'transaction_category' => $order->transaction_category,
+                'is_fully_paid' => $order->isFullyPaid(),
+                'settlement_amount' => $amountReceived,
+                'payment_method' => $request->payment_method,
+                'payment_proof_url' => $paymentProofPath ? asset('uploads/' . $paymentProofPath) : null
+            ];
+
+            $message = $order->isFullyPaid() 
+                ? 'Pelunasan berhasil! Order telah lunas.'
+                : 'Pelunasan sebagian berhasil. Sisa pembayaran: Rp ' . number_format($order->remaining_balance, 0, ',', '.');
+
+            return $this->successResponse($responseData, $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get DP summary for dashboard
+     */
+    public function getDpSummary(Request $request)
+    {
+        try {
+            $outletId = $request->query('outlet_id');
+            
+            $query = Order::dpPending();
+            
+            if ($outletId) {
+                $query->where('outlet_id', $outletId);
+            }
+
+            $dpOrders = $query->with(['user:id,name', 'outlet:id,name'])->get();
+
+            $summary = [
+                'dp_count' => $dpOrders->count(),
+                'total_remaining_balance' => $dpOrders->sum('remaining_balance'),
+                'recent_dp_orders' => $dpOrders->take(5)->map(function ($order) {
+                    return [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'customer' => $order->member ? $order->member->name : 'Customer',
+                        'total' => $order->total,
+                        'paid' => $order->total_paid,
+                        'remaining' => $order->remaining_balance,
+                        'created_at' => $order->created_at->format('d/m/Y'),
+                        'outlet' => $order->outlet->name
+                    ];
+                })
+            ];
+
+            return $this->successResponse($summary, 'DP summary berhasil diambil');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

@@ -278,6 +278,44 @@
     </div>
 </div>
 
+<!-- DP Summary Widget -->
+<div class="mb-6">
+    <div class="bg-white rounded-lg p-6 card-shadow">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">DP Belum Lunas</h3>
+                <p class="text-sm text-gray-500">Transaksi DP yang memerlukan pelunasan</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-blue-600" id="dpPendingCount">-</p>
+                    <p class="text-sm text-gray-500">Transaksi</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-2xl font-bold text-red-600" id="dpPendingAmount">-</p>
+                    <p class="text-sm text-gray-500">Total Sisa</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="dpPendingList" class="space-y-3">
+            <div class="text-center text-gray-500 py-4">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-sm">Memuat data DP...</p>
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <a href="/dashboard/closing/riwayat-transaksi" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                <span>Lihat Semua Riwayat Transaksi</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+
 <!-- Two Columns -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Left Column -->
@@ -500,6 +538,8 @@
             .then(data => {
                 if (data.success) {
                     updateDashboard(data.data);
+                    // Load DP summary data
+                    loadDpSummary();
                 } else {
                     console.error('Error fetching dashboard data:', data.message);
                     useDummyData();
@@ -617,6 +657,88 @@
     // Format currency as IDR
     function formatCurrency(value) {
         return 'Rp ' + parseFloat(value).toLocaleString('id-ID');
+    }
+
+    // Function to load DP summary
+    async function loadDpSummary() {
+        try {
+            const token = localStorage.getItem('token');
+            const outletId = localStorage.getItem('selectedOutletId') || 1;
+            
+            if (!token) {
+                console.error('No auth token found');
+                return;
+            }
+
+            const response = await fetch(`/api/dashboard/dp-summary?outlet_id=${outletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load DP data');
+            }
+
+            const result = await response.json();
+            updateDpWidget(result.data);
+            
+        } catch (error) {
+            console.error('Error loading DP summary:', error);
+            // Show error state
+            document.getElementById('dpPendingCount').textContent = '0';
+            document.getElementById('dpPendingAmount').textContent = 'Rp 0';
+            document.getElementById('dpPendingList').innerHTML = `
+                <div class="text-center text-gray-500 py-4">
+                    <p class="text-sm">Gagal memuat data DP</p>
+                </div>
+            `;
+        }
+    }
+
+    // Function to update DP widget
+    function updateDpWidget(data) {
+        document.getElementById('dpPendingCount').textContent = data.dp_count || 0;
+        document.getElementById('dpPendingAmount').textContent = formatCurrency(data.total_remaining_balance || 0);
+        
+        const dpList = document.getElementById('dpPendingList');
+        
+        if (!data.recent_dp_orders || data.recent_dp_orders.length === 0) {
+            dpList.innerHTML = `
+                <div class="text-center text-gray-500 py-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-gray-400">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6"></path>
+                    </svg>
+                    <p class="text-sm mt-2">Tidak ada DP yang belum lunas</p>
+                </div>
+            `;
+            return;
+        }
+
+        dpList.innerHTML = data.recent_dp_orders.map(order => `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <p class="font-medium text-gray-800">${order.order_number}</p>
+                        <p class="text-sm text-gray-500">${order.created_at}</p>
+                    </div>
+                    <p class="text-sm text-gray-600">${order.customer}</p>
+                    <div class="flex items-center space-x-4 mt-1">
+                        <span class="text-xs text-gray-500">Total: ${formatCurrency(order.total)}</span>
+                        <span class="text-xs text-gray-500">Dibayar: ${formatCurrency(order.paid)}</span>
+                        <span class="text-xs font-medium text-red-600">Sisa: ${formatCurrency(order.remaining)}</span>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <a href="/dashboard/closing/riwayat-transaksi?search=${order.order_number}" 
+                       class="inline-flex items-center px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors">
+                        Lunasi
+                    </a>
+                </div>
+            </div>
+        `).join('');
     }
     
     // Format date for display

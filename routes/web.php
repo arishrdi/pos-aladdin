@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.closing.riwayat-transaksi');
         })->name('riwayat-transaksi');
 
+        Route::get('/riwayat-bonus', function () {
+            return view('dashboard.closing.riwayat-bonus');
+        })->name('riwayat-bonus');
+
         Route::get('/approval-kas', function () {
             return view('dashboard.closing.approval-kas');
         })->name('approval-kas');
