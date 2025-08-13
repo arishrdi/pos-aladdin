@@ -59,7 +59,7 @@
       </div>
 
       <!-- Nomor Transaksi -->
-      <div class="p-5 bg-gray-100 border rounded-lg shadow-sm">
+      {{-- <div class="p-5 bg-gray-100 border rounded-lg shadow-sm">
         <h3 class="font-semibold mb-4 text-gray-700">Nomor Transaksi</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -75,7 +75,7 @@
             <input type="text" id="atasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening">
           </div>
         </div>
-      </div>
+      </div> --}}
 
       <!-- PKP Banking Info -->
       <div id="pkpBankingSection" class="p-5 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">

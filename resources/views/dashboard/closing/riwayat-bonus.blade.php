@@ -619,7 +619,7 @@
                         ${bonusProducts.length > 2 ? `<p class="text-xs text-gray-500">+${bonusProducts.length - 2} lainnya</p>` : ''}
                     </div>
                 </td>
-                <td class="py-4 font-medium">${totalItems} item</td>
+                <td class="py-4 font-medium">${parseFloat(Number(totalItems)).toFixed(2)} item</td>
                 <td class="py-4">
                     <span class="px-2 py-1 ${getBonusStatusBadgeClass(bonus.status)} rounded-full text-xs font-medium">
                         ${getBonusStatusText(bonus.status)}

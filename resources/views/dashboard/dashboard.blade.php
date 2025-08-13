@@ -279,7 +279,7 @@
 </div>
 
 <!-- DP Summary Widget -->
-<div class="mb-6">
+{{-- <div class="mb-6">
     <div class="bg-white rounded-lg p-6 card-shadow">
         <div class="flex justify-between items-start mb-4">
             <div>
@@ -314,7 +314,7 @@
             </a>
         </div>
     </div>
-</div>
+</div> --}}
 
 <!-- Two Columns -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1665,6 +1665,27 @@
             }
         });
     }
+
+    // Setup polling for real-time dashboard updates
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial data load
+        fetchDashboardData();
+        
+        // Start polling for dashboard updates every 60 seconds
+        if (window.pollingManager) {
+            window.pollingManager.start('dashboardData', async () => {
+                console.log('Polling dashboard data...');
+                await fetchDashboardData();
+            }, 60000); // 60 seconds interval
+        }
+    });
+    
+    // Stop polling when leaving the page
+    window.addEventListener('beforeunload', () => {
+        if (window.pollingManager) {
+            window.pollingManager.stop('dashboardData');
+        }
+    });
 
 </script>
 @endsection

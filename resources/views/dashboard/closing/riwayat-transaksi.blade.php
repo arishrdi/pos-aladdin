@@ -96,26 +96,38 @@
     </div>
     
     <!-- Table Content -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-base">
-            <thead class="text-left text-gray-700 border-b-2">
+    <div class="relative">
+        <!-- Scroll indicator shadows -->
+        <div class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white via-white to-transparent pointer-events-none z-10 rounded-r-lg" id="scrollIndicatorRight">
+            <!-- Scroll hint icon -->
+            <div class="absolute top-1/2 right-2 transform -translate-y-1/2">
+                <div class="flex items-center justify-center w-4 h-4 text-gray-400" title="Scroll horizontal untuk melihat lebih banyak kolom">
+                    <i data-lucide="chevrons-right" class="w-3 h-3"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto border border-gray-200 rounded-lg" id="tableContainer">
+            <table class="min-w-full text-sm">
+            <thead class="text-left text-gray-700 border-b-2 bg-gray-50">
                 <tr>
-                    <th class="py-3 font-bold">Invoice</th>
-                    <th class="py-3 font-bold">Waktu</th>
-                    <th class="py-3 font-bold">Kasir</th>
-                    <th class="py-3 font-bold">Kategori</th>
-                    <th class="py-3 font-bold">Pembayaran</th>
-                    <th class="py-3 font-bold">Status</th>
-                    <th class="py-3 font-bold">Approval</th>
-                    <th class="py-3 font-bold">Total</th>
-                    <th class="py-3 font-bold">Sisa Bayar</th>
-                    <th class="py-3 font-bold text-left">Aksi</th>
+                    <th class="px-4 py-3 font-bold min-w-[120px]">Invoice</th>
+                    <th class="px-4 py-3 font-bold min-w-[140px]">Waktu</th>
+                    <th class="px-4 py-3 font-bold min-w-[100px]">Kasir</th>
+                    <th class="px-4 py-3 font-bold min-w-[80px]">Kategori</th>
+                    <th class="px-4 py-3 font-bold min-w-[80px]">Pajak</th>
+                    <th class="px-4 py-3 font-bold min-w-[100px]">Pembayaran</th>
+                    <th class="px-4 py-3 font-bold min-w-[80px]">Status</th>
+                    <th class="px-4 py-3 font-bold min-w-[120px]">Approval</th>
+                    <th class="px-4 py-3 font-bold min-w-[100px]">Total</th>
+                    <th class="px-4 py-3 font-bold min-w-[100px]">Sisa Bayar</th>
+                    <th class="px-4 py-3 font-bold min-w-[400px] text-left">Aksi</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y">
                 <!-- Data akan diisi secara dinamis -->
                 <tr>
-                    <td colspan="10" class="py-8 text-center">
+                    <td colspan="11" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2 mx-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
@@ -128,6 +140,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 
@@ -163,6 +176,14 @@
                     <p class="text-gray-500">Status Approval</p>
                     <p id="detailApprovalStatus" class="font-medium"></p>
                 </div>
+                <div>
+                    <p class="text-gray-500">Kategori Transaksi</p>
+                    <p id="detailTransactionCategory" class="font-medium"></p>
+                </div>
+                <div id="memberInfoRow" class="hidden">
+                    <p class="text-gray-500">Member</p>
+                    <p id="detailMember" class="font-medium"></p>
+                </div>
             </div>
             
             <!-- Approval Information Section -->
@@ -195,6 +216,12 @@
             <div class="mb-4">
                 <h4 class="font-medium mb-2">Item Pembelian</h4>
                 <div id="detailItems"></div>
+            </div>
+            
+            <!-- Bonus Items Section -->
+            <div id="bonusItemsSection" class="mb-4 hidden">
+                <h4 class="font-medium mb-2 text-green-600">Item Bonus</h4>
+                <div id="detailBonusItems" class="bg-green-50 p-3 rounded-lg"></div>
             </div>
             
             <div class="border-t pt-4 space-y-2">
@@ -633,6 +660,10 @@
                 // untuk menampilkan transaksi pada hari yang dipilih saja
                 params.append('date_from', date);
                 params.append('date_to', date);
+            } else {
+                const currentDate = new Date().toISOString().split('T')[0];
+                params.append('date_from', currentDate.toLocaleString());
+                params.append('date_to', currentDate.toLocaleString());
             }
             
             // Tambahkan outlet_id ke parameters
@@ -657,6 +688,9 @@
             }
             
             const result = await response.json();
+            
+            // Debug log untuk API response
+            console.log('API Response:', result);
             
             // Update outlet info if available
             if (result.data && result.data.outlet) {
@@ -697,7 +731,7 @@
         if (!transactions || transactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="10" class="py-4 text-center text-gray-500">
+                    <td colspan="11" class="py-4 text-center text-gray-500">
                         Tidak ada transaksi pada tanggal ini.
                     </td>
                 </tr>
@@ -710,68 +744,80 @@
             row.className = 'border-b hover:bg-gray-50';
             row.dataset.transactionId = transaction.id; // Add transaction ID for filtering
             row.innerHTML = `
-                <td class="py-4">${transaction.order_number}</td>
-                <td class="py-4">${formatDateTime(transaction.created_at)}</td>
-                <td class="py-4">${transaction.user || 'Kasir'}</td>
-                <td class="py-4">
-                    <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium">
+                <td class="px-4 py-3">${transaction.order_number}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${formatDateTime(transaction.created_at)}</td>
+                <td class="px-4 py-3">${transaction.user || 'Kasir'}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getCategoryText(transaction.transaction_category)}
                     </span>
                 </td>
-                <td class="py-4">
-                    <span class="px-2 py-1 ${getPaymentBadgeClass(transaction.payment_method)} rounded-full text-xs">
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 ${getPkpBadgeClass(transaction.tax)} rounded-full text-xs font-medium whitespace-nowrap">
+                        ${getPkpText(transaction.tax)}
+                    </span>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 ${getPaymentBadgeClass(transaction.payment_method)} rounded-full text-xs whitespace-nowrap">
                         ${getPaymentMethodText(transaction.payment_method)}
                     </span>
                 </td>
-                <td class="py-4">
-                    <span class="px-2 py-1 ${getStatusBadgeClass(transaction.status)} rounded-full text-xs font-medium">
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 ${getStatusBadgeClass(transaction.status)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getStatusText(transaction.status)}
                     </span>
                 </td>
-                <td class="py-4">
-                    <span class="px-2 py-1 ${getApprovalBadgeClass(transaction.approval_status)} rounded-full text-xs font-medium">
+                <td class="px-4 py-3">
+                    <span class="px-2 py-1 ${getApprovalBadgeClass(transaction.approval_status)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getApprovalStatusText(transaction.approval_status)}
                     </span>
                 </td>
-                <td class="py-4 font-semibold">${formatCurrency(transaction.total)}</td>
-                <td class="py-4">
+                <td class="px-4 py-3 font-semibold whitespace-nowrap">${formatCurrency(transaction.total)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
                     ${transaction.remaining_balance > 0 ? 
                         `<span class="font-semibold text-red-600">${formatCurrency(transaction.remaining_balance)}</span>` : 
                         `<span class="text-gray-400">-</span>`
                     }
                 </td>
-                <td class="py-4">
-                    <div class="flex space-x-2">
-                        <a href="#" onclick="openDetailModal('${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Lihat Detail">
-                            <i data-lucide="eye" class="w-4 h-4"></i>
-                        </a>
+                <td class="px-4 py-3">
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="openDetailModal('${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Lihat Detail Transaksi">
+                            <i data-lucide="eye" class="w-3 h-3 mr-1"></i>
+                            Detail
+                        </button>
                         ${transaction.payment_proof_url ? `
-                        <a href="#" onclick="openPaymentProofModal('${transaction.payment_proof_url}')" class="text-gray-600 hover:text-purple-600" title="Lihat Bukti Pembayaran">
-                            <i data-lucide="image" class="w-4 h-4"></i>
-                        </a>
+                        <button onclick="openPaymentProofModal('${transaction.payment_proof_url}')" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Lihat Bukti Pembayaran">
+                            <i data-lucide="image" class="w-3 h-3 mr-1"></i>
+                            Bukti
+                        </button>
                         ` : ''}
                         ${transaction.can_settle ? `
-                        <a href="#" onclick="openSettlementModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-green-600" title="Lunasi DP">
-                            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-                        </a>
+                        <button onclick="openSettlementModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors" title="Lunasi DP">
+                            <i data-lucide="dollar-sign" class="w-3 h-3 mr-1"></i>
+                            Lunasi
+                        </button>
                         ` : ''}
                         ${transaction.approval_status === 'pending' ? `
-                        <a href="#" onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-green-600" title="Setujui">
-                            <i data-lucide="check-circle" class="w-4 h-4"></i>
-                        </a>
-                        <a href="#" onclick="openRejectModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-red-600" title="Tolak">
-                            <i data-lucide="x-circle" class="w-4 h-4"></i>
-                        </a>
+                        <button onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors" title="Setujui Transaksi">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                            Setujui
+                        </button>
+                        <button onclick="openRejectModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak Transaksi">
+                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
+                            Tolak
+                        </button>
                         ` : ''}
                         ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
-                        <a href="#" onclick="openCancellationRequestModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-orange-600" title="${transaction.status === 'pending' ? 'Minta Pembatalan' : 'Minta Refund'}">
-                            <i data-lucide="clock" class="w-4 h-4"></i>
-                        </a>
+                        <button onclick="openCancellationRequestModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors" title="${transaction.status === 'pending' ? 'Ajukan Pembatalan' : 'Ajukan Refund'}">
+                            <i data-lucide="rotate-ccw" class="w-3 h-3 mr-1"></i>
+                            ${transaction.status === 'pending' ? 'Batal' : 'Refund'}
+                        </button>
                         ` : ''}
                         ${transaction.cancellation_status === 'requested' ? `
-                        <a href="#" onclick="openCancellationApprovalModal('${transaction.order_number}', '${transaction.id}')" class="text-gray-600 hover:text-blue-600" title="Review Permintaan">
-                            <i data-lucide="eye" class="w-4 h-4"></i>
-                        </a>
+                        <button onclick="openCancellationApprovalModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded transition-colors" title="Review Permintaan Pembatalan/Refund">
+                            <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                            Review
+                        </button>
                         ` : ''}
                     </div>
                 </td>
@@ -780,6 +826,43 @@
         });
         
         if (window.lucide) window.lucide.createIcons();
+        
+        // Setup scroll indicator untuk tabel
+        setupTableScrollIndicator();
+    }
+    
+    // Setup scroll indicator
+    function setupTableScrollIndicator() {
+        const tableContainer = document.getElementById('tableContainer');
+        const scrollIndicatorRight = document.getElementById('scrollIndicatorRight');
+        
+        if (!tableContainer || !scrollIndicatorRight) return;
+        
+        function updateScrollIndicator() {
+            const { scrollLeft, scrollWidth, clientWidth } = tableContainer;
+            const isScrollable = scrollWidth > clientWidth;
+            const isAtEnd = scrollLeft >= (scrollWidth - clientWidth - 10); // 10px threshold
+            
+            // Show/hide right indicator
+            if (isScrollable && !isAtEnd) {
+                scrollIndicatorRight.classList.remove('hidden');
+            } else {
+                scrollIndicatorRight.classList.add('hidden');
+            }
+        }
+        
+        // Initial check
+        updateScrollIndicator();
+        
+        // Update on scroll
+        tableContainer.addEventListener('scroll', updateScrollIndicator);
+        
+        // Update on window resize
+        window.addEventListener('resize', updateScrollIndicator);
+        
+        // Update when table content changes
+        const observer = new MutationObserver(updateScrollIndicator);
+        observer.observe(tableContainer, { childList: true, subtree: true });
     }
 
     // Fungsi untuk fetch detail transaksi
@@ -804,6 +887,10 @@
                 showAlert('error', 'Detail transaksi tidak ditemukan');
                 return;
             }
+            
+            // Debug log untuk bonus items
+            console.log('Transaction data:', transaction);
+            console.log('Bonus items:', transaction.bonus_items);
 
             // Daftar element yang diperlukan
             const elements = {
@@ -812,13 +899,16 @@
                 paymentMethod: document.getElementById('detailPaymentMethod'),
                 status: document.getElementById('detailStatus'),
                 approvalStatus: document.getElementById('detailApprovalStatus'),
+                transactionCategory: document.getElementById('detailTransactionCategory'),
+                member: document.getElementById('detailMember'),
                 total: document.getElementById('detailTotal'),
                 subtotal: document.getElementById('detailSubtotal'),
                 tax: document.getElementById('detailTax'),
                 discount: document.getElementById('detailDiscount'),
                 totalPaid: document.getElementById('detailTotalPaid'),
                 change: document.getElementById('detailChange'),
-                items: document.getElementById('detailItems')
+                items: document.getElementById('detailItems'),
+                bonusItems: document.getElementById('detailBonusItems')
             };
 
             // Validasi element
@@ -835,6 +925,20 @@
             elements.paymentMethod.textContent = getPaymentMethodText(transaction.payment_method);
             elements.status.textContent = getStatusText(transaction.status);
             elements.approvalStatus.textContent = getApprovalStatusText(transaction.approval_status);
+            
+            // Isi kategori transaksi
+            const categoryText = transaction.transaction_category === 'dp' ? 'DP (Uang Muka)' : 'Lunas';
+            elements.transactionCategory.textContent = categoryText;
+            
+            // Isi member info
+            const memberRow = document.getElementById('memberInfoRow');
+            if (transaction.member && transaction.member.name) {
+                elements.member.textContent = `${transaction.member.name} (${transaction.member.member_code})`;
+                memberRow.classList.remove('hidden');
+            } else {
+                memberRow.classList.add('hidden');
+            }
+            
             elements.total.textContent = formatCurrency(transaction.total);
             elements.subtotal.textContent = formatCurrency(transaction.subtotal);
             elements.tax.textContent = formatCurrency(transaction.tax);
@@ -927,6 +1031,7 @@
                             <div>
                                 <p class="font-medium">${item.product}</p>
                                 <p class="text-sm text-gray-500">${item.quantity} × ${formatCurrency(item.price)}</p>
+                                ${item.bonus_qty > 0 ? `<p class="text-sm text-green-600">+ ${item.bonus_qty} bonus</p>` : ''}
                             </div>
                             <div class="text-right">
                                 <p class="font-medium">${formatCurrency(item.total)}</p>
@@ -938,6 +1043,34 @@
                 });
             } else {
                 elements.items.innerHTML = '<p class="text-gray-500 py-4">Tidak ada item</p>';
+            }
+
+            // Isi bonus items
+            const bonusSection = document.getElementById('bonusItemsSection');
+            elements.bonusItems.innerHTML = '';
+            if (transaction.bonus_items?.length > 0) {
+                transaction.bonus_items.forEach(bonusItem => {
+                    const bonusElement = document.createElement('div');
+                    bonusElement.className = 'border-b border-green-200 py-2 last:border-b-0';
+                    bonusElement.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-green-700">
+                                    <i class="fas fa-gift mr-1"></i>
+                                    ${bonusItem.product || bonusItem.product_name || '-'}
+                                </p>
+                                <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
+                            </div>
+                            <div class="text-sm text-green-600 font-medium">
+                                GRATIS
+                            </div>
+                        </div>
+                    `;
+                    elements.bonusItems.appendChild(bonusElement);
+                });
+                bonusSection.classList.remove('hidden');
+            } else {
+                bonusSection.classList.add('hidden');
             }
 
             // Tampilkan modal
@@ -1322,7 +1455,7 @@
         
         rows.forEach(row => {
             // Skip loading/empty state rows
-            if (row.cells.length < 10) {
+            if (row.cells.length < 11) {
                 return;
             }
             
@@ -1683,6 +1816,19 @@
         return classes[category] || 'bg-gray-100 text-gray-800';
     }
 
+    // Helper functions untuk PKP status
+    function getPkpText(tax) {
+        const taxAmount = parseFloat(tax || 0);
+        return taxAmount > 0 ? 'PKP' : 'Non-PKP';
+    }
+
+    function getPkpBadgeClass(tax) {
+        const taxAmount = parseFloat(tax || 0);
+        return taxAmount > 0 
+            ? 'bg-blue-100 text-blue-800 border-blue-200' 
+            : 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+
     // Settlement Modal Functions
     function openSettlementModal(orderNumber, orderId) {
         try {
@@ -1821,6 +1967,24 @@
             submitButton.disabled = false;
         }
     });
+    
+    // Setup polling for transaction history updates
+    document.addEventListener('DOMContentLoaded', function() {
+        // Start polling for transaction updates every 30 seconds
+        if (window.pollingManager) {
+            window.pollingManager.start('transactionHistory', async () => {
+                console.log('Polling transaction history...');
+                await fetchTransactionHistory();
+            }, 30000); // 30 seconds interval
+        }
+    });
+    
+    // Stop polling when leaving the page
+    window.addEventListener('beforeunload', () => {
+        if (window.pollingManager) {
+            window.pollingManager.stop('transactionHistory');
+        }
+    });
 </script>
 
 <style>
@@ -1853,6 +2017,54 @@
     
     .animate-fade-out {
         animation: fadeOut 0.3s ease-out forwards;
+    }
+    
+    /* Styling untuk scrollable table */
+    .overflow-x-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #CBD5E1 #F1F5F9;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #F1F5F9;
+        border-radius: 4px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 4px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: #94A3B8;
+    }
+    
+    /* Sticky first column for better UX (optional) */
+    .table-sticky-first {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 10;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Scroll indicator styling */
+    #scrollIndicatorRight {
+        transition: opacity 0.3s ease;
+        background: linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+    }
+    
+    #scrollIndicatorRight.hidden {
+        opacity: 0;
+    }
+    
+    /* Smooth scrolling for table */
+    #tableContainer {
+        scroll-behavior: smooth;
     }
 </style>
 

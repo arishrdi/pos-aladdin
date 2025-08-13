@@ -47,11 +47,17 @@ class SimplePaymentManager {
         // Reset form
         document.getElementById('amountReceived').value = '';
         document.getElementById('changeAmount').value = '';
+        
+        // Reset transaction category radio
+        document.querySelector('input[name="transactionCategory"][value="lunas"]').checked = true;
 
         // Set initial transaction category and update sections
         this.transactionCategory = 'lunas';
         this.currentPaymentMethod = 'cash';
         this.updateAmountSections();
+        
+        // Initialize payment method UI
+        this.handlePaymentMethodChange('cash');
     }
 
     // Update tax type display in modal
@@ -453,13 +459,14 @@ class SimplePaymentManager {
     const paymentMethod = this.currentPaymentMethod;
     const amountReceived = parseCurrencyInput(document.getElementById('amountReceived')?.value || '0');
 
-    // Validation (same as before)
+    // Validation
     if (this.transactionCategory === 'lunas') {
         if (paymentMethod === 'cash' && amountReceived < totals.grandTotal) {
             showNotification('Jumlah uang tidak mencukupi', 'warning');
             return;
         }
     } else if (this.transactionCategory === 'dp') {
+        // Untuk DP: validasi input amount untuk semua metode pembayaran
         if (amountReceived <= 0) {
             showNotification('Masukkan jumlah DP yang valid', 'warning');
             return;
@@ -507,18 +514,23 @@ class SimplePaymentManager {
 
         // Handle payment amounts
         if (this.transactionCategory === 'dp') {
+            // Untuk DP: selalu gunakan jumlah yang diinput user
             formData.append('total_paid', amountReceived);
             formData.append('remaining_balance', totals.grandTotal - amountReceived);
             formData.append('change', '0');
             formData.append('status', 'partial');
-        } else if (paymentMethod === 'cash') {
-            formData.append('total_paid', amountReceived);
-            formData.append('change', amountReceived - totals.grandTotal);
-            formData.append('remaining_balance', '0');
         } else {
-            formData.append('total_paid', totals.grandTotal);
-            formData.append('change', '0');
-            formData.append('remaining_balance', '0');
+            // Untuk Lunas: logika berbeda berdasarkan metode pembayaran
+            if (paymentMethod === 'cash') {
+                formData.append('total_paid', amountReceived);
+                formData.append('change', amountReceived - totals.grandTotal);
+                formData.append('remaining_balance', '0');
+            } else {
+                // Non-cash lunas = bayar penuh
+                formData.append('total_paid', totals.grandTotal);
+                formData.append('change', '0');
+                formData.append('remaining_balance', '0');
+            }
         }
 
         // Handle payment proofs
@@ -570,6 +582,17 @@ class SimplePaymentManager {
             this.cartManager.setMember(null);
             this.selectedMember = null;
             closeModal('paymentModal');
+            
+            // Reload products to get updated stock quantities
+            if (typeof loadProducts === 'function') {
+                loadProducts();
+            }
+            
+            // Refresh transaction history data
+            if (typeof ambilDataTransaksi === 'function') {
+                const hariIni = new Date();
+                ambilDataTransaksi(hariIni, hariIni);
+            }
         }
 
     } catch (error) {

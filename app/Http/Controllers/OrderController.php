@@ -65,7 +65,7 @@ class OrderController extends Controller
             'shift_id' => 'required|exists:shifts,id',
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.discount' => 'required|numeric|min:0',
             'items.*.price' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,qris,transfer',
@@ -122,18 +122,22 @@ class OrderController extends Controller
 
             // 7. Hitung kembalian dan remaining balance
             $totalPaid = floatval($request->total_paid ?? 0);
-            if ($request->payment_method === 'qris' || $request->payment_method === 'transfer') {
-                $totalPaid = $total;
-                $change = 0;
-            } else {
-                $change = $totalPaid - $total;
-            }
-
+            
             // 8. Hitung remaining balance untuk DP
             $remainingBalance = 0;
             if ($request->transaction_category === 'dp') {
+                // Untuk DP: gunakan jumlah yang diinput user, tidak peduli metode pembayaran
                 $remainingBalance = $total - $totalPaid;
                 $change = 0; // DP tidak ada kembalian
+            } else {
+                // Untuk Lunas: logika berbeda berdasarkan metode pembayaran
+                if ($request->payment_method === 'qris' || $request->payment_method === 'transfer') {
+                    $totalPaid = $total; // Non-cash lunas = bayar penuh
+                    $change = 0;
+                } else {
+                    // Cash lunas: hitung kembalian
+                    $change = $totalPaid - $total;
+                }
             }
 
             // Buat order dengan status pending untuk approval
@@ -233,10 +237,10 @@ class OrderController extends Controller
                 'items' => $order->items->map(function ($item) {
                     return [
                         'product' => $item->product->name,
-                        'quantity' => $item->quantity,
-                        'price' => $item->price,
-                        'discount' => $item->discount,
-                        'total' => $item->quantity * $item->price
+                        'quantity' => floatval($item->quantity),
+                        'price' => floatval($item->price),
+                        'discount' => floatval($item->discount),
+                        'total' => floatval($item->quantity) * floatval($item->price)
                     ];
                 }),
                 'member' => $order->member ? [
@@ -454,10 +458,10 @@ class OrderController extends Controller
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product_name' => $item->product->name,
-                            'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'discount' => $item->discount,
-                            'subtotal' => $item->subtotal
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'discount' => floatval($item->discount),
+                            'subtotal' => floatval($item->subtotal)
                         ];
                     })
                 ];
@@ -714,7 +718,10 @@ class OrderController extends Controller
                 'user:id,name',
                 'approver:id,name',
                 'cancellationRequester:id,name',
-                'cancellationProcessor:id,name'
+                'cancellationProcessor:id,name',
+                'bonusTransactions.bonusItems.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku');
+                }
             ])->has('outlet')->has('user')->latest()->get();
 
             // $totalDiscount = $query->where('status', 'completed')->sum('discount');
@@ -745,16 +752,28 @@ class OrderController extends Controller
                             'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',
                             'sku' => $item->product ? $item->product->sku : '',
                             'unit' => $item->product ? ($item->product->unit ?? 'pcs') : 'pcs',
-                            'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'discount' => $item->discount,
-                            'total' => $item->quantity * $item->price
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'discount' => floatval($item->discount),
+                            'total' => floatval($item->quantity) * floatval($item->price)
                         ];
                     }),
                     'member' => $order->member ? [
                         'name' => $order->member->name,
                         'member_code' => $order->member->member_code
                     ] : null,
+                    'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
+                        return $bonusTransaction->bonusItems->map(function ($bonusItem) {
+                            return [
+                                'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
+                                'quantity' => $bonusItem->quantity,
+                                'bonus_value' => $bonusItem->bonus_value ?? 0,
+                                'status' => $bonusItem->status ?? 'approved'
+                            ];
+                        });
+                    }),
                     // Data baru untuk approval system (tanpa mengubah struktur yang ada)
                     'approval_status' => $order->approval_status,
                     'payment_proof_url' => $order->payment_proof_url,
@@ -839,7 +858,10 @@ class OrderController extends Controller
                 'items.product:id,name,sku',
                 'outlet:id,name',
                 'shift:id',
-                'user:id,name'
+                'user:id,name',
+                'bonusTransactions.bonusItems.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku');
+                }
             ])->latest()->get();
 
             // Transformasi data
@@ -863,10 +885,22 @@ class OrderController extends Controller
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product' => $item->product->name,
-                            'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'total' => $item->quantity * $item->price
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'total' => floatval($item->quantity) * floatval($item->price)
                         ];
+                    }),
+                    'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
+                        return $bonusTransaction->bonusItems->map(function ($bonusItem) {
+                            return [
+                                'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
+                                'quantity' => $bonusItem->quantity,
+                                'bonus_value' => $bonusItem->bonus_value ?? 0,
+                                'status' => $bonusItem->status ?? 'approved'
+                            ];
+                        });
                     })
                 ];
             });
@@ -900,7 +934,15 @@ class OrderController extends Controller
                 return $this->errorResponse('Outlet ID diperlukan', 400);
             }
 
-            $orders = Order::with(['user:id,name', 'outlet:id,name', 'items.product:id,name', 'member:id,name,member_code'])
+            $orders = Order::with([
+                'user:id,name', 
+                'outlet:id,name', 
+                'items.product:id,name', 
+                'member:id,name,member_code',
+                'bonusTransactions.bonusItems.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku');
+                }
+            ])
                 ->where('outlet_id', $outletId)
                 ->where('approval_status', 'pending')
                 ->latest()
@@ -925,11 +967,23 @@ class OrderController extends Controller
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product_name' => $item->product->name,
-                            'quantity' => $item->quantity,
-                            'price' => $item->price,
-                            'discount' => $item->discount,
-                            'subtotal' => $item->subtotal
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'discount' => floatval($item->discount),
+                            'subtotal' => floatval($item->subtotal)
                         ];
+                    }),
+                    'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
+                        return $bonusTransaction->bonusItems->map(function ($bonusItem) {
+                            return [
+                                'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
+                                'quantity' => $bonusItem->quantity,
+                                'bonus_value' => $bonusItem->bonus_value ?? 0,
+                                'status' => $bonusItem->status ?? 'approved'
+                            ];
+                        });
                     })
                 ];
             });

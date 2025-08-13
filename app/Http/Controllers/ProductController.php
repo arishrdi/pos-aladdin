@@ -327,11 +327,14 @@ class ProductController extends Controller
                 'is_active' => $request->is_active,
             ]);
 
-            foreach ($request->outlet_ids as $outletId) {
+            // Store existing quantities before any deletion
+            $existingQuantities = Inventory::where('product_id', $product->id)
+                ->pluck('quantity', 'outlet_id')
+                ->toArray();
 
-                $currentQuantity = Inventory::where('product_id', $product->id)
-                    ->where('outlet_id', $outletId)
-                    ->value('quantity') ?? 0;
+            foreach ($request->outlet_ids as $outletId) {
+                // Use stored quantity if outlet was previously assigned, otherwise use 0 for new outlets
+                $currentQuantity = $existingQuantities[$outletId] ?? 0;
 
                 Inventory::updateOrCreate(
                     [
@@ -345,6 +348,7 @@ class ProductController extends Controller
                 );
             }
 
+            // Delete inventory records for outlets that are no longer assigned
             Inventory::where('product_id', $product->id)
                 ->whereNotIn('outlet_id', $request->outlet_ids)
                 ->delete();

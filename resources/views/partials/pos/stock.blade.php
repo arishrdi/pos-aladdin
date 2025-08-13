@@ -75,7 +75,7 @@
                     <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-base font-medium text-gray-700 mb-2">Nilai + / -</label>
-                            <input type="number" id="quantity_change" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Masukkan nilai">
+                            <input type="number" step="0.1" id="quantity_change" class="w-full px-4 py-2.5 text-base border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Masukkan nilai (contoh: 5 atau 2.5)">
                         </div>
                         <div>
                             <label class="block text-base font-medium text-gray-700 mb-2">Tipe</label>
@@ -227,18 +227,57 @@
         lucide.createIcons();
     }
 
-    // Modal functions
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-        if (modalId === 'stockModal') {
-            loadProducts();
-            setDefaultDates();
+    // Function to override openModal - will be called after all scripts loaded
+    function setupModalOverride() {
+        console.log('Setting up modal override...');
+        const originalOpenModal = window.openModal;
+        console.log('Original openModal before override:', originalOpenModal);
+        
+        window.openModal = function(modalId) {
+            console.log('OVERRIDDEN openModal called with:', modalId);
             
-            if (document.getElementById('historyContent') && 
-                !document.getElementById('historyContent').classList.contains('hidden')) {
-                loadInventoryHistory();
+            // Call original function first
+            if (originalOpenModal) {
+                console.log('Calling original openModal');
+                originalOpenModal(modalId);
+            } else {
+                console.log('No original openModal, showing modal directly');
+                document.getElementById(modalId).classList.remove('hidden');
             }
-        }
+            
+            // Add stock modal specific logic
+            if (modalId === 'stockModal') {
+                console.log('Stock modal opened, initializing...');
+                console.log('About to call setDefaultDates...');
+                setDefaultDates();
+                console.log('About to call loadProducts...');
+                console.log('loadStockProducts function exists:', typeof loadStockProducts);
+                console.log('loadStockProducts function:', loadStockProducts);
+                try {
+                    if (typeof loadStockProducts === 'function') {
+                        loadStockProducts();
+                        console.log('loadStockProducts called successfully');
+                    } else {
+                        console.error('loadStockProducts is not a function!');
+                    }
+                } catch (error) {
+                    console.error('Error calling loadStockProducts:', error);
+                }
+                
+                console.log('Checking if history tab is visible...');
+                const historyContent = document.getElementById('historyContent');
+                console.log('historyContent element:', historyContent);
+                
+                if (historyContent && !historyContent.classList.contains('hidden')) {
+                    console.log('History tab is visible, loading inventory history...');
+                    loadInventoryHistory();
+                } else {
+                    console.log('History tab is hidden or not found');
+                }
+            }
+        };
+        
+        console.log('Override complete. New openModal:', window.openModal);
     }
 
     function closeModal(modalId) {
@@ -275,38 +314,79 @@
     
     // Get outlet ID from local storage or parent component
     function getOutletId() {
-        const outletId = localStorage.getItem('outlet_id');
-        if (!outletId) {
-            showNotification('warning', 'Peringatan', 'Tidak ada outlet yang dipilih');
-            return null;
+        // Try multiple localStorage keys in order of preference
+        let outletId = localStorage.getItem('outlet_id') || 
+                      localStorage.getItem('selectedOutletId');
+        
+        // If still no outlet ID, try to get from global POS config
+        if (!outletId && typeof outletInfo !== 'undefined' && outletInfo.id) {
+            outletId = outletInfo.id;
         }
+        
+        // Last resort: default to outlet 1
+        if (!outletId) {
+            outletId = '1';
+            localStorage.setItem('outlet_id', '1'); // Set default
+        }
+        
+        console.log('Got outlet ID:', outletId);
         return outletId;
     }
     
     // Get auth token from localStorage
     function getToken() {
-        const token = localStorage.getItem('token');
+        // Try different possible token keys
+        let token = localStorage.getItem('token') || 
+                   localStorage.getItem('auth_token') ||
+                   localStorage.getItem('access_token');
+        
+        // Try to get from global POS config
+        if (!token && typeof POS_CONFIG !== 'undefined' && POS_CONFIG.API_TOKEN) {
+            token = POS_CONFIG.API_TOKEN;
+        }
+        
         if (!token) {
-            showNotification('error', 'Error', 'Anda tidak terautentikasi');
+            console.error('No authentication token found');
+            showNotification('error', 'Error', 'Anda tidak terautentikasi. Silakan login ulang.');
             return null;
         }
+        
+        console.log('Got token (first 10 chars):', token.substring(0, 10) + '...');
         return token;
     }
 
     let allProducts = [];
 
-    function loadProducts() {
-        const outletId = getOutletId();
-        const token = getToken();
+    // Format quantity to handle decimal display
+    function formatQuantity(quantity) {
+        const num = parseFloat(quantity || 0);
+        // Show decimal if it has decimal places, otherwise show as integer
+        return num % 1 === 0 ? num.toString() : num.toFixed(1);
+    }
+
+    function loadStockProducts() {
+        console.log('=== loadStockProducts function called ===');
+        console.log('loadStockProducts function is running...');
+        try {
+            const outletId = getOutletId();
+            const token = getToken();
+
+            console.log('Loading products for outlet:', outletId);
+            console.log('Token available:', !!token);
         
         if (!outletId || !token) {
+            console.error('Missing outlet ID or token:', { outletId, hasToken: !!token });
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '<div class="p-4 text-center text-red-500">Error: Missing outlet ID or authentication token</div>';
             return;
         }
         
         const productList = document.getElementById('productList');
         productList.innerHTML = '<div class="p-4 text-center text-gray-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...</div>';
+        lucide.createIcons();
     
         const apiUrl = `/api/products/outlet/${outletId}`;
+        console.log('API URL:', apiUrl);
         
         fetch(apiUrl, {
             method: 'GET',
@@ -316,45 +396,63 @@
             }
         })
         .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+            
             if (!response.ok) {
                 return response.text().then(text => {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    console.error('Error response text:', text);
+                    throw new Error(`HTTP error! Status: ${response.status} - ${text}`);
                 });
             }
             return response.json();
         })
         .then(data => {
+            console.log('API Response data:', data);
+            
             if (data.success && data.data) {
                 allProducts = Array.isArray(data.data) ? 
                     data.data.sort((a, b) => a.name.localeCompare(b.name)) : 
                     [];
                 
+                console.log('Processed products:', allProducts.length);
+                
                 const selectElement = document.getElementById('product_id');
                 selectElement.innerHTML = '<option value="">Pilih produk</option>';
                 
                 if (allProducts.length === 0) {
-                    productList.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ada produk</div>';
+                    productList.innerHTML = '<div class="p-4 text-center text-gray-500">Tidak ada produk di outlet ini</div>';
                     return;
                 }
                 
                 allProducts.forEach(product => {
                     const option = document.createElement('option');
                     option.value = product.id;
-                    option.textContent = `${product.name} (${product.sku || 'No SKU'}) - Stok: ${product.quantity || 0}`;
+                    option.textContent = `${product.name} (${product.sku || 'No SKU'}) - Stok: ${formatQuantity(product.quantity || 0)}`;
                     selectElement.appendChild(option);
                 });
                 
                 filterDropdownProducts();
             } else {
+                console.error('API returned unsuccessful response:', data);
                 showNotification('error', 'Error', data.message || 'Format data tidak sesuai');
                 productList.innerHTML = '<div class="p-4 text-center text-gray-500">Gagal memuat produk</div>';
             }
         })
         .catch(error => {
             console.error('Error fetching products:', error);
-            showNotification('error', 'Error', 'Gagal memuat daftar produk');
-            productList.innerHTML = '<div class="p-4 text-center text-gray-500">Error memuat produk</div>';
+            showNotification('error', 'Error', 'Gagal memuat daftar produk: ' + error.message);
+            productList.innerHTML = '<div class="p-4 text-center text-red-500">Error memuat produk: ' + error.message + '</div>';
         });
+        
+        } catch (error) {
+            console.error('Error in loadStockProducts function:', error);
+            const productList = document.getElementById('productList');
+            if (productList) {
+                productList.innerHTML = '<div class="p-4 text-center text-red-500">JavaScript Error: ' + error.message + '</div>';
+            }
+        }
+        console.log('=== loadStockProducts function completed ===');
     }
 
     function filterDropdownProducts() {
@@ -381,12 +479,12 @@
             html += `
                 <div 
                     class="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100"
-                    onclick="selectProduct('${product.id}', '${product.name} (${product.sku || 'No SKU'}) - Stok: ${product.quantity || 0}')"
+                    onclick="selectProduct('${product.id}', '${product.name} (${product.sku || 'No SKU'}) - Stok: ${formatQuantity(product.quantity || 0)}')"
                 >
                     <div class="font-medium">${product.name}</div>
                     <div class="text-sm text-gray-500 flex justify-between mt-1">
                         <span>${product.sku || 'No SKU'}</span>
-                        <span>Stok: ${product.quantity || 0}</span>
+                        <span>Stok: ${formatQuantity(product.quantity || 0)}</span>
                     </div>
                 </div>
             `;
@@ -447,23 +545,42 @@
     }
 
     function loadInventoryHistory() {
+        console.log('loadInventoryHistory called');
         const outletId = getOutletId();
         const token = getToken();
-        const dateFrom = document.getElementById('date_from').value;
-        const dateTo = document.getElementById('date_to').value;
+        
+        console.log('Checking date inputs...');
+        const dateFromElement = document.getElementById('date_from');
+        const dateToElement = document.getElementById('date_to');
+        
+        console.log('Date from element:', dateFromElement);
+        console.log('Date to element:', dateToElement);
+        
+        const dateFrom = dateFromElement?.value;
+        const dateTo = dateToElement?.value;
+        
+        console.log('Date from value:', dateFrom);
+        console.log('Date to value:', dateTo);
         
         // Validate dates
         if (!dateFrom || !dateTo) {
+            console.log('Missing dates, showing notification');
             showNotification('warning', 'Peringatan', 'Silakan pilih rentang tanggal');
             return;
         }
         
         if (new Date(dateFrom) > new Date(dateTo)) {
+            console.log('Invalid date range');
             showNotification('warning', 'Peringatan', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir');
             return;
         }
         
-        if (!outletId || !token) return;
+        if (!outletId || !token) {
+            console.log('Missing outlet ID or token');
+            return;
+        }
+        
+        console.log('All validations passed, proceeding with fetch...');
         
         const historyTableBody = document.getElementById('historyTableBody');
         historyTableBody.innerHTML = `
@@ -488,7 +605,14 @@
         const formattedFrom = fromDate.toISOString();
         const formattedTo = toDate.toISOString();
         
-        fetch(`/api/adjust-inventory/${outletId}?date_from=${encodeURIComponent(formattedFrom)}&date_to=${encodeURIComponent(formattedTo)}`, {
+        const apiUrl = `/api/adjust-inventory/${outletId}?date_from=${encodeURIComponent(formattedFrom)}&date_to=${encodeURIComponent(formattedTo)}`;
+        console.log('Making fetch request to:', apiUrl);
+        console.log('Request headers:', {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token.substring(0, 10)}...`
+        });
+        
+        fetch(apiUrl, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -564,7 +688,7 @@
                         <td class="px-4 py-3 text-sm">${formattedDate}</td>
                         <td class="px-4 py-3 text-sm">${history.product.name}</td>
                         <td class="px-4 py-3 text-sm ${history.quantity_change > 0 ? 'text-green-600' : 'text-red-600'} font-medium">
-                            ${history.quantity_change > 0 ? '+' : ''}${history.quantity_change}
+                            ${history.quantity_change > 0 ? '+' : ''}${formatQuantity(history.quantity_change)}
                         </td>
                         <td class="px-4 py-3 text-sm">${typeMap[history.type] || history.type}</td>
                         <td class="px-4 py-3 text-sm">${history.notes || '-'}</td>
@@ -653,7 +777,7 @@
             body: JSON.stringify({
                 outlet_id: outletId,
                 product_id: productId,
-                quantity_change: parseInt(quantityChange),
+                quantity_change: parseFloat(quantityChange),
                 type: adjustType,
                 notes: notes
             })
@@ -689,7 +813,24 @@
 
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Stock modal script loaded');
+        console.log('window.openModal function:', window.openModal);
         lucide.createIcons();
+    });
+    
+    // Also check when window loads (in case DOMContentLoaded already fired)
+    window.addEventListener('load', function() {
+        console.log('Window loaded, checking openModal function:', window.openModal);
+        
+        // Make loadStockProducts available globally for manual testing
+        window.testLoadStockProducts = loadStockProducts;
+        console.log('You can test loadStockProducts by running: window.testLoadStockProducts()');
+        
+        // Setup modal override after a short delay to ensure all scripts are loaded
+        setTimeout(function() {
+            console.log('Setting up modal override after delay...');
+            setupModalOverride();
+        }, 100);
     });
 </script>
 

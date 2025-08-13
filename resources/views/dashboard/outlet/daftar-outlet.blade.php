@@ -520,9 +520,6 @@
         formData.append('email', document.getElementById('editEmail').value);
         formData.append('tax', document.getElementById('editPersentasePajak').value || '0.00');
         formData.append('tax_type', document.getElementById('editTaxType').value);
-        formData.append('nomor_transaksi_bank', document.getElementById('editNoTransaksi').value);
-        formData.append('nama_bank', document.getElementById('editNamaBank').value);
-        formData.append('atas_nama_bank', document.getElementById('editAtasNama').value);
         formData.append('is_active', document.getElementById('editStatusAktif').checked ? '1' : '0');
         
         // Add PKP banking fields
@@ -617,9 +614,6 @@
             document.getElementById('editEmail').value = outlet.email;
             document.getElementById('editPersentasePajak').value = outlet.tax;
             document.getElementById('editTaxType').value = outlet.tax_type || 'non_pkp';
-            document.getElementById('editNoTransaksi').value = outlet.nomor_transaksi_bank || '';
-            document.getElementById('editNamaBank').value = outlet.nama_bank || '';
-            document.getElementById('editAtasNama').value = outlet.atas_nama_bank || '';
             document.getElementById('editStatusAktif').checked = outlet.is_active;
             
             // Load PKP banking fields

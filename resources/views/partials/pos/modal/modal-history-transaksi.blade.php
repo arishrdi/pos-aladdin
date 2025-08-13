@@ -28,7 +28,23 @@
           </div>
           <div>
             <div class="text-sm text-gray-500">Status</div>
-            <div id="modalStatus" class="inline-block px-3 py-1 rounded-full text-xs font-medium">-</div>
+            <div class="space-y-1">
+              <div id="modalStatus" class="inline-block px-3 py-1 rounded-full text-xs font-medium">-</div>
+              <div id="modalCancellationStatus" class="hidden">
+                <div class="inline-block px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                  <i class="fas fa-clock mr-1"></i>
+                  <span id="modalCancellationText">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Kategori</div>
+            <div id="modalTransactionCategory" class="font-medium">-</div>
+          </div>
+          <div id="modalMemberRow" class="hidden">
+            <div class="text-sm text-gray-500">Member</div>
+            <div id="modalMember" class="font-medium">-</div>
           </div>
         </div>
       </div>
@@ -46,6 +62,18 @@
           </thead>
           <tbody id="modalItems" class="divide-y"></tbody>
         </table>
+      </div>
+
+      {{-- Item Bonus --}}
+      <div id="modalBonusSection" class="hidden">
+        <h4 class="font-medium text-green-600 mb-2">
+          <i class="fas fa-gift mr-1"></i>Item Bonus
+        </h4>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+          <div id="modalBonusItems" class="space-y-2">
+            <!-- Bonus items akan diisi di sini -->
+          </div>
+        </div>
       </div>
 
       {{-- Ringkasan Harga --}}

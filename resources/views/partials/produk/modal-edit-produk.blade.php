@@ -70,7 +70,7 @@
                     </div>                                        
                     <div>
                         <label class="block font-medium mb-1">Stok Minimum</label>
-                        <input type="number" id="editStokMinimum" class="w-full border rounded px-3 py-2 text-sm">
+                        <input type="number" step="0.1" id="editStokMinimum" class="w-full border rounded px-3 py-2 text-sm" placeholder="contoh: 10 atau 5.5">
                     </div>
                 </div>
             </div>

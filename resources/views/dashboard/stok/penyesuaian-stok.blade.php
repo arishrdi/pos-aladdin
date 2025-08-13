@@ -613,13 +613,13 @@
     // Fungsi untuk submit penyesuaian
     function submitAdjust() {
         // Ambil data dari form
-        const jumlah = parseInt(document.getElementById('jumlahAdjust').value);
+        const jumlah = parseFloat(document.getElementById('jumlahAdjust').value);
         const tipe = document.getElementById('tipeAdjust').value;
         const keterangan = document.getElementById('keteranganAdjust').value;
         
         // Validasi input
-        if (!jumlah) {
-            showAlert('error', 'Jumlah penyesuaian harus diisi');
+        if (isNaN(jumlah) || jumlah === 0) {
+            showAlert('error', 'Jumlah penyesuaian harus diisi dengan angka yang valid');
             return;
         }
         
@@ -632,7 +632,7 @@
         const outletId = getSelectedOutletId(); // Use the reliable getSelectedOutletId function
         const productId = parseInt(document.getElementById('adjustProductId').value, 10);
         const sku = document.getElementById('adjustSku').textContent;
-        const stokSaatIni = parseInt(document.getElementById('stokSaatIni').textContent, 10);
+        const stokSaatIni = parseFloat(document.getElementById('stokSaatIni').textContent) || 0;
 
         console.log("Product ID being sent:", productId);
         console.log("Outlet ID:", outletId);

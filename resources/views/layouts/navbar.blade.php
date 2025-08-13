@@ -86,6 +86,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Lucide icons
         lucide.createIcons();
+
         
         // Profile dropdown functionality
         const userMenuButton = document.getElementById('user-menu-button');

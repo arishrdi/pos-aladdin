@@ -63,25 +63,6 @@
         </div>
       </div>
 
-      <!-- Nomor Transaksi -->
-      <div class="p-5 border rounded-lg shadow-sm bg-gray-50">
-        <h3 class="font-semibold mb-4 text-gray-700">Nomor Transaksi</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-medium mb-1">Nomor Transaksi Default</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNoTransaksi" placeholder="Contoh: 001">
-          </div>
-          <div>
-            <label class="block font-medium mb-1">Nama Bank</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editNamaBank" placeholder="Contoh: BCA">
-          </div>
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Atas Nama</label>
-            <input type="text" class="w-full border rounded-lg px-4 py-2 text-sm" id="editAtasNama" placeholder="Nama pemilik rekening">
-          </div>
-        </div>
-      </div>
-
       <!-- PKP Banking Info -->
       <div id="editPkpBankingSection" class="p-5 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
         <h3 class="font-semibold mb-4 text-blue-700">Informasi Bank PKP (11%)</h3>

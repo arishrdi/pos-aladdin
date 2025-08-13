@@ -44,9 +44,9 @@
         <!-- Jumlah Penyesuaian -->
         <div>
             <label for="jumlahAdjust" class="block text-sm font-medium text-gray-700 mb-1">Jumlah Penyesuaian</label>
-            <input type="number" id="jumlahAdjust" name="jumlahAdjust" 
+            <input type="number" step="0.1" id="jumlahAdjust" name="jumlahAdjust" 
                 class="w-full border rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="+/- nilai">
+                placeholder="+/- nilai (contoh: 5 atau -2.5)">
             <p class="text-xs text-gray-500 mt-1">Gunakan tanda minus (-) untuk mengurangi stok</p>
         </div>
 

@@ -28,7 +28,7 @@ class InventoryController extends Controller
                 'product_id' => 'required|exists:products,id',
                 'source_outlet_id' => 'required|exists:outlets,id',
                 'target_outlet_id' => 'required|exists:outlets,id|different:source_outlet_id',
-                'quantity' => 'required|integer|min:1',
+                'quantity' => 'required|numeric|min:0.01',
                 'user_id' => 'required|exists:users,id',
                 'notes' => 'nullable|string',
             ]);
@@ -144,8 +144,8 @@ class InventoryController extends Controller
                 'product_id' => 'required|exists:products,id',
                 'outlet_id' => 'required|exists:outlets,id',
                 'user_id' => 'required|exists:users,id',
-                'min_stock' => 'required|integer',
-                'quantity' => 'required|integer',
+                'min_stock' => 'required|numeric',
+                'quantity' => 'required|numeric',
             ]);
             $inventory = Inventory::create($request->all());
             return $this->successResponse($inventory, 'Inventory created successfully');
@@ -185,8 +185,8 @@ class InventoryController extends Controller
                 'product_id' => 'required|exists:products,id',
                 'outlet_id' => 'required|exists:outlets,id',
                 'user_id' => 'required|exists:users,id',
-                'min_stock' => 'required|integer',
-                'quantity' => 'required|integer',
+                'min_stock' => 'required|numeric',
+                'quantity' => 'required|numeric',
             ]);
             $inventory->update($request->all());
             return $this->successResponse($inventory, 'Inventory updated successfully');

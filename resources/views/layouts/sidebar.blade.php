@@ -43,9 +43,16 @@
             <img src="/images/logo.png" alt="Aladdin Karpet Logo" class="w-10 h-10 object-contain" />
             <span class="ml-2 font-bold text-xl whitespace-nowrap sidebar-logo-text">Aladdin Karpet</span>
         </div>
-        <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all">
-            <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="toggleIcon"></i>
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Mobile close button -->
+            <button id="closeMobileSidebarBtn" class="text-gray-500 hover:text-red-600 md:hidden transition-all p-1 rounded hover:bg-red-50" title="Tutup Menu">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <!-- Desktop collapse button -->
+            <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all" title="Perkecil Sidebar">
+                <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="toggleIcon"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Outlet Dropdown -->
@@ -79,8 +86,8 @@
     
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto py-4">
-        <div class="px-4 py-2 group rounded-lg transition-all menu-item">
-           <a href="/dashboard" class="flex items-center py-2 hover:text-green-700 transition-all menu-subitem">
+        <div class="px-4 py-2 group rounded-lg transition-all menu-item" data-tooltip="Dashboard">
+           <a href="/dashboard" class="flex items-center py-2 hover:text-green-700 transition-all menu-subitem" title="Dashboard">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-black sidebar-icon"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
@@ -88,8 +95,8 @@
 
         <!-- Product Dropdown -->
         @if(auth()->check() && auth()->user()->role !== 'supervisor')
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown">
-            <div class="flex items-center justify-between w-full cursor-pointer">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown" data-tooltip="Produk">
+            <div class="flex items-center justify-between w-full cursor-pointer" title="Produk">
                 <div class="flex items-center">
                     <i data-lucide="package" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Produk</span>
@@ -109,7 +116,7 @@
         </div>
 
         <!-- Outlet Management Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="outletManagementDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="outletManagementDropdown" data-tooltip="Outlet">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="building-2" class="w-5 h-5 sidebar-icon"></i>
@@ -127,7 +134,7 @@
         @endif
 
         <!-- Stock Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="stockDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="stockDropdown" data-tooltip="Stok">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="package-open" class="w-5 h-5 sidebar-icon"></i>
@@ -160,7 +167,7 @@
         </div>
 
         <!-- User Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="userDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="userDropdown" data-tooltip="User">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="users" class="w-5 h-5 sidebar-icon"></i>
@@ -183,7 +190,7 @@
         </div>
 
         <!-- Closing Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="closingDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="closingDropdown" data-tooltip="Closing">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="clock" class="w-5 h-5 sidebar-icon"></i>
@@ -192,10 +199,10 @@
                 <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="closingDropdownArrow"></i>
             </div>
             <div id="closingDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
-                <a href="/riwayat-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/riwayat-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="wallet" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Kas</span>
-                </a>
+                </a> --}}
                 <a href="/approval-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="wallet" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approval Kas</span>
@@ -212,7 +219,7 @@
         </div>
 
         <!-- Report Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown" data-tooltip="Laporan">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="file-text" class="w-5 h-5 sidebar-icon"></i>
@@ -254,7 +261,7 @@
 
         @if(auth()->check() && auth()->user()->role !== 'supervisor')
         <!-- Settings Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown" data-tooltip="Pengaturan">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="settings" class="w-5 h-5 sidebar-icon"></i>
@@ -271,22 +278,11 @@
         </div>
         @endif
     </nav>
-    
-    <!-- Collapse Button for Desktop -->
-    <div class="p-4 border-t flex justify-center">
-        <button id="toggleSidebar" class="text-gray-500 hover:text-black transition-all">
-            <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="bottomToggleIcon"></i>
-        </button>
-    </div>
 </div>
 
 <!-- Mobile overlay for clicking outside to close -->
 <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
-<!-- Mobile toggle button (hamburger) -->
-<button id="mobileSidebarToggle" class="fixed bottom-4 right-4 md:hidden bg-green-700 text-white p-3 rounded-full shadow-lg z-30">
-    <i data-lucide="menu" class="w-6 h-6"></i>
-</button>
 
 <style>
     /* Sidebar responsive styles */
@@ -317,35 +313,152 @@
         justify-content: center;
     }
     
-    .sidebar.collapsed .sidebar-dropdown {
-        position: absolute;
-        left: 80px;
-        width: 200px;
-        background: white;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-        border-radius: 0 8px 8px 0;
-        padding-left: 0;
-        margin-left: 0;
+    /* Pastikan ini hanya berlaku di desktop */
+    @media (min-width: 769px) {
+        .sidebar.collapsed .menu-item > div > div {
+            justify-content: center;
+        }
     }
     
-    /* Mobile styles */
+    /* Dropdown untuk desktop collapsed */
+    @media (min-width: 769px) {
+        .sidebar.collapsed .sidebar-dropdown {
+            position: absolute;
+            left: 80px;
+            width: 200px;
+            background: white;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            border-radius: 0 8px 8px 0;
+            padding-left: 0;
+            margin-left: 0;
+        }
+    }
+    
+    /* Tooltip styles for collapsed sidebar */
+    .sidebar.collapsed .menu-item {
+        position: relative;
+    }
+    
+    .sidebar.collapsed .menu-item:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 80px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    
+    .sidebar.collapsed .menu-item:hover::before {
+        content: '';
+        position: absolute;
+        left: 75px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 5px solid transparent;
+        border-right-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        pointer-events: none;
+    }
+    
+    /* Mobile styles - Simple accordion like desktop */
     @media (max-width: 768px) {
         .sidebar {
             transform: translateX(-100%);
             width: 280px;
+            z-index: 60;
         }
         
         .sidebar.mobile-open {
             transform: translateX(0);
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
         }
         
+        /* Reset collapsed behavior di mobile */
         .sidebar.collapsed {
+            width: 280px;
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.collapsed.mobile-open {
+            transform: translateX(0);
             width: 280px;
         }
         
+        /* Tampilkan semua text, icon, arrow di mobile */
+        .sidebar.collapsed .sidebar-text,
+        .sidebar.collapsed .sidebar-logo-text,
+        .sidebar.collapsed .sidebar-arrow {
+            display: block !important;
+        }
+        
+        .sidebar.collapsed .sidebar-icon {
+            margin-right: 0.75rem !important;
+        }
+        
+        /* Reset justify-content untuk mobile */
+        .sidebar.collapsed .menu-item > div > div {
+            justify-content: flex-start !important;
+        }
+        
+        /* Reset dropdown positioning untuk mobile */
+        .sidebar.collapsed .sidebar-dropdown {
+            position: static !important;
+            left: auto !important;
+            width: auto !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            padding-left: 3rem !important;
+            margin-left: 0 !important;
+        }
+        
+        /* Main content reset */
         #mainContent {
             margin-left: 0 !important;
+        }
+        
+        /* Disable desktop tooltips */
+        .sidebar .menu-item:hover::after,
+        .sidebar .menu-item:hover::before {
+            display: none !important;
+        }
+        
+        /* Mobile padding untuk semua menu */
+        .sidebar .menu-item {
+            padding: 0 1rem !important;
+        }
+        
+        /* Dashboard dan menu lain yang tidak punya dropdown */
+        .sidebar .menu-item:not([data-dropdown]) a {
+            padding: 0.75rem 0 !important;
+        }
+        
+        /* Menu dengan dropdown */
+        .sidebar .menu-item[data-dropdown] > div {
+            padding: 0.75rem 0 !important;
+        }
+        
+        /* Submenu padding */
+        .sidebar .sidebar-dropdown {
+            padding-left: 3rem !important;
+            margin-top: 0.5rem !important;
+        }
+        
+        .sidebar .menu-subitem {
+            padding: 0.625rem 0 !important;
+        }
+        
+        /* Touch targets */
+        .sidebar .menu-item,
+        .sidebar .menu-subitem {
+            min-height: 48px !important;
         }
     }
     
@@ -367,6 +480,37 @@
         padding: 0.5rem 1rem;
         margin-left: -0.5rem;
         margin-right: -0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    /* Improved visual feedback */
+    .sidebar .menu-item > .flex.items-center,
+    .sidebar .menu-subitem {
+        transition: all 0.2s ease;
+    }
+    
+    /* Mobile specific improvements */
+    @media (max-width: 768px) {
+        .sidebar .menu-item,
+        .sidebar .menu-subitem {
+            font-size: 0.95rem;
+        }
+        
+        .sidebar .menu-item > .flex.items-center {
+            padding: 0.75rem 0;
+        }
+        
+        .sidebar .menu-subitem {
+            padding: 0.6rem 0;
+        }
+        
+        /* Larger touch targets for mobile */
+        .sidebar .menu-item,
+        .sidebar .menu-subitem {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
     }
     /* Active menu parent */
     .menu-item.active-parent > .flex.items-center.justify-between {
@@ -416,20 +560,18 @@
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
         const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-        const toggleSidebar = document.getElementById('toggleSidebar');
-        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMobileSidebarBtn = document.getElementById('closeMobileSidebarBtn');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const toggleIcon = document.getElementById('toggleIcon');
-        const bottomToggleIcon = document.getElementById('bottomToggleIcon');
 
         // Function to toggle sidebar collapsed state
         function toggleCollapse() {
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('collapsed');
             
-            // Rotate toggle icons
+            // Rotate toggle icon
             if (toggleIcon) toggleIcon.classList.toggle('rotate-180');
-            if (bottomToggleIcon) bottomToggleIcon.classList.toggle('rotate-180');
             
             // Store state in localStorage
             const isCollapsed = sidebar.classList.contains('collapsed');
@@ -438,9 +580,26 @@
 
         // Function to toggle mobile sidebar
         function toggleMobileSidebar() {
-            sidebar.classList.toggle('mobile-open');
-            sidebarOverlay.classList.toggle('hidden');
-            document.body.classList.toggle('overflow-hidden');
+            const isOpen = sidebar.classList.contains('mobile-open');
+            
+            if (isOpen) {
+                // Close sidebar
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            } else {
+                // Open sidebar
+                sidebar.classList.add('mobile-open');
+                sidebarOverlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+        }
+        
+        // Function to close mobile sidebar
+        function closeMobileSidebar() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         }
 
         // Initialize sidebar state from localStorage
@@ -448,7 +607,6 @@
             sidebar.classList.add('collapsed');
             mainContent.classList.add('collapsed');
             if (toggleIcon) toggleIcon.classList.add('rotate-180');
-            if (bottomToggleIcon) bottomToggleIcon.classList.add('rotate-180');
         }
 
         // Event listeners for desktop toggle
@@ -456,35 +614,41 @@
             toggleSidebarBtn.addEventListener('click', toggleCollapse);
         }
         
-        if (toggleSidebar) {
-            toggleSidebar.addEventListener('click', toggleCollapse);
+        // Event listeners for mobile toggle (from navbar)
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
         }
         
-        // Event listeners for mobile toggle
-        if (mobileSidebarToggle) {
-            mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
+        // Event listener for mobile close button
+        if (closeMobileSidebarBtn) {
+            closeMobileSidebarBtn.addEventListener('click', closeMobileSidebar);
         }
         
         if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', toggleMobileSidebar);
+            sidebarOverlay.addEventListener('click', closeMobileSidebar);
         }
 
         // Close mobile sidebar when clicking on a link
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', function() {
                 if (window.innerWidth <= 768) {
-                    toggleMobileSidebar();
+                    closeMobileSidebar();
                 }
             });
+        });
+        
+        // Close sidebar when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                closeMobileSidebar();
+            }
         });
 
         // Handle window resize
         function handleResize() {
             if (window.innerWidth > 768) {
                 // On desktop, ensure mobile sidebar is closed
-                sidebar.classList.remove('mobile-open');
-                sidebarOverlay.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
+                closeMobileSidebar();
                 
                 // Apply collapsed state if it was saved
                 if (localStorage.getItem('sidebarCollapsed') === 'true') {
@@ -496,9 +660,7 @@
                 }
             } else {
                 // On mobile, ensure sidebar starts closed
-                sidebar.classList.remove('mobile-open');
-                sidebarOverlay.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
+                closeMobileSidebar();
             }
         }
 
@@ -546,7 +708,7 @@
             });
         }
 
-        // Menu Dropdowns
+        // Menu Dropdowns - Simple accordion behavior
         const menuItems = document.querySelectorAll('.menu-item[data-dropdown]');
 
         menuItems.forEach(item => {
@@ -571,6 +733,13 @@
                     subitem.classList.add('active');
                     document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('active-parent'));
                     item.classList.add('active-parent');
+                    
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth <= 768) {
+                        setTimeout(() => {
+                            closeMobileSidebar();
+                        }, 150);
+                    }
                 });
             });
         });

@@ -62,11 +62,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-medium mb-1" for="stok">Stok <span class="text-red-500">*</span></label>
-                            <input type="number" id="stok" name="quantity" class="w-full border rounded-lg px-4 py-2 text-sm" value="0" required>
+                            <input type="number" step="0.1" id="stok" name="quantity" class="w-full border rounded-lg px-4 py-2 text-sm" value="0" placeholder="contoh: 100 atau 50.5" required>
                         </div>
                         <div>
                             <label class="block font-medium mb-1" for="stokMinimum">Stok Minimum</label>
-                            <input type="number" id="stokMinimum" name="min_stock" class="w-full border rounded-lg px-4 py-2 text-sm" value="0">
+                            <input type="number" step="0.1" id="stokMinimum" name="min_stock" class="w-full border rounded-lg px-4 py-2 text-sm" value="0" placeholder="contoh: 10 atau 5.5">
                         </div>
                     </div>
                 </div>

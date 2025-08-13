@@ -223,8 +223,6 @@
                             <option value="cash">Tunai</option>
                             <option value="transfer">Transfer Bank</option>
                             <option value="qris">QRIS</option>
-                            <option value="debit">Kartu Debit</option>
-                            <option value="credit">Kartu Kredit</option>
                         </select>
                     </div>
                     
@@ -315,15 +313,20 @@
             // Membuat URL endpoint dengan parameter
             let url = '/api/orders/history';
             const params = new URLSearchParams();
-            const { start, end } = getHariIni();
-            params.append('date_from', formatTanggalUntukBackend(start));
-            params.append('date_to', formatTanggalUntukBackend(end));
-            
-            if (!tanggalMulai && !tanggalSampai) {
-                const hariIni = new Date();
-                tanggalMulai = hariIni;
-                tanggalSampai = hariIni;
+
+            let dateFrom, dateTo;
+
+            if (tanggalMulai && tanggalSampai) {
+                dateFrom = tanggalMulai;
+                dateTo = tanggalSampai;
+            } else {
+                const { start, end } = getHariIni();
+                dateFrom = start;
+                dateTo = end;
             }
+
+            params.append('date_from', formatTanggalUntukBackend(dateFrom));
+            params.append('date_to', formatTanggalUntukBackend(dateTo));
 
             const outletId = localStorage.getItem('outlet_id');
             if (outletId) {
@@ -354,10 +357,19 @@
 
             const data = await response.json();
             
+            // Debug log untuk API response
+            console.log('POS API Response:', data);
+            
             // Jika sukses, proses data
             if (data.success) {
                 // Konversi order_number menjadi invoice untuk konsistensi
-                semuaTransaksi = data.data.orders.map(transaksi => ({
+                semuaTransaksi = data.data.orders.map(transaksi => {
+                    // Debug log untuk transaksi dengan bonus
+                    if (transaksi.bonus_items && transaksi.bonus_items.length > 0) {
+                        console.log('Transaction with bonus:', transaksi.order_number, transaksi.bonus_items);
+                    }
+                    
+                    return {
                     id: transaksi.id,
                     invoice: transaksi.order_number,  // Menggunakan order_number sebagai invoice
                     waktu: transaksi.created_at,      // Menggunakan created_at sebagai waktu
@@ -379,7 +391,13 @@
                     total_paid: parseFloat(transaksi.total_paid || 0),
                     remaining_balance: parseFloat(transaksi.remaining_balance || 0),
                     change: parseFloat(transaksi.change || 0),
-                }));
+                    // Tambahkan status cancellation
+                    cancellation_request: transaksi.cancellation_request || null,
+                    has_pending_cancellation: transaksi.has_pending_cancellation || false,
+                    // Tambahkan bonus items
+                    bonus_items: transaksi.bonus_items || []
+                    };
+                });
                 
                 perbaruiTampilanTransaksi();
                 perbaruiRingkasan({
@@ -441,9 +459,16 @@
                     <td class="p-2 border">${transaksi.transaction_category}</td>
                     <td class="p-2 border">${transaksi.pembayaran}</td>
                     <td class="p-2 border">
-                        <span class="px-2 py-1 rounded-full text-xs ${getClassStatus(transaksi.status)}">
-                            ${transaksi.status}
-                        </span>
+                        <div class="flex flex-col gap-1">
+                            <span class="px-2 py-1 rounded-full text-xs ${getClassStatus(transaksi.status)}">
+                                ${transaksi.status}
+                            </span>
+                            ${transaksi.has_pending_cancellation ? `
+                                <span class="px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
+                                    Menunggu ${transaksi.status === 'Selesai' ? 'Refund' : 'Pembatalan'}
+                                </span>
+                            ` : ''}
+                        </div>
                     </td>
                     <td class="p-2 border font-medium">Rp ${formatUang(transaksi.total)}</td>
                     <td class="p-2 border font-medium ${transaksi.remaining_balance > 0 ? 'text-red-600' : 'text-green-600'}">
@@ -457,19 +482,29 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
+                            ${transaksi.status === 'Selesai' ? `
                             <button onclick="cetakStruk('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Cetak Struk">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                             </button>
-                            ${transaksi.status === 'Selesai' ? `
+                            ` : ''}
+                            ${transaksi.has_pending_cancellation ? `
+                                <div class="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700" title="Sedang diproses oleh admin">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    ${transaksi.status === 'Selesai' ? 'Refund' : 'Pembatalan'} Diproses
+                                </div>
+                            ` : ''}
+                            ${!transaksi.has_pending_cancellation && transaksi.status === 'Selesai' ? `
                             <button onclick="bukaModalRefund('${transaksi.invoice}')" class="text-red-500 hover:text-red-700" title="Ajukan Refund">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
                                 </svg>
                             </button>
                             ` : ''}
-                            ${transaksi.status === 'pending' ? `
+                            ${!transaksi.has_pending_cancellation && transaksi.status === 'pending' ? `
                             <button onclick="bukaModalRefund('${transaksi.invoice}')" class="text-orange-500 hover:text-orange-700" title="Ajukan Pembatalan">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -477,8 +512,8 @@
                             </button>
                             ` : ''}
                             ${transaksi.transaction_category === 'dp' && transaksi.remaining_balance > 0 ? `
-                            <button onclick="bukaModalPelunasan('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Lunasi DP">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button onclick="bukaModalPelunasan('${transaksi.invoice}')" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition-colors" title="Lunasi DP">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                                 </svg>
                             </button>
@@ -867,6 +902,10 @@
                             ${templateData.company_slogan || ''}
                             ${outletData.address ? `<br>${outletData.address}` : ''}
                             ${outletData.phone ? `<br>Telp: ${outletData.phone}` : ''}
+                            ${outletData.email ? `<br>Email: ${outletData.email}` : ''}
+                            <br>Website : 
+                            <br>www.aladdinkarpet.com
+                            <br>www.gudangkarpetmasjid.com
                         </div>
                     </div>
                 </div>
@@ -926,6 +965,33 @@
                     }
                 </div>
                 
+                <!-- Bonus items section -->
+                ${safeTransaction.bonus_items && safeTransaction.bonus_items.length > 0 ? `
+                <div class="divider"></div>
+                
+                <div class="items-list">
+                    <div class="text-center" style="font-weight: bold; margin-bottom: 8px;">BONUS ITEMS</div>
+                    ${safeTransaction.bonus_items.map(bonusItem => {
+                        const safeBonusItem = {
+                            ...bonusItem,
+                            quantity: safeNumber(bonusItem.quantity),
+                            product: bonusItem.product || bonusItem.product_name || 'Bonus Item'
+                        };
+                        
+                        return `
+                            <div class="item-row">
+                                <div class="item-name">
+                                    ${safeBonusItem.quantity}x ${safeBonusItem.product}
+                                </div>
+                                <div class="item-price">
+                                    GRATIS
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                ` : ''}
+                
                 <div class="divider"></div>
                 
                 <!-- Total pembelian -->
@@ -968,6 +1034,16 @@
                         <span>${safeTransaction.transaction_category.toUpperCase()}</span>
                     </div>
                     
+                    ${safeTransaction.transaction_category.toLowerCase() === 'dp' ? `
+                    <div class="total-row">
+                        <span>Uang Muka (DP):</span>
+                        <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Sisa Bayar:</span>
+                        <span>Rp ${formatCurrency(safeTransaction.remaining_balance || (safeTransaction.total - safeTransaction.total_paid))}</span>
+                    </div>
+                    ` : `
                     ${safeTransaction.pembayaran === 'cash' ? `
                     <div class="total-row">
                         <span>Dibayar:</span>
@@ -978,14 +1054,27 @@
                         <span>Rp ${formatCurrency(safeTransaction.change)}</span>
                     </div>
                     ` : ''}
+                    `}
                 </div>
                 
                 ${safeTransaction.member ? `
                 <div class="divider"></div>
                 <div class="info-row">
                     <span class="info-label">Tuan:</span>
-                    <span>${safeTransaction.member.name || ''} (${safeTransaction.member.member_code || ''})</span>
+                    <span class="text-bold">${safeTransaction.member.name || ''}</span>
                 </div>
+                ${safeTransaction.member.address ? `
+                <div class="info-row">
+                    <span class="info-label">Alamat:</span>
+                    <span class="text-bold">${safeTransaction.member.address}</span>
+                </div>
+                ` : ''}
+                ${safeTransaction.member.phone ? `
+                <div class="info-row">
+                    <span class="info-label">No. HP:</span>
+                    <span class="text-bold">${safeTransaction.member.phone}</span>
+                </div>
+                ` : ''}
                 ` : ''}
                 
                 <!-- Footer -->
@@ -1014,205 +1103,6 @@
             </body>
             </html>
         `;       
-
-        // return `
-        //     <!DOCTYPE html>
-        //     <html>
-        //     <head>
-        //         <title>Struk Transaksi #${safeTransaction.invoice}</title>
-        //         <meta charset="UTF-8">
-        //         <style>
-        //             @page {
-        //                 size: 58mm auto;
-        //                 margin: 0;
-        //             }
-        //             body {
-        //                 width: 58mm;
-        //                 margin: 0 auto;
-        //                 font-weight: bold;
-        //                 font-size: 18px;
-        //                 font-family: 'Courier New', monospace;
-        //                 color: #000;
-        //             }
-
-        //             .receipt-header {
-        //                 display: flex;
-        //                 align-items: center;
-        //                 gap: 5px;
-        //                 padding: 5px;
-        //                 border-bottom: 1px dashed #000;
-        //             }
-
-        //             .logo-container {
-        //                 width: 50px;
-        //                 height: 50px;
-        //                 display: flex;
-        //                 align-items: center;
-        //                 justify-content: center;
-        //                 padding: 2px;
-        //                 background-color: white;
-        //             }
-
-        //             .logo {
-        //                 max-width: 100%;
-        //                 max-height: 100%;
-        //                 object-fit: contain;
-        //             }
-
-        //             .header-text {
-        //                 flex: 1;
-        //                 font-size: 16px;
-        //                 text-align: right;
-        //             }
-
-        //             .company-name {
-        //                 font-size: 18px;
-        //                 margin-bottom: 3px;
-        //             }
-
-        //             .company-info {
-        //                 font-size: 14px;
-        //                 line-height: 1.3;
-        //             }
-
-        //             .divider {
-        //                 border-top: 1px dashed #000;
-        //                 margin: 4px 0;
-        //             }
-
-        //             .transaction-info, .totals, .payment-info {
-        //                 padding: 0 5px;
-        //             }
-
-        //             .info-row, .total-row {
-        //                 display: flex;
-        //                 justify-content: space-between;
-        //                 margin-bottom: 2px;
-        //             }
-
-        //             .item-row {
-        //                 display: flex;
-        //                 justify-content: space-between;
-        //                 padding: 0 5px;
-        //                 margin-bottom: 2px;
-        //                 flex-wrap: wrap;
-        //             }
-
-        //             .item-name {
-        //                 flex: 2;
-        //                 font-size: 16px;
-        //             }
-
-        //             .item-price {
-        //                 flex: 1;
-        //                 text-align: right;
-        //             }
-
-        //             .grand-total {
-        //                 font-size: 18px;
-        //                 border-top: 1px dashed #000;
-        //                 padding-top: 4px;
-        //             }
-
-        //             .receipt-footer {
-        //                 font-size: 12px;
-        //                 text-align: left;
-        //                 padding: 5px;
-        //                 line-height: 1.3;
-        //                 white-space: pre-line;
-        //             }
-        //         </style>
-        //     </head>
-        //     <body>
-        //         <div class="receipt-header">
-        //             <div class="logo-container">
-        //                 <img src="${logoPath}" 
-        //                     alt="Logo" 
-        //                     class="logo"
-        //                     onerror="this.style.display='none'">
-        //             </div>
-        //             <div class="header-text">
-        //                 <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
-        //                 <div class="company-info">
-        //                     ${templateData.company_slogan || ''}
-        //                     ${outletData.address ? `<br>${outletData.address}` : ''}
-        //                     ${outletData.phone ? `<br>Telp: ${outletData.phone}` : ''}
-        //                 </div>
-        //             </div>
-        //         </div>
-
-        //         <div class="transaction-info">
-        //             <div class="info-row"><span>No. Invoice:</span><span>${safeTransaction.invoice}</span></div>
-        //             <div class="info-row"><span>No. Order:</span><span>${safeTransaction.id}</span></div>
-        //             <div class="info-row"><span>Tanggal:</span><span>${formatDate(safeTransaction.waktu)}</span></div>
-        //             <div class="info-row"><span>Kasir:</span><span>${safeTransaction.kasir}</span></div>
-        //         </div>
-
-        //         <div class="divider"></div>
-
-        //         <div class="items-list">
-        //             ${safeTransaction.items.length > 0 
-        //                 ? safeTransaction.items.map(item => {
-        //                     const safeItem = {
-        //                         ...item,
-        //                         quantity: safeNumber(item.quantity),
-        //                         price: safeNumber(item.price),
-        //                         discount: safeNumber(item.discount),
-        //                         product: item.product || 'Produk'
-        //                     };
-        //                     return `
-        //                         <div class="item-row">
-        //                             <div class="item-name">${safeItem.quantity}x ${safeItem.product}</div>
-        //                             <div class="item-price">Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
-        //                                 ${safeItem.discount > 0 ? `<br><small>Diskon: -Rp ${formatCurrency(safeItem.discount)}</small>` : ''}
-        //                             </div>
-        //                         </div>
-        //                     `;
-        //                 }).join('')
-        //                 : '<div class="text-center">Tidak ada item</div>'
-        //             }
-        //         </div>
-
-        //         <div class="divider"></div>
-
-        //         <div class="totals">
-        //             <div class="total-row"><span>Subtotal:</span><span>Rp ${formatCurrency(safeTransaction.subtotal)}</span></div>
-        //             ${safeTransaction.discount > 0 ? `<div class="total-row"><span>Diskon:</span><span>- Rp ${formatCurrency(safeTransaction.discount)}</span></div>` : ''}
-        //             ${safeTransaction.tax > 0 ? `<div class="total-row"><span>Pajak:</span><span>Rp ${formatCurrency(safeTransaction.tax)}</span></div>` : ''}
-        //             <div class="total-row grand-total"><span>TOTAL:</span><span>Rp ${formatCurrency(safeTransaction.total)}</span></div>
-        //         </div>
-
-        //         <div class="payment-info">
-        //             <div class="total-row"><span>Metode Bayar:</span>
-        //                 <span>${safeTransaction.pembayaran === "cash" ? "TUNAI" : 
-        //                     safeTransaction.pembayaran === "qris" ? "QRIS" : 
-        //                     (safeTransaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</span>
-        //             </div>
-        //             <div class="total-row"><span>Transaksi:</span><span>${safeTransaction.transaction_category.toUpperCase()}</span></div>
-        //             ${safeTransaction.pembayaran === 'cash' ? `
-        //             <div class="total-row"><span>Dibayar:</span><span>Rp ${formatCurrency(safeTransaction.total_paid)}</span></div>
-        //             <div class="total-row"><span>Kembalian:</span><span>Rp ${formatCurrency(safeTransaction.change)}</span></div>
-        //             ` : ''}
-        //         </div>
-
-        //         ${safeTransaction.member ? `
-        //         <div class="divider"></div>
-        //         <div class="info-row">
-        //             <span class="info-label">Tuan:</span>
-        //             <span>${safeTransaction.member.name || ''} (${safeTransaction.member.member_code || ''})</span>
-        //         </div>
-        //         ` : ''}
-
-        //         <div class="divider"></div>
-
-        //         <div class="receipt-footer">
-        //             ${templateData.footer_message || 'Terima kasih telah berbelanja'}<br>
-        //             Barang yang sudah dibeli tidak dapat ditukar<br>
-        //             ${new Date().getFullYear()} © ${templateData.company_name || outletData.name || 'TOKO ANDA'}
-        //         </div>
-        //     </body>
-        //     </html>
-        //     `;
 
     }
 
@@ -1243,6 +1133,10 @@
     function lihatDetail(nomorInvoice) {
         const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
         if (!t) return alert('Transaksi tidak ditemukan');
+        
+        // Debug log untuk melihat data transaksi
+        console.log('Transaction data:', t);
+        console.log('Bonus items:', t.bonus_items);
 
         // Helper function yang lebih baik untuk handle number
         const safeNumber = (value) => {
@@ -1269,6 +1163,18 @@
         const statusEl = document.getElementById('modalStatus');
         statusEl.textContent = t.status || '-';
         statusEl.className = `inline-block px-3 py-1 rounded-full text-xs font-medium ${getClassStatus(t.status || '')}`;
+        
+        // Cancellation status
+        const cancellationStatusEl = document.getElementById('modalCancellationStatus');
+        const cancellationTextEl = document.getElementById('modalCancellationText');
+        
+        if (t.has_pending_cancellation && cancellationStatusEl && cancellationTextEl) {
+            const requestType = t.status === 'Selesai' ? 'Refund' : 'Pembatalan';
+            cancellationTextEl.textContent = `Menunggu ${requestType}`;
+            cancellationStatusEl.classList.remove('hidden');
+        } else if (cancellationStatusEl) {
+            cancellationStatusEl.classList.add('hidden');
+        }
 
         // Items
         const itemsEl = document.getElementById('modalItems');
@@ -1323,6 +1229,30 @@
         const changeEl = document.getElementById('modalChange');
         if (totalPaidEl) totalPaidEl.textContent = `Rp ${formatUang(safeNumber(t.total_paid))}`;
         if (changeEl) changeEl.textContent = `Rp ${formatUang(safeNumber(t.change))}`;
+
+        // Bonus Items
+        const bonusSection = document.getElementById('modalBonusSection');
+        const bonusItemsEl = document.getElementById('modalBonusItems');
+        
+        if (t.bonus_items && t.bonus_items.length > 0) {
+            bonusItemsEl.innerHTML = t.bonus_items.map(bonusItem => `
+                <div class="flex justify-between items-center py-2 border-b border-green-200 last:border-b-0">
+                    <div>
+                        <p class="font-medium text-green-700">
+                            <i class="fas fa-gift mr-1"></i>
+                            ${bonusItem.product || bonusItem.product_name || '-'}
+                        </p>
+                        <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
+                    </div>
+                    <div class="text-sm text-green-600 font-medium">
+                        GRATIS
+                    </div>
+                </div>
+            `).join('');
+            bonusSection.classList.remove('hidden');
+        } else {
+            bonusSection.classList.add('hidden');
+        }
 
         bukaModal('transactionModal');
     }
@@ -1390,6 +1320,13 @@
         const transaksi = semuaTransaksi.find(t => t.invoice === nomorInvoice);
         if (!transaksi) {
             alert('Transaksi tidak ditemukan');
+            return;
+        }
+
+        // Cek apakah sudah ada permintaan cancellation yang sedang diproses
+        if (transaksi.has_pending_cancellation) {
+            const requestType = transaksi.status === 'Selesai' ? 'refund' : 'pembatalan';
+            alert(`Permintaan ${requestType} untuk transaksi ini sedang diproses oleh admin. Silakan tunggu hingga proses selesai.`);
             return;
         }
 

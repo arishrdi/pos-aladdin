@@ -203,11 +203,11 @@
         <div class="flex flex-col">
             <h3 class="text-2xl font-bold text-gray-800">Riwayat Transaksi Kas</h3>
             <div id="balanceMethodIndicator" class="hidden mt-1 flex items-center gap-2">
-                <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                {{-- <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
                     <i data-lucide="check-circle" class="w-3 h-3"></i>
                     Saldo Komprehensif
-                </span>
-                <span class="text-xs text-gray-500">Termasuk POS, refund, dan manual kas</span>
+                </span> --}}
+                {{-- <span class="text-xs text-gray-500">Termasuk POS, refund, dan manual kas</span> --}}
             </div>
             <div id="balanceFallbackIndicator" class="hidden mt-1 flex items-center gap-2">
                 <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold flex items-center gap-1">
@@ -1260,43 +1260,62 @@ document.addEventListener('DOMContentLoaded', function() {
         const displayData = [...sortedData].reverse(); // Reverse untuk tampilkan yang terbaru dulu
         const balanceHistory = [];
         
-        if (useComprehensiveBalance && allTransactions.length > 0) {
+        if (useComprehensiveBalance) {
             // Calculate comprehensive running balance including all transaction types
             let runningBalance = comprehensiveRunningBalance;
             
             // Process all transactions chronologically untuk accurate running balance
-            allTransactions.forEach((transaction, index) => {
-                const previousBalance = runningBalance;
-                
-                // Calculate balance change berdasarkan transaction type dan source
-                let balanceChange = 0;
-                const amount = parseFloat(transaction.amount) || 0;
-                
-                if (transaction.source === 'pos') {
-                    // POS sales always add to cash
-                    balanceChange = amount;
-                } else if (transaction.source === 'refund') {
-                    // Refunds subtract from cash
-                    balanceChange = -amount;
-                } else if (transaction.source === 'cash') {
-                    // Manual cash operations
-                    balanceChange = transaction.type === 'add' ? amount : -amount;
-                } else {
-                    // Other transactions
-                    balanceChange = transaction.type === 'add' ? amount : -amount;
-                }
-                
-                runningBalance += balanceChange;
-                
-                // Only store balance untuk manual cash transactions yang akan ditampilkan
-                if (transaction.source === 'cash') {
+            if (allTransactions.length > 0) {
+                allTransactions.forEach((transaction, index) => {
+                    const previousBalance = runningBalance;
+                    
+                    // Calculate balance change berdasarkan transaction type dan source
+                    let balanceChange = 0;
+                    const amount = parseFloat(transaction.amount) || 0;
+                    
+                    if (transaction.source === 'pos') {
+                        // POS sales always add to cash
+                        balanceChange = amount;
+                    } else if (transaction.source === 'refund') {
+                        // Refunds subtract from cash
+                        balanceChange = -amount;
+                    } else if (transaction.source === 'cash') {
+                        // Manual cash operations
+                        balanceChange = transaction.type === 'add' ? amount : -amount;
+                    } else {
+                        // Other transactions
+                        balanceChange = transaction.type === 'add' ? amount : -amount;
+                    }
+                    
+                    runningBalance += balanceChange;
+                    
+                    // Only store balance untuk manual cash transactions yang akan ditampilkan
+                    if (transaction.source === 'cash') {
+                        balanceHistory.push({
+                            id: transaction.id,
+                            beforeBalance: previousBalance,
+                            afterBalance: runningBalance
+                        });
+                    }
+                });
+            }
+            
+            // Even if no comprehensive transactions, use comprehensive opening balance 
+            // and calculate based on manual cash transactions
+            if (balanceHistory.length === 0 && sortedData.length > 0) {
+                sortedData.forEach(transaction => {
+                    const isAdd = transaction.type === 'add';
+                    const amount = parseFloat(transaction.amount);
+                    const previousBalance = runningBalance;
+                    runningBalance += isAdd ? amount : -amount;
+                    
                     balanceHistory.push({
                         id: transaction.id,
                         beforeBalance: previousBalance,
                         afterBalance: runningBalance
                     });
-                }
-            });
+                });
+            }
         } else {
             // Fallback to old calculation (manual cash only)
             let runningBalance = parseFloat(openingBalance) || 0;
@@ -1435,7 +1454,8 @@ document.addEventListener('DOMContentLoaded', function() {
             description.textContent = 'Perhitungan saldo hanya mencakup transaksi manual kas. Saldo mungkin berbeda dengan dashboard utama yang mencakup POS dan refund.';
         }
         
-        banner.classList.remove('hidden');
+        // banner.classList.remove('hidden');
+        banner.classList.add('hidden');
     }
 
     // Initialize with current date and outlet
@@ -1458,6 +1478,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally for the approval functions
     window.fetchCashHistory = fetchCashHistory;
     window.fetchBalanceInfo = fetchBalanceInfo;
+    
+    // Setup polling for cash data updates
+    if (window.pollingManager) {
+        const outletId = getSelectedOutletId();
+        const selectedDate = document.getElementById('cashDatePicker').value || new Date().toISOString().split('T')[0];
+        
+        // Start polling for cash data updates every 45 seconds
+        window.pollingManager.start('cashData', async () => {
+            console.log('Polling cash data...');
+            const currentOutletId = getSelectedOutletId();
+            const currentDate = document.getElementById('cashDatePicker').value || new Date().toISOString().split('T')[0];
+            
+            // Refresh all cash-related data
+            await Promise.all([
+                fetchCashHistory(currentOutletId, currentDate),
+                fetchPendingRequests(currentOutletId),
+                fetchBalanceInfo(currentOutletId)
+            ]);
+        }, 45000); // 45 seconds interval
+    }
+    
+    // Stop polling when leaving the page
+    window.addEventListener('beforeunload', () => {
+        if (window.pollingManager) {
+            window.pollingManager.stop('cashData');
+        }
+    });
 });
 </script>
 

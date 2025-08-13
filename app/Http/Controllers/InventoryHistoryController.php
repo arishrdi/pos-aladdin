@@ -70,7 +70,7 @@ class InventoryHistoryController extends Controller
             $request->validate([
                 'outlet_id' => 'required|exists:outlets,id',
                 'product_id' => 'required|exists:products,id',
-                'quantity_change' => 'required|integer',
+                'quantity_change' => 'required|numeric',
                 'type' => 'required|in:purchase,sale,adjustment,transfer,stocktake,shipment,other',
                 'notes' => 'nullable|string',
             ]);
@@ -116,7 +116,7 @@ class InventoryHistoryController extends Controller
             $request->validate([
                 'outlet_id' => 'required|exists:outlets,id',
                 'product_id' => 'required|exists:products,id',
-                'quantity_change' => 'required|integer',
+                'quantity_change' => 'required|numeric',
                 'type' => 'required|in:purchase,sale,adjustment,transfer,stocktake,shipment,other',
                 'notes' => 'nullable|string',
             ]);
