@@ -6,40 +6,41 @@
 
 `resources/views/pos/index.blade.php`
 
-- Saat berhasil melakukan transaksi, stok (qty) salah. misal stoknya saat ini adalah 10, dikeranjang 2 jadi stoknya sekarang 8. tetapi ketika berhasil melakukan transaksi, stoknya kembali ke 10. ketika di refresh baru akan tampil stok aktual (8). hal yang sama terjadi pada bonus
-- bonus tidak mampu mengurangi stok pada daftar produk dan real stok (cuma mampu mengurangi 1), payload sudah mengirim qty yang benar **(skip)**
+- [x] Saat berhasil melakukan transaksi, stok (qty) salah. misal stoknya saat ini adalah 10, dikeranjang 2 jadi stoknya sekarang 8. tetapi ketika berhasil melakukan transaksi, stoknya kembali ke 10. ketika di refresh baru akan tampil stok aktual (8). hal yang sama terjadi pada bonus
+- [ ] bonus tidak mampu mengurangi stok pada daftar produk dan real stok (cuma mampu mengurangi 1), payload sudah mengirim qty yang benar **(skip)**
 
 ### Modal Pembayaran **(medium)**
 
 `resources/views/partials/pos/payment-modal.blade.php`
 
-- Saat modal pembayaran muncul maka metode pembayaran nya adalah Cash (default) tetapi komponen untuk upload bukti pembayaran tidak muncul dan akan muncul jika user telah memilih metode pembayaran lain.
-- Saat memilih NonPKP maka akan tampil NonPKP rekening, tetapi ketika modal di tutup dan diganti jadi PKP maka yang tampil masih rekening NonPKP dan metode pembayaran adalah Cash/Tunai
+- [x] Saat modal pembayaran muncul maka metode pembayaran nya adalah Cash (default) tetapi komponen untuk upload bukti pembayaran tidak muncul dan akan muncul jika user telah memilih metode pembayaran lain.
+- [x] Saat memilih NonPKP maka akan tampil NonPKP rekening, tetapi ketika modal di tutup dan diganti jadi PKP maka yang tampil masih rekening NonPKP dan metode pembayaran adalah Cash/Tunai
+- [x] Saat kategori transaksi adalah DP dan metode pembayaran selain cash, akan dianggap lunas (langsung bayar penuh), meski sudah mengisi jumlah dp diterima `app/Http/Controllers/OrderController.php`
 
 ### Detail Transaksi **(medium)**
 
 `resources/views/dashboard/closing/riwayat-transaksi.blade.php`, `resources/views/partials/pos/modal/modal-history-transaksi.blade.php`
 
-- Detail transaksi kurang lengkap, tampilkan bonus, kategori transaksi dan mungkin informasi lain yang berkaitan
+- [x] Detail transaksi kurang lengkap, tampilkan bonus, kategori transaksi dan mungkin informasi lain yang berkaitan
 
 ### Riwayat Transaksi (Kasir) **(high)**
 
 `resources/views/partials/pos/history-modal.blade.php`
 
-- Tombol Cetak Nota/Receipt harusnya hanya muncul jika transaksi sukses.
-- Tombol pelunasan DP terlalu kecil
+- [x] Tombol Cetak Nota/Receipt harusnya hanya muncul jika transaksi sukses.
+- [ ] Tombol pelunasan DP terlalu kecil
 
 ### Riwayat Transaksi (Admin) **(medium)**
 
 `resources/views/dashboard/closing/riwayat-transaksi.blade.php`
 
-- Tombol-tombol pada aksi kurang menjelaskan fungsinya
+- [x] Tombol-tombol pada aksi kurang menjelaskan fungsinya
 
 ### Email **(critical)**
 
 `app/Mail/ApprovalRequest.php`
 
-- Email tidak terkirim walau pada Log, informasi nya terkirim
+- [x] Email tidak terkirim walau pada Log, informasi nya terkirim
 
 ``` log
 [2025-08-12 13:44:41] local.INFO: Sending email to supervisor: ini.alternatif.email@gmail.com for PEMBATALAN TRANSAKSI of order INV-1754974211-LDFSI0
@@ -57,7 +58,7 @@ Content-Transfer-Encoding: quoted-printable
 
 `app/Http/Controllers/ProductController.php`
 
-- Jika saya punya produk dengan distribusi outlet: 1, 2, 3. Lalu saya mengedit distribusi Outlet ke 2 dan 3. dan mengembalikan lagi distribusinya ke 1, 2, 3 maka stok yang ada pada outlet 1 jadi 0. Padahal stok sebelum di edit distribusinya bukan 0
+- [ ] Jika saya punya produk dengan distribusi outlet: 1, 2, 3. Lalu saya mengedit distribusi Outlet ke 2 dan 3. dan mengembalikan lagi distribusinya ke 1, 2, 3 maka stok yang ada pada outlet 1 jadi 0. Padahal stok sebelum di edit distribusinya bukan 0
 
 ```php
 foreach ($request->outlet_ids as $outletId) {
@@ -84,25 +85,25 @@ Inventory::where('product_id', $product->id)
 
 `resources/views/dashboard/closing/approval-kas.blade.php`
 
-- Pada riwayat kas, saldo akhir yang tidak menghitung dari penjualan sehingga nilainya beda dengan kas yang sebenarnya
+- [ ] Pada riwayat kas, saldo akhir yang tidak menghitung dari penjualan sehingga nilainya beda dengan kas yang sebenarnya **(skip)**
 
 ### Sidebar **(low)**
 
 `resources/views/layouts/sidebar.blade.php`
 
-- Tampilan sidebar yang membuat aplikasi jadi kurang responsive
-- Label pada menu sidebar tidak ada
-- Harus menekan tombol pada kanan bawah untuk menutup sidebar, padahal tombol ini seharusnya dihapus
+- [ ] Tampilan sidebar yang membuat aplikasi jadi kurang responsive
+- [x] Label pada menu sidebar tidak ada
+- [x] Harus menekan tombol pada kanan bawah untuk menutup sidebar, padahal tombol ini seharusnya dihapus
 
 ### Stok **(high)**
 
 `resources/views/pos/index.blade.php`,  `app/Http/Controllers/InventoryController.php`, `app/Http/Controllers/InventoryHistoryController.php`
 
-- Stok harus benar-benar tampil secara desimal (tambah/kurang)
-- User dapat mengedit stok secara desimal
+- [x] Stok harus benar-benar tampil secara desimal (tambah/kurang)
+- [x] User dapat mengedit stok secara desimal
 
 ### Tambahan **(low)**
 
-- Bisa di tambahkan polling pada beberapa bagian agar user tidak perlu refresh untuk melihat data terbaru
+- [ ] Bisa di tambahkan polling pada beberapa bagian agar user tidak perlu refresh untuk melihat data terbaru
 
 #### *File ini akan terus diupdate jika ada bug, jangan dibenerin list yang di skip*
