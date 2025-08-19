@@ -79,7 +79,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Saldo Awal</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalSaldoAwal">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalSaldoAwal">0 </h3>
                 </div>
                 <div class="p-3 bg-blue-50 rounded-full">
                     <i data-lucide="box" class="w-6 h-6 text-blue-500"></i>
@@ -92,7 +92,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Masuk</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockMasuk">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockMasuk">0 </h3>
                 </div>
                 <div class="p-3 bg-green-50 rounded-full">
                     <i data-lucide="arrow-down-circle" class="w-6 h-6 text-green-500"></i>
@@ -105,7 +105,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Keluar</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockKeluar">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockKeluar">0 </h3>
                 </div>
                 <div class="p-3 bg-red-50 rounded-full">
                     <i data-lucide="arrow-up-circle" class="w-6 h-6 text-red-500"></i>
@@ -118,7 +118,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Stock Akhir</p>
-                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockAkhir">0 pcs</h3>
+                    <h3 class="text-2xl font-bold text-gray-800" id="totalStockAkhir">0 </h3>
                 </div>
                 <div class="p-3 bg-purple-50 rounded-full">
                     <i data-lucide="package-check" class="w-6 h-6 text-purple-500"></i>
@@ -366,17 +366,32 @@
         document.getElementById('outletName').textContent = `Menampilkan laporan untuk: ${inventoryData.outlet}`;
         document.getElementById('outletSubtitle').textContent = `Perubahan stok produk di ${inventoryData.outlet}`;
         
-        // Update summary cards
-        document.getElementById('totalSaldoAwal').textContent = `${inventoryData.summary.total_saldo_awal} pcs`;
-        document.getElementById('totalStockMasuk').textContent = `${inventoryData.summary.total_stock_masuk} pcs`;
-        document.getElementById('totalStockKeluar').textContent = `${inventoryData.summary.total_stock_keluar} pcs`;
-        document.getElementById('totalStockAkhir').textContent = `${inventoryData.summary.total_stock_akhir} pcs`;
+        // Update summary cards - always show as  for totals
+        document.getElementById('totalSaldoAwal').textContent = `${inventoryData.summary.total_saldo_awal} `;
+        document.getElementById('totalStockMasuk').textContent = `${inventoryData.summary.total_stock_masuk} `;
+        document.getElementById('totalStockKeluar').textContent = `${inventoryData.summary.total_stock_keluar} `;
+        document.getElementById('totalStockAkhir').textContent = `${inventoryData.summary.total_stock_akhir} `;
         
         // Update product table
         updateProductTable();
         
         // Update stock in and stock out tables
         updateStockTables();
+    }
+
+    // Helper function to format stock quantity based on unit_type
+    function formatStockQuantity(quantity, unit_type) {
+        if (!quantity && quantity !== 0) return '0';
+        
+        // Convert to number for proper formatting
+        const numQuantity = parseFloat(quantity);
+        
+        // If unit_type is 'meter', show decimal places, otherwise show as integer
+        if (unit_type && unit_type.toLowerCase() === 'meter') {
+            return numQuantity % 1 === 0 ? numQuantity.toString() : numQuantity.toFixed(1);
+        } else {
+            return Math.floor(numQuantity).toString();
+        }
     }
 
     // Update main product table
@@ -390,11 +405,11 @@
             productTable.innerHTML += `
                 <tr>
                     <td class="py-4 px-4">${product.product_name}</td>
-                    <td class="py-4 px-4">${product.unit}</td>
-                    <td class="py-4 px-4 text-right">${product.saldo_awal}</td>
-                    <td class="py-4 px-4 text-right">${product.stock_masuk}</td>
-                    <td class="py-4 px-4 text-right">${product.stock_keluar}</td>
-                    <td class="py-4 px-4 text-right">${product.stock_akhir}</td>
+                    <td class="py-4 px-4">${product.unit_type}</td>
+                    <td class="py-4 px-4 text-right">${formatStockQuantity(product.saldo_awal, product.unit_type)}</td>
+                    <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_masuk, product.unit_type)}</td>
+                    <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_keluar, product.unit_type)}</td>
+                    <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_akhir, product.unit_type)}</td>
                 </tr>
             `;
         });
@@ -431,7 +446,7 @@
                 stockInTable.innerHTML += `
                     <tr>
                         <td class="py-4 px-4">${product.product_name}</td>
-                        <td class="py-4 px-4 text-right">${product.stock_masuk} ${product.unit}</td>
+                        <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_masuk, product.unit_type)} ${product.unit_type}</td>
                     </tr>
                 `;
             });
@@ -452,7 +467,7 @@
                 stockOutTable.innerHTML += `
                     <tr>
                         <td class="py-4 px-4">${product.product_name}</td>
-                        <td class="py-4 px-4 text-right">${product.stock_keluar} ${product.unit}</td>
+                        <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_keluar, product.unit_type)} ${product.unit_type}</td>
                     </tr>
                 `;
             });
@@ -556,11 +571,11 @@
             printWindow.document.write(`
                 <tr>
                     <td>${product.product_name}</td>
-                    <td>${product.unit}</td>
-                    <td class="text-right">${product.saldo_awal}</td>
-                    <td class="text-right">${product.stock_masuk}</td>
-                    <td class="text-right">${product.stock_keluar}</td>
-                    <td class="text-right">${product.stock_akhir}</td>
+                    <td>${product.unit_type}</td>
+                    <td class="text-right">${formatStockQuantity(product.saldo_awal, product.unit_type)}</td>
+                    <td class="text-right">${formatStockQuantity(product.stock_masuk, product.unit_type)}</td>
+                    <td class="text-right">${formatStockQuantity(product.stock_keluar, product.unit_type)}</td>
+                    <td class="text-right">${formatStockQuantity(product.stock_akhir, product.unit_type)}</td>
                 </tr>
             `);
         });
@@ -607,11 +622,11 @@
                 // Add data rows
                 inventoryData.products.forEach(product => {
                     csvContent += `"${product.product_name}",`;
-                    csvContent += `${product.unit},`;
-                    csvContent += `${product.saldo_awal},`;
-                    csvContent += `${product.stock_masuk},`;
-                    csvContent += `${product.stock_keluar},`;
-                    csvContent += `${product.stock_akhir}\n`;
+                    csvContent += `${product.unit_type},`;
+                    csvContent += `${formatStockQuantity(product.saldo_awal, product.unit_type)},`;
+                    csvContent += `${formatStockQuantity(product.stock_masuk, product.unit_type)},`;
+                    csvContent += `${formatStockQuantity(product.stock_keluar, product.unit_type)},`;
+                    csvContent += `${formatStockQuantity(product.stock_akhir, product.unit_type)}\n`;
                 });
                 
                 // Create download link

@@ -53,6 +53,16 @@
                             <!-- Options akan diisi via JavaScript -->
                         </select>
                     </div>
+                    <div>
+                        <label class="block font-medium mb-1">Satuan</label>
+                        <select id="editUnitType" class="w-full border rounded px-3 py-2 text-sm" name="unit_type">
+                            <option value="">Pilih Satuan</option>
+                            <option value="meter">Meter</option>
+                            <option value="pcs">Pcs</option>
+                            <option value="unit">Unit</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Meter: angka desimal (10.3), Pcs/Unit: angka bulat (10)</p>
+                    </div>
                 </div>
             </div>
 

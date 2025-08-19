@@ -19,7 +19,8 @@ class Product extends Model
         'price',
         'image',
         'is_active',
-        'unit'
+        'unit',
+        'unit_type'
     ];
 
     protected $casts = [

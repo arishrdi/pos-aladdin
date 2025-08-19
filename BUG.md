@@ -104,6 +104,6 @@ Inventory::where('product_id', $product->id)
 
 ### Tambahan **(low)**
 
-- [ ] Bisa di tambahkan polling pada beberapa bagian agar user tidak perlu refresh untuk melihat data terbaru
+- [x] Bisa di tambahkan polling pada beberapa bagian agar user tidak perlu refresh untuk melihat data terbaru
 
 #### *File ini akan terus diupdate jika ada bug, jangan dibenerin list yang di skip*

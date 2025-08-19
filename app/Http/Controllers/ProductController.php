@@ -150,7 +150,7 @@ class ProductController extends Controller
         }
 
         try {
-            $request->validate([
+            $validationRules = [
                 'name' => 'required|string|max:255',
                 'sku' => [
                     'required',
@@ -171,9 +171,18 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                'quantity' => 'required|numeric',
+                'unit_type' => 'required|in:meter,pcs,unit',
                 'min_stock' => 'required|numeric',
-            ]);
+            ];
+
+            // Validasi quantity berdasarkan unit_type
+            if ($request->unit_type === 'meter') {
+                $validationRules['quantity'] = 'required|numeric|regex:/^\d+(\.\d+)?$/';
+            } else {
+                $validationRules['quantity'] = 'required|integer|min:0';
+            }
+
+            $request->validate($validationRules);
 
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->exists()) {
@@ -210,6 +219,7 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
+                'unit_type' => $request->unit_type,
             ]);
 
             foreach ($request->outlet_ids as $outletId) {
@@ -270,7 +280,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         try {
-            $request->validate([
+            $validationRules = [
                 'name' => 'required|string|max:255',
                 'sku' => [
                     'required',
@@ -291,9 +301,11 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                // 'quantity' => 'required|numeric',
+                'unit_type' => 'required|in:meter,pcs,unit',
                 'min_stock' => 'required|numeric',
-            ]);
+            ];
+
+            $request->validate($validationRules);
 
             // Validasi manual untuk SKU dan barcode
             if ($request->sku && Product::where('sku', $request->sku)->where('id', '!=', $product->id)->exists()) {
@@ -325,6 +337,7 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'image' => $imagePath,
                 'is_active' => $request->is_active,
+                'unit_type' => $request->unit_type,
             ]);
 
             // Store existing quantities before any deletion
@@ -464,6 +477,7 @@ class ProductController extends Controller
                         'barcode' => $product->barcode,
                         'description' => $product->description,
                         'price' => $product->price,
+                        'unit_type' => $product->unit_type,
                         'image_url' => $product->image_url,
                         'is_active' => $product->is_active,
                         'category' => [

@@ -41,7 +41,7 @@
                 <!-- Card: Harga & Kategori -->
                 <div class="p-5 border rounded-lg shadow-sm">
                     <h3 class="font-semibold mb-4 text-gray-700">Harga & Kategori</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block font-medium mb-1" for="harga">Harga Jual <span class="text-red-500">*</span></label>
                             <input type="number" id="harga" name="price" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Rp" required>
@@ -52,6 +52,16 @@
                                 <option value="">Pilih Kategori</option>
                                 <!-- Options akan diisi via JavaScript -->
                             </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1" for="unitType">Satuan <span class="text-red-500">*</span></label>
+                            <select id="unitType" name="unit_type" class="w-full border rounded-lg px-4 py-2 text-sm" required>
+                                <option value="">Pilih Satuan</option>
+                                <option value="meter">Meter</option>
+                                <option value="pcs">Pcs</option>
+                                <option value="unit">Unit</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Meter: angka desimal (10.3), Pcs/Unit: angka bulat (10)</p>
                         </div>
                     </div>
                 </div>

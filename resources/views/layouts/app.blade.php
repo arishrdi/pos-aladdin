@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,56 +18,173 @@
             --sidebar-expanded-width: 280px;
             --sidebar-collapsed-width: 80px;
             --transition-speed: 0.3s;
-            
+
         }
-        
-        /* Override green backgrounds with green */
-        .bg-green-50 { background-color: #f0fdf4 !important; }
-        .bg-green-100 { background-color: #dcfce7 !important; }
-        .bg-green-200 { background-color: #bbf7d0 !important; }
-        .bg-green-300 { background-color: #86efac !important; }
-        .bg-green-400 { background-color: #4ade80 !important; }
-        .bg-green-500 { background-color: #22c55e !important; }
-        .bg-green-600 { background-color: #16a34a !important; }
-        .bg-green-700 { background-color: #15803d !important; }
-        .bg-green-800 { background-color: #166534 !important; }
-        .bg-green-900 { background-color: #14532d !important; }
-        
-        /* Override green text with green */
-        .text-green-50 { color: #f0fdf4 !important; }
-        .text-green-100 { color: #dcfce7 !important; }
-        .text-green-200 { color: #bbf7d0 !important; }
-        .text-green-300 { color: #86efac !important; }
-        .text-green-400 { color: #4ade80 !important; }
-        .text-green-500 { color: #22c55e !important; }
-        .text-green-600 { color: #16a34a !important; }
-        .text-green-700 { color: #15803d !important; }
-        .text-green-800 { color: #166534 !important; }
-        .text-green-900 { color: #14532d !important; }
-        
-        /* Override green borders with green */
-        .border-green-50 { border-color: #f0fdf4 !important; }
-        .border-green-100 { border-color: #dcfce7 !important; }
-        .border-green-200 { border-color: #bbf7d0 !important; }
-        .border-green-300 { border-color: #86efac !important; }
-        .border-green-400 { border-color: #4ade80 !important; }
-        .border-green-500 { border-color: #22c55e !important; }
-        .border-green-600 { border-color: #16a34a !important; }
-        .border-green-700 { border-color: #15803d !important; }
-        .border-green-800 { border-color: #166534 !important; }
-        .border-green-900 { border-color: #14532d !important; }
-        
+
+        /* Background colors */
+        .bg-green-50 {
+            background-color: #e6ede8 !important;
+        }
+
+        .bg-green-100 {
+            background-color: #cdd9d1 !important;
+        }
+
+        .bg-green-200 {
+            background-color: #b3c5ba !important;
+        }
+
+        .bg-green-300 {
+            background-color: #99b1a3 !important;
+        }
+
+        .bg-green-400 {
+            background-color: #7f9d8c !important;
+        }
+
+        .bg-green-500 {
+            background-color: #354c41 !important;
+        }
+
+        /* warna utama */
+        .bg-green-600 {
+            background-color: #2e4238 !important;
+        }
+
+        .bg-green-700 {
+            background-color: #27382f !important;
+        }
+
+        .bg-green-800 {
+            background-color: #1f2f26 !important;
+        }
+
+        .bg-green-900 {
+            background-color: #18241d !important;
+        }
+
+        /* Text colors */
+        .text-green-50 {
+            color: #e6ede8 !important;
+        }
+
+        .text-green-100 {
+            color: #cdd9d1 !important;
+        }
+
+        .text-green-200 {
+            color: #b3c5ba !important;
+        }
+
+        .text-green-300 {
+            color: #99b1a3 !important;
+        }
+
+        .text-green-400 {
+            color: #7f9d8c !important;
+        }
+
+        .text-green-500 {
+            color: #354c41 !important;
+        }
+
+        .text-green-600 {
+            color: #2e4238 !important;
+        }
+
+        .text-green-700 {
+            color: #27382f !important;
+        }
+
+        .text-green-800 {
+            color: #1f2f26 !important;
+        }
+
+        .text-green-900 {
+            color: #18241d !important;
+        }
+
+        /* Border colors */
+        .border-green-50 {
+            border-color: #e6ede8 !important;
+        }
+
+        .border-green-100 {
+            border-color: #cdd9d1 !important;
+        }
+
+        .border-green-200 {
+            border-color: #b3c5ba !important;
+        }
+
+        .border-green-300 {
+            border-color: #99b1a3 !important;
+        }
+
+        .border-green-400 {
+            border-color: #7f9d8c !important;
+        }
+
+        .border-green-500 {
+            border-color: #354c41 !important;
+        }
+
+        .border-green-600 {
+            border-color: #2e4238 !important;
+        }
+
+        .border-green-700 {
+            border-color: #27382f !important;
+        }
+
+        .border-green-800 {
+            border-color: #1f2f26 !important;
+        }
+
+        .border-green-900 {
+            border-color: #18241d !important;
+        }
+
         /* Override green rings with green */
-        .ring-green-50 { border-color: #f0fdf4 !important; }
-        .ring-green-100 { border-color: #dcfce7 !important; }
-        .ring-green-200 { border-color: #bbf7d0 !important; }
-        .ring-green-300 { border-color: #86efac !important; }
-        .ring-green-400 { border-color: #4ade80 !important; }
-        .ring-green-500 { border-color: #22c55e !important; }
-        .ring-green-600 { border-color: #16a34a !important; }
-        .ring-green-700 { border-color: #15803d !important; }
-        .ring-green-800 { border-color: #166534 !important; }
-        .ring-green-900 { border-color: #14532d !important; }
+        .ring-green-50 {
+            border-color: #f0fdf4 !important;
+        }
+
+        .ring-green-100 {
+            border-color: #dcfce7 !important;
+        }
+
+        .ring-green-200 {
+            border-color: #bbf7d0 !important;
+        }
+
+        .ring-green-300 {
+            border-color: #86efac !important;
+        }
+
+        .ring-green-400 {
+            border-color: #4ade80 !important;
+        }
+
+        .ring-green-500 {
+            border-color: #22c55e !important;
+        }
+
+        .ring-green-600 {
+            border-color: #16a34a !important;
+        }
+
+        .ring-green-700 {
+            border-color: #15803d !important;
+        }
+
+        .ring-green-800 {
+            border-color: #166534 !important;
+        }
+
+        .ring-green-900 {
+            border-color: #14532d !important;
+        }
 
         body {
             overflow-x: hidden;
@@ -156,12 +274,12 @@
                 margin-left: 0 !important;
                 width: 100% !important;
             }
-            
+
             .sidebar {
                 transform: translateX(-100%);
                 z-index: 60;
             }
-            
+
             .sidebar.mobile-show {
                 transform: translateX(0);
                 box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
@@ -201,23 +319,23 @@
         .text-green-700 {
             color: #15803D;
         }
-        
+
         .bg-green-700 {
             background-color: #15803D;
         }
-        
+
         .border-green-700 {
             border-color: #15803D;
         }
-        
+
         .focus\:ring-green-700:focus {
             --tw-ring-color: #15803D;
         }
-        
+
         .focus\:border-green-700:focus {
             border-color: #15803D;
         }
-        
+
         .hover\:bg-green-700:hover {
             background-color: #15803D;
         }
@@ -228,10 +346,11 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100 font-sans">
     <!-- Mobile Sidebar Overlay -->
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
-    
+
     <!-- Layout Container -->
     <div class="flex h-screen overflow-hidden relative">
         <!-- Sidebar -->
@@ -248,7 +367,7 @@
             <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100">
                 @yield('content')
             </main>
-            
+
             <!-- Polling Status Indicator -->
             <div id="pollingStatus" class="fixed bottom-4 right-4 z-40 hidden">
                 <div class="bg-green-500 text-white px-3 py-2 rounded-lg shadow-lg flex items-center space-x-2 text-sm">
@@ -366,10 +485,11 @@
             });
         });
     </script>
-    
+
     <!-- Polling Utility -->
     <script src="{{ asset('js/utils/polling.js') }}"></script>
-    
+
     @stack('scripts')
 </body>
+
 </html>

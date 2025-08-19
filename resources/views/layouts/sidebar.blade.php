@@ -1,42 +1,131 @@
 <style>
-     /* Override green backgrounds with green */
-        .bg-green-50 { background-color: #f0fdf4 !important; }
-        .bg-green-100 { background-color: #dcfce7 !important; }
-        .bg-green-200 { background-color: #bbf7d0 !important; }
-        .bg-green-300 { background-color: #86efac !important; }
-        .bg-green-400 { background-color: #4ade80 !important; }
-        .bg-green-500 { background-color: #22c55e !important; }
-        .bg-green-600 { background-color: #16a34a !important; }
-        .bg-green-700 { background-color: #15803d !important; }
-        .bg-green-800 { background-color: #166534 !important; }
-        .bg-green-900 { background-color: #14532d !important; }
-        
-        /* Override green text with green */
-        .text-green-50 { color: #f0fdf4 !important; }
-        .text-green-100 { color: #dcfce7 !important; }
-        .text-green-200 { color: #bbf7d0 !important; }
-        .text-green-300 { color: #86efac !important; }
-        .text-green-400 { color: #4ade80 !important; }
-        .text-green-500 { color: #22c55e !important; }
-        .text-green-600 { color: #16a34a !important; }
-        .text-green-700 { color: #15803d !important; }
-        .text-green-800 { color: #166534 !important; }
-        .text-green-900 { color: #14532d !important; }
-        
-        /* Override green borders with green */
-        .border-green-50 { border-color: #f0fdf4 !important; }
-        .border-green-100 { border-color: #dcfce7 !important; }
-        .border-green-200 { border-color: #bbf7d0 !important; }
-        .border-green-300 { border-color: #86efac !important; }
-        .border-green-400 { border-color: #4ade80 !important; }
-        .border-green-500 { border-color: #22c55e !important; }
-        .border-green-600 { border-color: #16a34a !important; }
-        .border-green-700 { border-color: #15803d !important; }
-        .border-green-800 { border-color: #166534 !important; }
-        .border-green-900 { border-color: #14532d !important; }
+    /* Background colors */
+    .bg-green-50 {
+        background-color: #e6ede8 !important;
+    }
+
+    .bg-green-100 {
+        background-color: #cdd9d1 !important;
+    }
+
+    .bg-green-200 {
+        background-color: #b3c5ba !important;
+    }
+
+    .bg-green-300 {
+        background-color: #99b1a3 !important;
+    }
+
+    .bg-green-400 {
+        background-color: #7f9d8c !important;
+    }
+
+    .bg-green-500 {
+        background-color: #354c41 !important;
+    }
+
+    /* warna utama */
+    .bg-green-600 {
+        background-color: #2e4238 !important;
+    }
+
+    .bg-green-700 {
+        background-color: #27382f !important;
+    }
+
+    .bg-green-800 {
+        background-color: #1f2f26 !important;
+    }
+
+    .bg-green-900 {
+        background-color: #18241d !important;
+    }
+
+    /* Text colors */
+    .text-green-50 {
+        color: #e6ede8 !important;
+    }
+
+    .text-green-100 {
+        color: #cdd9d1 !important;
+    }
+
+    .text-green-200 {
+        color: #b3c5ba !important;
+    }
+
+    .text-green-300 {
+        color: #99b1a3 !important;
+    }
+
+    .text-green-400 {
+        color: #7f9d8c !important;
+    }
+
+    .text-green-500 {
+        color: #354c41 !important;
+    }
+
+    .text-green-600 {
+        color: #2e4238 !important;
+    }
+
+    .text-green-700 {
+        color: #27382f !important;
+    }
+
+    .text-green-800 {
+        color: #1f2f26 !important;
+    }
+
+    .text-green-900 {
+        color: #18241d !important;
+    }
+
+    /* Border colors */
+    .border-green-50 {
+        border-color: #e6ede8 !important;
+    }
+
+    .border-green-100 {
+        border-color: #cdd9d1 !important;
+    }
+
+    .border-green-200 {
+        border-color: #b3c5ba !important;
+    }
+
+    .border-green-300 {
+        border-color: #99b1a3 !important;
+    }
+
+    .border-green-400 {
+        border-color: #7f9d8c !important;
+    }
+
+    .border-green-500 {
+        border-color: #354c41 !important;
+    }
+
+    .border-green-600 {
+        border-color: #2e4238 !important;
+    }
+
+    .border-green-700 {
+        border-color: #27382f !important;
+    }
+
+    .border-green-800 {
+        border-color: #1f2f26 !important;
+    }
+
+    .border-green-900 {
+        border-color: #18241d !important;
+    }
 </style>
 
-<div class="sidebar bg-white text-gray-800 flex flex-col fixed h-full z-50 transition-all duration-300 ease-in-out" id="sidebar">
+<div class="sidebar bg-white text-gray-800 flex flex-col fixed h-full z-50 transition-all duration-300 ease-in-out"
+    id="sidebar">
     <!-- Logo -->
     <div class="p-4 flex items-center justify-between border-b">
         <div class="flex items-center">
@@ -45,11 +134,14 @@
         </div>
         <div class="flex items-center gap-2">
             <!-- Mobile close button -->
-            <button id="closeMobileSidebarBtn" class="text-gray-500 hover:text-red-600 md:hidden transition-all p-1 rounded hover:bg-red-50" title="Tutup Menu">
+            <button id="closeMobileSidebarBtn"
+                class="text-gray-500 hover:text-red-600 md:hidden transition-all p-1 rounded hover:bg-red-50"
+                title="Tutup Menu">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             <!-- Desktop collapse button -->
-            <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all" title="Perkecil Sidebar">
+            <button id="toggleSidebarBtn" class="text-gray-500 hover:text-black hidden md:block transition-all"
+                title="Perkecil Sidebar">
                 <i data-lucide="chevrons-left" class="w-5 h-5 text-black" id="toggleIcon"></i>
             </button>
         </div>
@@ -58,24 +150,28 @@
     <!-- Outlet Dropdown -->
     <div class="px-4 py-3 border-b">
         <div class="relative">
-            <button id="outletDropdownButton" class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+            <button id="outletDropdownButton"
+                class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
                 <div class="flex items-center">
                     <i data-lucide="store" class="w-5 h-5 text-black"></i>
                     <span class="ml-3 font-medium truncate sidebar-text">Loading outlets...</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform text-black" id="outletDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform text-black"
+                    id="outletDropdownArrow"></i>
             </button>
-            
+
             <!-- Outlet Dropdown Menu -->
-            <div id="outletDropdown" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-50 border border-gray-200 max-h-60 overflow-y-auto">
+            <div id="outletDropdown"
+                class="hidden absolute left-0 right-0 mt-1 bg-white rounded-lg shadow-lg z-50 border border-gray-200 max-h-60 overflow-y-auto">
                 <!-- Search Box -->
                 <div class="p-2 border-b">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" placeholder="Cari outlet..." class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-green-700 focus:border-green-700">
+                        <input type="text" placeholder="Cari outlet..."
+                            class="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-1 focus:ring-green-700 focus:border-green-700">
                     </div>
                 </div>
-                
+
                 <!-- Outlet List -->
                 <div class="p-2">
                     <ul id="outletListContainer" class="divide-y divide-gray-100"></ul>
@@ -83,11 +179,12 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto py-4">
         <div class="px-4 py-2 group rounded-lg transition-all menu-item" data-tooltip="Dashboard">
-           <a href="/dashboard" class="flex items-center py-2 hover:text-green-700 transition-all menu-subitem" title="Dashboard">
+            <a href="/dashboard" class="flex items-center py-2 hover:text-green-700 transition-all menu-subitem"
+                title="Dashboard">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-black sidebar-icon"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
@@ -95,13 +192,15 @@
 
         <!-- Product Dropdown -->
         @if(auth()->check() && auth()->user()->role !== 'supervisor')
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="productDropdown" data-tooltip="Produk">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="productDropdown"
+            data-tooltip="Produk">
             <div class="flex items-center justify-between w-full cursor-pointer" title="Produk">
                 <div class="flex items-center">
                     <i data-lucide="package" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Produk</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="productDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="productDropdownArrow"></i>
             </div>
             <div id="productDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/list-produk" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -116,13 +215,15 @@
         </div>
 
         <!-- Outlet Management Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="outletManagementDropdown" data-tooltip="Outlet">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="outletManagementDropdown"
+            data-tooltip="Outlet">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="building-2" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Outlet</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="outletManagementDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="outletManagementDropdownArrow"></i>
             </div>
             <div id="outletManagementDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/outlet" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -134,13 +235,15 @@
         @endif
 
         <!-- Stock Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="stockDropdown" data-tooltip="Stok">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="stockDropdown"
+            data-tooltip="Stok">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="package-open" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Stok</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="stockDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="stockDropdownArrow"></i>
             </div>
             <div id="stockDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -167,13 +270,15 @@
         </div>
 
         <!-- User Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="userDropdown" data-tooltip="User">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="userDropdown"
+            data-tooltip="User">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="users" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">User</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="userDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="userDropdownArrow"></i>
             </div>
             <div id="userDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/member" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -190,13 +295,15 @@
         </div>
 
         <!-- Closing Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="closingDropdown" data-tooltip="Closing">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="closingDropdown"
+            data-tooltip="Closing">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="clock" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Closing</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="closingDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="closingDropdownArrow"></i>
             </div>
             <div id="closingDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 {{-- <a href="/riwayat-kas" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -219,13 +326,15 @@
         </div>
 
         <!-- Report Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="reportDropdown" data-tooltip="Laporan">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="reportDropdown"
+            data-tooltip="Laporan">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="file-text" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Laporan</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="reportDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="reportDropdownArrow"></i>
             </div>
             <div id="reportDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/perhari" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -261,13 +370,15 @@
 
         @if(auth()->check() && auth()->user()->role !== 'supervisor')
         <!-- Settings Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all" data-dropdown="settingsDropdown" data-tooltip="Pengaturan">
+        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="settingsDropdown"
+            data-tooltip="Pengaturan">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
                     <i data-lucide="settings" class="w-5 h-5 sidebar-icon"></i>
                     <span class="ml-3 sidebar-text">Pengaturan</span>
                 </div>
-                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow" id="settingsDropdownArrow"></i>
+                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform sidebar-arrow"
+                    id="settingsDropdownArrow"></i>
             </div>
             <div id="settingsDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
                 <a href="/template-print" class="menu-subitem flex items-center py-2 transition-all w-full">
@@ -294,32 +405,32 @@
         transform: translateX(0);
         transition: transform 0.3s ease, width 0.3s ease;
     }
-    
+
     .sidebar.collapsed {
         width: 80px;
     }
-    
+
     .sidebar.collapsed .sidebar-text,
     .sidebar.collapsed .sidebar-logo-text,
     .sidebar.collapsed .sidebar-arrow {
         display: none;
     }
-    
+
     .sidebar.collapsed .sidebar-icon {
         margin-right: 0;
     }
-    
-    .sidebar.collapsed .menu-item > div > div {
+
+    .sidebar.collapsed .menu-item>div>div {
         justify-content: center;
     }
-    
+
     /* Pastikan ini hanya berlaku di desktop */
     @media (min-width: 769px) {
-        .sidebar.collapsed .menu-item > div > div {
+        .sidebar.collapsed .menu-item>div>div {
             justify-content: center;
         }
     }
-    
+
     /* Dropdown untuk desktop collapsed */
     @media (min-width: 769px) {
         .sidebar.collapsed .sidebar-dropdown {
@@ -327,18 +438,19 @@
             left: 80px;
             width: 200px;
             background: white;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
             border-radius: 0 8px 8px 0;
             padding-left: 0;
             margin-left: 0;
+            z-index: 1000;
         }
     }
-    
+
     /* Tooltip styles for collapsed sidebar */
     .sidebar.collapsed .menu-item {
         position: relative;
     }
-    
+
     .sidebar.collapsed .menu-item:hover::after {
         content: attr(data-tooltip);
         position: absolute;
@@ -354,7 +466,7 @@
         z-index: 1000;
         pointer-events: none;
     }
-    
+
     .sidebar.collapsed .menu-item:hover::before {
         content: '';
         position: absolute;
@@ -366,7 +478,7 @@
         z-index: 1000;
         pointer-events: none;
     }
-    
+
     /* Mobile styles - Simple accordion like desktop */
     @media (max-width: 768px) {
         .sidebar {
@@ -374,39 +486,39 @@
             width: 280px;
             z-index: 60;
         }
-        
+
         .sidebar.mobile-open {
             transform: translateX(0);
-            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Reset collapsed behavior di mobile */
         .sidebar.collapsed {
             width: 280px;
             transform: translateX(-100%);
         }
-        
+
         .sidebar.collapsed.mobile-open {
             transform: translateX(0);
             width: 280px;
         }
-        
+
         /* Tampilkan semua text, icon, arrow di mobile */
         .sidebar.collapsed .sidebar-text,
         .sidebar.collapsed .sidebar-logo-text,
         .sidebar.collapsed .sidebar-arrow {
             display: block !important;
         }
-        
+
         .sidebar.collapsed .sidebar-icon {
             margin-right: 0.75rem !important;
         }
-        
+
         /* Reset justify-content untuk mobile */
-        .sidebar.collapsed .menu-item > div > div {
+        .sidebar.collapsed .menu-item>div>div {
             justify-content: flex-start !important;
         }
-        
+
         /* Reset dropdown positioning untuk mobile */
         .sidebar.collapsed .sidebar-dropdown {
             position: static !important;
@@ -419,61 +531,67 @@
             margin-left: 0 !important;
         }
         
+        /* Ensure normal dropdowns work on mobile */
+        .sidebar .sidebar-dropdown {
+            padding-left: 3rem;
+            margin-top: 0.5rem;
+        }
+
         /* Main content reset */
         #mainContent {
             margin-left: 0 !important;
         }
-        
+
         /* Disable desktop tooltips */
         .sidebar .menu-item:hover::after,
         .sidebar .menu-item:hover::before {
             display: none !important;
         }
-        
+
         /* Mobile padding untuk semua menu */
         .sidebar .menu-item {
             padding: 0 1rem !important;
         }
-        
+
         /* Dashboard dan menu lain yang tidak punya dropdown */
         .sidebar .menu-item:not([data-dropdown]) a {
             padding: 0.75rem 0 !important;
         }
-        
+
         /* Menu dengan dropdown */
-        .sidebar .menu-item[data-dropdown] > div {
+        .sidebar .menu-item[data-dropdown]>div {
             padding: 0.75rem 0 !important;
         }
-        
+
         /* Submenu padding */
         .sidebar .sidebar-dropdown {
             padding-left: 3rem !important;
             margin-top: 0.5rem !important;
         }
-        
+
         .sidebar .menu-subitem {
             padding: 0.625rem 0 !important;
         }
-        
+
         /* Touch targets */
         .sidebar .menu-item,
         .sidebar .menu-subitem {
             min-height: 48px !important;
         }
     }
-    
+
     /* Main content adjust with sidebar */
     #mainContent {
         margin-left: 280px;
         transition: margin-left 0.3s ease;
     }
-    
+
     #mainContent.collapsed {
         margin-left: 80px;
     }
-    
+
     /* Hover effect menu item and subitem */
-    .sidebar .menu-item:hover > .flex.items-center,
+    .sidebar .menu-item:hover>.flex.items-center,
     .sidebar .menu-subitem:hover {
         background-color: #f3f4f6;
         border-radius: 0.5rem;
@@ -482,28 +600,29 @@
         margin-right: -0.5rem;
         transition: all 0.2s ease;
     }
-    
+
     /* Improved visual feedback */
-    .sidebar .menu-item > .flex.items-center,
+    .sidebar .menu-item>.flex.items-center,
     .sidebar .menu-subitem {
         transition: all 0.2s ease;
     }
-    
+
     /* Mobile specific improvements */
     @media (max-width: 768px) {
+
         .sidebar .menu-item,
         .sidebar .menu-subitem {
             font-size: 0.95rem;
         }
-        
-        .sidebar .menu-item > .flex.items-center {
+
+        .sidebar .menu-item>.flex.items-center {
             padding: 0.75rem 0;
         }
-        
+
         .sidebar .menu-subitem {
             padding: 0.6rem 0;
         }
-        
+
         /* Larger touch targets for mobile */
         .sidebar .menu-item,
         .sidebar .menu-subitem {
@@ -511,15 +630,39 @@
             display: flex;
             align-items: center;
         }
+        
+        /* Mobile specific hover fixes */
+        @media (max-width: 768px) {
+            .sidebar .menu-item:hover>.flex.items-center,
+            .sidebar .menu-subitem:hover {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 0.75rem 0 !important;
+            }
+            
+            .sidebar .menu-item.active-parent>.flex.items-center.justify-between {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 0.75rem 0 !important;
+            }
+            
+            .sidebar .menu-subitem.active {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 0.625rem 0 !important;
+            }
+        }
     }
+
     /* Active menu parent */
-    .menu-item.active-parent > .flex.items-center.justify-between {
+    .menu-item.active-parent>.flex.items-center.justify-between {
         background-color: #f0fdf4;
         border-radius: 0.5rem;
         padding: 0.5rem 1rem;
         margin-left: -0.5rem;
         margin-right: -0.5rem;
     }
+
     /* Active menu subitem */
     .menu-subitem.active {
         background-color: #f0fdf4;
@@ -528,23 +671,27 @@
         margin-left: -0.5rem;
         margin-right: -0.5rem;
     }
+
     /* Text color and font weight for active items */
     .menu-subitem.active i,
     .menu-subitem.active span,
-    .menu-item.active-parent > .flex.items-center.justify-between i,
-    .menu-item.active-parent > .flex.items-center.justify-between span {
+    .menu-item.active-parent>.flex.items-center.justify-between i,
+    .menu-item.active-parent>.flex.items-center.justify-between span {
         color: #15803d;
         font-weight: 500;
     }
+
     /* Dropdown styles */
     .sidebar-dropdown {
         transition: all 0.3s ease;
     }
+
     /* Icon rotation animation */
     .rotate-180 {
         transform: rotate(180deg);
         transition: transform 0.3s ease;
     }
+
     /* Cursor for clickable items */
     .cursor-pointer {
         cursor: pointer;

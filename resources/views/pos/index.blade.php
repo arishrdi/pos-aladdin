@@ -184,127 +184,128 @@
             color: white;
         }
 
-        /* Override green backgrounds with green */
+        /* Background colors */
         .bg-green-50 {
-            background-color: #f0fdf4 !important;
+            background-color: #e6ede8 !important;
         }
 
         .bg-green-100 {
-            background-color: #dcfce7 !important;
+            background-color: #cdd9d1 !important;
         }
 
         .bg-green-200 {
-            background-color: #bbf7d0 !important;
+            background-color: #b3c5ba !important;
         }
 
         .bg-green-300 {
-            background-color: #86efac !important;
+            background-color: #99b1a3 !important;
         }
 
         .bg-green-400 {
-            background-color: #4ade80 !important;
+            background-color: #7f9d8c !important;
         }
 
         .bg-green-500 {
-            background-color: #22c55e !important;
+            background-color: #354c41 !important;
         }
 
+        /* warna utama */
         .bg-green-600 {
-            background-color: #16a34a !important;
+            background-color: #2e4238 !important;
         }
 
         .bg-green-700 {
-            background-color: #15803d !important;
+            background-color: #27382f !important;
         }
 
         .bg-green-800 {
-            background-color: #166534 !important;
+            background-color: #1f2f26 !important;
         }
 
         .bg-green-900 {
-            background-color: #14532d !important;
+            background-color: #18241d !important;
         }
 
-        /* Override green text with green */
+        /* Text colors */
         .text-green-50 {
-            color: #f0fdf4 !important;
+            color: #e6ede8 !important;
         }
 
         .text-green-100 {
-            color: #dcfce7 !important;
+            color: #cdd9d1 !important;
         }
 
         .text-green-200 {
-            color: #bbf7d0 !important;
+            color: #b3c5ba !important;
         }
 
         .text-green-300 {
-            color: #86efac !important;
+            color: #99b1a3 !important;
         }
 
         .text-green-400 {
-            color: #4ade80 !important;
+            color: #7f9d8c !important;
         }
 
         .text-green-500 {
-            color: #22c55e !important;
+            color: #354c41 !important;
         }
 
         .text-green-600 {
-            color: #16a34a !important;
+            color: #2e4238 !important;
         }
 
         .text-green-700 {
-            color: #15803d !important;
+            color: #27382f !important;
         }
 
         .text-green-800 {
-            color: #166534 !important;
+            color: #1f2f26 !important;
         }
 
         .text-green-900 {
-            color: #14532d !important;
+            color: #18241d !important;
         }
 
-        /* Override green borders with green */
+        /* Border colors */
         .border-green-50 {
-            border-color: #f0fdf4 !important;
+            border-color: #e6ede8 !important;
         }
 
         .border-green-100 {
-            border-color: #dcfce7 !important;
+            border-color: #cdd9d1 !important;
         }
 
         .border-green-200 {
-            border-color: #bbf7d0 !important;
+            border-color: #b3c5ba !important;
         }
 
         .border-green-300 {
-            border-color: #86efac !important;
+            border-color: #99b1a3 !important;
         }
 
         .border-green-400 {
-            border-color: #4ade80 !important;
+            border-color: #7f9d8c !important;
         }
 
         .border-green-500 {
-            border-color: #22c55e !important;
+            border-color: #354c41 !important;
         }
 
         .border-green-600 {
-            border-color: #16a34a !important;
+            border-color: #2e4238 !important;
         }
 
         .border-green-700 {
-            border-color: #15803d !important;
+            border-color: #27382f !important;
         }
 
         .border-green-800 {
-            border-color: #166534 !important;
+            border-color: #1f2f26 !important;
         }
 
         .border-green-900 {
-            border-color: #14532d !important;
+            border-color: #18241d !important;
         }
     </style>
 </head>
@@ -410,7 +411,8 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Pajak Transaksi</label>
                         <div class="flex space-x-3">
                             <label class="flex items-center cursor-pointer">
-                                <input type="radio" name="transactionTaxType" value="non_pkp" class="mr-2 text-green-600" checked>
+                                <input type="radio" name="transactionTaxType" value="non_pkp"
+                                    class="mr-2 text-green-600" checked>
                                 <span class="text-sm font-medium text-green-600">Non-PKP (0%)</span>
                             </label>
                             <label class="flex items-center cursor-pointer">
@@ -435,7 +437,8 @@
                     <div class="flex justify-between mb-3">
                         <div class="summary-item text-base text-gray-500">
                             <span id="taxLabel">Pajak (0%)</span>
-                            <span id="taxTypeIndicator" class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"></span>
+                            <span id="taxTypeIndicator"
+                                class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"></span>
                         </div>
                         <div id="taxAmount" class="summary-item text-base text-gray-500">Rp 0</div>
                     </div>
@@ -676,7 +679,7 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
     
     let filteredProducts = window.products.filter(product => {
         const categoryMatch = filterCategory === 'all' || 
-            (product.category?.name || 'uncategorized').toLowerCase() === filterCategory;
+            (product.category?.name || 'uncategorized') === filterCategory;
         const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
         return categoryMatch && searchMatch;
@@ -710,7 +713,10 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
                         <div>
                             <div class="product-name text-base font-medium">${product.name}</div>
                             <div class="product-price text-green-500 font-semibold text-base">${formatCurrency(product.price, true)}</div>
-                            <div class="text-sm text-gray-500">Stok: ${formatQuantity(availableStock)}</div>
+                            <div class="text-sm text-gray-500">
+                                <span>Stok: ${formatQuantity(availableStock)}</span>
+                                <span class="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${product.unit_type || 'pcs'}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="flex items-center space-x-3">

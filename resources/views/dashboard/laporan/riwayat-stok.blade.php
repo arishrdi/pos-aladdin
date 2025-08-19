@@ -628,6 +628,21 @@
         showNoData(!hasData);
     }
 
+    // Helper function to format stock quantity based on unit_type
+    function formatStockQuantity(quantity, unit_type) {
+        if (!quantity && quantity !== 0) return '0';
+        
+        // Convert to number for proper formatting
+        const numQuantity = parseFloat(quantity);
+        
+        // If unit_type is 'meter', show decimal places, otherwise show as integer
+        if (unit_type && unit_type.toLowerCase() === 'meter') {
+            return numQuantity % 1 === 0 ? numQuantity.toString() : numQuantity.toFixed(1);
+        } else {
+            return Math.floor(numQuantity).toString();
+        }
+    }
+
     // Populate table for specific type
     function populateTable(type, products) {
         const tableId = `${type}Table`;
@@ -642,8 +657,8 @@
             row.innerHTML = `
                 <td class="py-4 px-4">${product.product_name}</td>
                 <td class="py-4 px-4">${product.sku}</td>
-                <td class="py-4 px-4 text-right">${product.stock_as_of_end_date} ${product.unit || 'pcs'}</td>
-                <td class="py-4 px-4 text-right ${changeClass}">${parseInt(product.total_quantity_changed) >= 0 ? '+' : ''}${product.total_quantity_changed} ${product.unit || 'pcs'}</td>
+                <td class="py-4 px-4 text-right">${formatStockQuantity(product.stock_as_of_end_date, product.unit_type)} ${product.unit_type || 'pcs'}</td>
+                <td class="py-4 px-4 text-right ${changeClass}">${parseInt(product.total_quantity_changed) >= 0 ? '+' : ''}${formatStockQuantity(product.total_quantity_changed, product.unit_type)} ${product.unit_type || 'pcs'}</td>
                 <td class="py-4 px-4 text-right">${product.total_entries}</td>
                 <td class="py-4 px-4 text-right">
                     <button onclick="showStockHistory('${type}', '${product.product_id}', '${product.product_name}', '${product.sku}')" class="text-green-500 hover:text-green-700 flex items-center gap-1 justify-end w-full">
@@ -676,12 +691,12 @@
         document.getElementById('modalProductName').textContent = productName;
         document.getElementById('modalSKU').textContent = sku;
         document.getElementById('modalEndStock').textContent = 
-            `${product.stock_as_of_end_date} ${product.unit || 'pcs'}`;
+            `${formatStockQuantity(product.stock_as_of_end_date, product.unit_type)} ${product.unit_type || 'pcs'}`;
 
         const changeClass = parseInt(product.total_quantity_changed) >= 0 ? 'text-green-600' : 'text-red-600';
         const changePrefix = parseInt(product.total_quantity_changed) >= 0 ? '+' : '';
         document.getElementById('modalTotalChange').textContent = 
-            `${changePrefix}${product.total_quantity_changed}`;
+            `${changePrefix}${formatStockQuantity(product.total_quantity_changed, product.unit_type)}`;
         document.getElementById('modalTotalChange').className = `text-lg font-semibold ${changeClass}`;
         
         document.getElementById('modalTotalEntries').textContent = product.total_entries;
@@ -707,9 +722,9 @@
 
                 row.innerHTML = `
                     <td class="py-3 px-4">${formattedDate}</td>
-                    <td class="py-3 px-4 text-right">${entry.quantity_before} ${product.unit || 'pcs'}</td>
-                    <td class="py-3 px-4 text-right">${entry.quantity_after} ${product.unit || 'pcs'}</td>
-                    <td class="py-3 px-4 text-right ${entryChangeClass}">${entryChangePrefix}${entry.quantity_change} ${product.unit || 'pcs'}</td>
+                    <td class="py-3 px-4 text-right">${formatStockQuantity(entry.quantity_before, product.unit_type)} ${product.unit_type || 'pcs'}</td>
+                    <td class="py-3 px-4 text-right">${formatStockQuantity(entry.quantity_after, product.unit_type)} ${product.unit_type || 'pcs'}</td>
+                    <td class="py-3 px-4 text-right ${entryChangeClass}">${entryChangePrefix}${formatStockQuantity(entry.quantity_change, product.unit_type)} ${product.unit_type || 'pcs'}</td>
                     <td class="py-3 px-4">${entry.notes || '-'}</td>
                 `;
                 historyTable.appendChild(row);
@@ -850,8 +865,8 @@
                         <tr>
                             <td>${product.product_name}</td>
                             <td>${product.sku}</td>
-                            <td class="text-right">${product.stock_as_of_end_date} ${product.unit || 'pcs'}</td>
-                            <td class="text-right ${changeClass}">${changePrefix}${product.total_quantity_changed} ${product.unit || 'pcs'}</td>
+                            <td class="text-right">${formatStockQuantity(product.stock_as_of_end_date, product.unit_type)} ${product.unit_type || 'pcs'}</td>
+                            <td class="text-right ${changeClass}">${changePrefix}${formatStockQuantity(product.total_quantity_changed, product.unit_type)} ${product.unit_type || 'pcs'}</td>
                             <td class="text-right">${product.total_entries}</td>
                         </tr>
                     `);
@@ -937,14 +952,14 @@
                                 typeLabel,
                                 `"${product.product_name || 'Unknown Product'}"`,
                                 product.sku || '',
-                                product.stock_as_of_end_date,
-                                `"${product.unit || 'pcs'}"`,
-                                product.total_quantity_changed,
+                                formatStockQuantity(product.stock_as_of_end_date, product.unit_type),
+                                `"${product.unit_type || 'pcs'}"`,
+                                formatStockQuantity(product.total_quantity_changed, product.unit_type),
                                 product.total_entries,
                                 `"${formattedDate}"`,
-                                entry.quantity_before,
-                                entry.quantity_change,
-                                entry.quantity_after,
+                                formatStockQuantity(entry.quantity_before, product.unit_type),
+                                formatStockQuantity(entry.quantity_change, product.unit_type),
+                                formatStockQuantity(entry.quantity_after, product.unit_type),
                                 `"${entry.notes || ''}"`,
                                 `"${outletName}"`
                             ].join(',') + '\n';

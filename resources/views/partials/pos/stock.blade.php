@@ -508,6 +508,26 @@
         document.getElementById('selectedProductText').textContent = productText;
         document.getElementById('productDropdown').classList.add('hidden');
         document.getElementById('productSearch').value = '';
+        
+        // Set validation based on selected product's unit type
+        const selectedProduct = allProducts.find(p => p.id == productId);
+        const quantityInput = document.getElementById('quantity_change');
+        
+        if (selectedProduct && quantityInput) {
+            const unitType = selectedProduct.unit_type || 'pcs';
+            if (unitType === 'meter') {
+                quantityInput.step = '0.1';
+                quantityInput.setAttribute('data-unit-type', 'meter');
+            } else {
+                quantityInput.step = '1';
+                quantityInput.setAttribute('data-unit-type', unitType);
+            }
+            
+            // Add validation event listener
+            quantityInput.removeEventListener('input', validateStockQuantity);
+            quantityInput.addEventListener('input', validateStockQuantity);
+        }
+        
         filterDropdownProducts();
     }
 
@@ -809,6 +829,36 @@
             submitButton.disabled = false;
             showNotification('error', 'Error', 'Terjadi kesalahan saat menyimpan penyesuaian stok');
         });
+    }
+
+    // Validate stock quantity based on unit type
+    function validateStockQuantity() {
+        const input = document.getElementById('quantity_change');
+        const unitType = input.getAttribute('data-unit-type') || 'pcs';
+        const value = input.value;
+        
+        if (!value) return;
+        
+        const numValue = parseFloat(value);
+        
+        if (isNaN(numValue)) {
+            input.setCustomValidity('Masukkan angka yang valid');
+            return;
+        }
+        
+        if (unitType === 'meter') {
+            // Allow decimal for meter (including negative values)
+            input.setCustomValidity('');
+        } else {
+            // Only integers for pcs and unit (including negative values)
+            if (value.includes('.') && numValue !== Math.floor(numValue)) {
+                input.setCustomValidity('Untuk satuan pcs/unit, hanya angka bulat yang diperbolehkan');
+                input.value = Math.floor(numValue);
+                return;
+            } else {
+                input.setCustomValidity('');
+            }
+        }
     }
 
     // Initialize when page loads

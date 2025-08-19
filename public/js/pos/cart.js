@@ -46,7 +46,8 @@ class CartManager {
                     subtotal: (parseFloat(product.price) || 0) * qty,
                     is_active: product.is_active !== false,
                     image_url: product.image_url || null,
-                    bonus_qty: 0 // Quantity bonus untuk item ini
+                    bonus_qty: 0, // Quantity bonus untuk item ini
+                    unit_type: product.unit_type || 'pcs' // Satuan produk
                 });
             }
             
@@ -683,11 +684,12 @@ class CartManager {
                             <button class="btn-decrease px-1 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 text-xs" data-index="${index}">
                                 <i data-lucide="minus" class="w-3 h-3"></i>
                             </button>
-                            <input type="text" class="qty-input w-12 px-1 py-1 text-center text-xs border border-gray-300 rounded" value="${formatQuantity(item.quantity)}" data-index="${index}">
+                            <input type="text" class="qty-input w-12 px-1 py-1 text-center text-xs border border-gray-300 rounded" value="${formatQuantity(item.quantity)}" data-index="${index}" data-unit-type="${item.unit_type || 'pcs'}"${item.unit_type === 'meter' ? ' step="0.1"' : ' step="1"'}${item.unit_type !== 'meter' ? ' pattern="[0-9]+"' : ''}>
                             <button class="btn-increase px-1 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 text-xs" data-index="${index}">
                                 <i data-lucide="plus" class="w-3 h-3"></i>
                             </button>
                         </div>
+                        <div class="text-xs text-center text-gray-500 mt-1">${item.unit_type || 'pcs'}</div>
                     </div>
                     
                     <!-- Discount (col-span-3) -->
@@ -738,9 +740,22 @@ class CartManager {
                 input.addEventListener('change', (e) => {
                     const index = parseInt(e.target.getAttribute('data-index'));
                     const newQty = e.target.value;
-                    if (!this.updateQuantity(index, newQty)) {
+                    const unitType = e.target.getAttribute('data-unit-type') || 'pcs';
+                    
+                    // Validate quantity based on unit type
+                    if (this.validateQuantityInput(e.target, unitType, newQty)) {
+                        if (!this.updateQuantity(index, newQty)) {
+                            e.target.value = formatQuantity(this.cart[index]?.quantity || 1);
+                        }
+                    } else {
                         e.target.value = formatQuantity(this.cart[index]?.quantity || 1);
                     }
+                });
+
+                // Add input listener for real-time validation
+                input.addEventListener('input', (e) => {
+                    const unitType = e.target.getAttribute('data-unit-type') || 'pcs';
+                    this.validateQuantityInput(e.target, unitType, e.target.value);
                 });
             });
 
@@ -751,7 +766,9 @@ class CartManager {
                     const index = parseInt(e.target.closest('button').getAttribute('data-index'));
                     if (this.cart[index]) {
                         const currentQty = this.cart[index].quantity;
-                        this.updateQuantity(index, currentQty + 1); // Increment by 1
+                        const unitType = this.cart[index].unit_type || 'pcs';
+                        const increment = unitType === 'meter' ? 0.1 : 1;
+                        this.updateQuantity(index, currentQty + increment);
                     }
                 });
             });
@@ -763,7 +780,9 @@ class CartManager {
                     const index = parseInt(e.target.closest('button').getAttribute('data-index'));
                     if (this.cart[index]) {
                         const currentQty = this.cart[index].quantity;
-                        this.updateQuantity(index, Math.max(0, currentQty - 1));
+                        const unitType = this.cart[index].unit_type || 'pcs';
+                        const decrement = unitType === 'meter' ? 0.1 : 1;
+                        this.updateQuantity(index, Math.max(0, currentQty - decrement));
                     }
                 });
             });
@@ -1123,5 +1142,32 @@ class CartManager {
             tax_type: this.taxType,
             totals: this.calculateTotals()
         };
+    }
+
+    // Validate quantity input based on unit type
+    validateQuantityInput(input, unitType, value) {
+        if (!input || !unitType || !value) return true;
+        
+        const numValue = parseFloat(value);
+        
+        if (isNaN(numValue) || numValue < 0) {
+            input.setCustomValidity('Harus berupa angka positif');
+            return false;
+        }
+        
+        if (unitType === 'meter') {
+            // Allow decimal for meter
+            input.setCustomValidity('');
+            return true;
+        } else {
+            // Only integers for pcs and unit
+            if (value.includes('.') || numValue !== Math.floor(numValue)) {
+                input.setCustomValidity('Untuk satuan pcs/unit, hanya angka bulat yang diperbolehkan');
+                return false;
+            } else {
+                input.setCustomValidity('');
+                return true;
+            }
+        }
     }
 }

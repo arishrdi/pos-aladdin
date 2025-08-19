@@ -417,7 +417,7 @@
             const actionCell = document.createElement('td');
             actionCell.className = 'py-4 text-right';
             actionCell.innerHTML = `
-                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${escapeQuotes(item.product.name)}', '${escapeQuotes(item.outlet.name)}', ${item.product.qty})" 
+                <button onclick="openModalAdjust(${item.product.id}, '${item.product.sku}', '${escapeQuotes(item.product.name)}', '${escapeQuotes(item.outlet.name)}', ${item.product.qty}, '${item.product.unit_type || 'pcs'}')" 
                         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-white bg-green-500 rounded-md hover:bg-green-600">
                         <i data-lucide="clipboard-list" class="w-4 h-4"></i> Sesuaikan
                 </button>
@@ -570,7 +570,7 @@
     }
 
     // Fungsi untuk membuka modal penyesuaian
-    function openModalAdjust(productId, sku, produk, outlet, stok) {
+    function openModalAdjust(productId, sku, produk, outlet, stok, unitType) {
         // Convert productId to number to ensure it's not a string
         productId = parseInt(productId, 10);
         
@@ -597,6 +597,21 @@
         document.getElementById('stokSaatIni').textContent = stok;
         document.getElementById('jumlahAdjust').value = '';
         document.getElementById('keteranganAdjust').value = '';
+        
+        // Set validation based on unit type
+        const quantityInput = document.getElementById('jumlahAdjust');
+        if (unitType === 'meter') {
+            quantityInput.step = '0.1';
+            quantityInput.setAttribute('data-unit-type', 'meter');
+        } else {
+            quantityInput.step = '1';
+            quantityInput.setAttribute('data-unit-type', unitType || 'pcs');
+        }
+        
+        // Add validation event listener
+        quantityInput.addEventListener('input', function() {
+            validateAdjustmentQuantity(this);
+        });
         
         // Tampilkan modal
         modal.classList.remove('hidden');
@@ -704,6 +719,35 @@
         .finally(() => {
             showLoading(false);
         });
+    }
+
+    // Validate adjustment quantity based on unit type
+    function validateAdjustmentQuantity(input) {
+        const unitType = input.getAttribute('data-unit-type') || 'pcs';
+        const value = input.value;
+        
+        if (!value) return;
+        
+        const numValue = parseFloat(value);
+        
+        if (isNaN(numValue)) {
+            input.setCustomValidity('Masukkan angka yang valid');
+            return;
+        }
+        
+        if (unitType === 'meter') {
+            // Allow decimal for meter (including negative values)
+            input.setCustomValidity('');
+        } else {
+            // Only integers for pcs and unit (including negative values)
+            if (value.includes('.') && numValue !== Math.floor(numValue)) {
+                input.setCustomValidity('Untuk satuan pcs/unit, hanya angka bulat yang diperbolehkan');
+                input.value = Math.floor(numValue);
+                return;
+            } else {
+                input.setCustomValidity('');
+            }
+        }
     }
 
     // Event listener untuk tombol di modal

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ApprovalRequest;
 use App\Models\CashRegister;
+use App\Models\DpSettlementHistory;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
@@ -209,6 +210,22 @@ class OrderController extends Controller
                         ->where('created_at', '>=', now()->subMinutes(5)) // Recent bonuses within 5 minutes
                         ->update(['order_id' => $order->id ]);
                 }
+            }
+
+            // Jika transaksi DP, buat entry riwayat pelunasan pertama
+            if ($request->transaction_category === 'dp' && $totalPaid > 0) {
+                DpSettlementHistory::create([
+                    'order_id' => $order->id,
+                    'amount' => $totalPaid,
+                    'payment_method' => $request->payment_method,
+                    'payment_proof' => $paymentProofPath,
+                    'notes' => 'Pembayaran DP pertama',
+                    'remaining_balance_before' => $total,
+                    'remaining_balance_after' => $remainingBalance,
+                    'is_final_payment' => $remainingBalance <= 0,
+                    'processed_by' => $request->user()->id,
+                    'processed_at' => now(),
+                ]);
             }
 
             // Jangan tambahkan ke kas register dulu, tunggu approval
@@ -1133,6 +1150,9 @@ class OrderController extends Controller
                 $paymentProofPath = 'payment_proofs/' . $fileName;
             }
 
+            // Simpan data sebelum settlement untuk history
+            $remainingBalanceBefore = $order->remaining_balance;
+            
             // Data untuk settlement
             $settlementData = [
                 'notes' => $request->notes
@@ -1148,6 +1168,25 @@ class OrderController extends Controller
             if (!$success) {
                 throw new \Exception('Gagal memproses pelunasan');
             }
+
+            // Refresh order untuk mendapatkan data terbaru
+            $order->refresh();
+            $remainingBalanceAfter = $order->remaining_balance;
+            $isFinalPayment = $remainingBalanceAfter <= 0;
+
+            // Simpan ke riwayat pelunasan DP
+            DpSettlementHistory::create([
+                'order_id' => $order->id,
+                'amount' => $amountReceived,
+                'payment_method' => $request->payment_method,
+                'payment_proof' => $paymentProofPath,
+                'notes' => $request->notes,
+                'remaining_balance_before' => $remainingBalanceBefore,
+                'remaining_balance_after' => $remainingBalanceAfter,
+                'is_final_payment' => $isFinalPayment,
+                'processed_by' => $user->id,
+                'processed_at' => now(),
+            ]);
 
             // Jika sudah fully paid dan approved, record cash transaction
             if ($order->isFullyPaid() && $order->approval_status === 'approved') {
@@ -1179,6 +1218,60 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get DP settlement history for an order
+     */
+    public function getSettlementHistory(Request $request, $orderId)
+    {
+        try {
+            $order = Order::findOrFail($orderId);
+            
+            // Cek apakah order adalah DP
+            if ($order->transaction_category !== 'dp') {
+                return $this->errorResponse('Order ini bukan transaksi DP', 400);
+            }
+
+            $settlementHistory = DpSettlementHistory::with(['processedBy'])
+                ->where('order_id', $orderId)
+                ->orderBy('processed_at', 'desc')
+                ->get()
+                ->map(function ($settlement) {
+                    return [
+                        'id' => $settlement->id,
+                        'amount' => $settlement->amount,
+                        'payment_method' => $settlement->payment_method,
+                        'payment_proof_url' => $settlement->payment_proof ? asset('uploads/' . $settlement->payment_proof) : null,
+                        'notes' => $settlement->notes,
+                        'remaining_balance_before' => $settlement->remaining_balance_before,
+                        'remaining_balance_after' => $settlement->remaining_balance_after,
+                        'is_final_payment' => $settlement->is_final_payment,
+                        'processed_by' => $settlement->processedBy->name ?? '-',
+                        'processed_at' => $settlement->processed_at->format('d/m/Y H:i'),
+                        'created_at' => $settlement->created_at->format('d/m/Y H:i'),
+                    ];
+                });
+
+            $responseData = [
+                'order' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'total' => $order->total,
+                    'total_paid' => $order->total_paid,
+                    'remaining_balance' => $order->remaining_balance,
+                    'is_fully_paid' => $order->isFullyPaid(),
+                ],
+                'settlement_history' => $settlementHistory,
+                'total_settlements' => $settlementHistory->count(),
+                'total_amount_settled' => $settlementHistory->sum('amount'),
+            ];
+
+            return $this->successResponse($responseData, 'Riwayat pelunasan berhasil diambil');
+
+        } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
         }
     }

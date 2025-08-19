@@ -167,17 +167,17 @@
             <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('pelunasanModal')"></div>
             
             <!-- Modal Box -->
-            <div class="bg-white w-[90%] md:w-1/2 max-w-lg mx-auto rounded shadow-lg z-60 relative mt-20">
+            <div class="bg-white w-[90%] md:w-1/2 max-w-lg mx-auto rounded shadow-lg z-60 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
                 <!-- Header -->
-                <div class="p-4 border-b">
+                <div class="p-4 border-b flex-shrink-0">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold text-green-600">Pelunasan DP</h3>
                         <button onclick="tutupModal('pelunasanModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
                     </div>
                 </div>
                 
-                <!-- Body -->
-                <div class="p-6">
+                <!-- Body Scrollable -->
+                <div class="p-6 overflow-y-auto flex-1">
                     <div class="mb-4">
                         <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                             <div class="grid grid-cols-2 gap-4 text-sm">
@@ -201,6 +201,16 @@
                         </div>
                     </div>
                     
+                    <!-- Riwayat Pelunasan (jika ada) -->
+                    <div id="riwayatPelunasanSection" class="mb-4 hidden">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Riwayat Pelunasan Sebelumnya</h4>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                            <div id="riwayatPelunasanList" class="space-y-2">
+                                <!-- Riwayat akan dimuat di sini -->
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Form Pelunasan -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -249,7 +259,7 @@
                 </div>
                 
                 <!-- Footer -->
-                <div class="border-t p-4 bg-gray-50 rounded-b">
+                <div class="border-t p-4 bg-gray-50 rounded-b flex-shrink-0">
                     <div class="flex justify-end gap-3">
                         <button onclick="tutupModal('pelunasanModal')" 
                                 class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
@@ -1457,7 +1467,7 @@
     let transaksiPelunasan = null;
 
     // Fungsi untuk membuka modal pelunasan DP
-    function bukaModalPelunasan(nomorInvoice) {
+    async function bukaModalPelunasan(nomorInvoice) {
         const transaksi = semuaTransaksi.find(t => t.invoice === nomorInvoice);
         if (!transaksi) {
             alert('Transaksi tidak ditemukan');
@@ -1493,8 +1503,80 @@
         document.getElementById('buktiPembayaranPelunasan').value = '';
         document.getElementById('catatanPelunasan').value = '';
 
+        // Muat riwayat pelunasan
+        await muatRiwayatPelunasan(transaksi.id);
+
         // Buka modal
         bukaModal('pelunasanModal');
+    }
+
+    // Fungsi untuk memuat riwayat pelunasan DP
+    async function muatRiwayatPelunasan(orderId) {
+        try {
+            const token = localStorage.getItem('token') || document.querySelector('meta[name="csrf-token"]').content;
+            
+            const response = await fetch(`/api/orders/${orderId}/settlement-history`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success && result.data.settlement_history.length > 0) {
+                tampilkanRiwayatPelunasan(result.data.settlement_history);
+            } else {
+                // Sembunyikan section riwayat jika tidak ada data
+                document.getElementById('riwayatPelunasanSection').classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error loading settlement history:', error);
+            // Sembunyikan section riwayat jika error
+            document.getElementById('riwayatPelunasanSection').classList.add('hidden');
+        }
+    }
+
+    // Fungsi untuk menampilkan riwayat pelunasan
+    function tampilkanRiwayatPelunasan(riwayat) {
+        const listElement = document.getElementById('riwayatPelunasanList');
+        const sectionElement = document.getElementById('riwayatPelunasanSection');
+        
+        if (riwayat.length === 0) {
+            sectionElement.classList.add('hidden');
+            return;
+        }
+
+        listElement.innerHTML = riwayat.map(item => `
+            <div class="flex justify-between items-center py-2 px-3 bg-white border border-gray-200 rounded text-xs">
+                <div class="flex-1">
+                    <div class="font-medium text-gray-800">
+                        ${item.processed_at} - Rp ${formatUang(item.amount)}
+                    </div>
+                    <div class="text-gray-600">
+                        ${item.payment_method.toUpperCase()} • ${item.processed_by}
+                        ${item.is_final_payment ? ' • <span class="text-green-600 font-medium">LUNAS</span>' : ''}
+                    </div>
+                    ${item.notes ? `<div class="text-gray-500 mt-1">${item.notes}</div>` : ''}
+                </div>
+                ${item.payment_proof_url ? `
+                <a href="${item.payment_proof_url}" target="_blank" class="ml-2 text-blue-500 hover:text-blue-700" title="Lihat Bukti Pembayaran">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </a>
+                ` : ''}
+            </div>
+        `).join('');
+
+        sectionElement.classList.remove('hidden');
     }
 
     // Fungsi untuk memproses pelunasan DP

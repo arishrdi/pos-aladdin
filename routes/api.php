@@ -220,6 +220,7 @@ Route::middleware('auth:sanctum')->group(function () {
             
             // DP Settlement routes
             Route::post('/orders/{id}/settle', 'settleOrder'); // Settlement DP
+            Route::get('/orders/{id}/settlement-history', 'getSettlementHistory'); // Get DP settlement history
             Route::get('/dashboard/dp-summary', 'getDpSummary'); // DP summary for dashboard
         });
 

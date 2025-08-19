@@ -179,6 +179,21 @@
     let currentEndDate = formatDateLocal(today);
     // let outletId = 1;
     
+    // Helper function to format quantity based on unit_type
+    function formatQuantity(quantity, unit_type) {
+        if (!quantity && quantity !== 0) return '0';
+        
+        // Convert to number for proper formatting
+        const numQuantity = parseFloat(quantity);
+        
+        // If unit_type is 'meter', show decimal places, otherwise show as integer
+        if (unit_type && unit_type.toLowerCase() === 'meter') {
+            return numQuantity % 1 === 0 ? numQuantity.toString() : numQuantity.toFixed(1);
+        } else {
+            return Math.floor(numQuantity).toString();
+        }
+    }
+
     // Format currency to Indonesian Rupiah
     function formatRupiah(amount) {
         return new Intl.NumberFormat('id-ID', {
@@ -345,7 +360,7 @@
                     <td class="py-4">${product.product_name}</td>
                     <td class="py-4">${product.category_name}</td>
                     <td class="py-4 text-right">${product.order_count}</td>
-                    <td class="py-4 text-right">${product.total_quantity}</td>
+                    <td class="py-4 text-right">${formatQuantity(product.total_quantity, product.unit_type)}</td>
                     <td class="py-4 text-right font-bold">${formatRupiah(product.total_sales)}</td>
                     <td class="py-4 text-right">${product.sales_percentage.toFixed(1)}%</td>
                 `;

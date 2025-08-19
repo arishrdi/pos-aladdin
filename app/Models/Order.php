@@ -122,6 +122,12 @@ class Order extends Model
         return $this->belongsTo(User::class, 'cancellation_processed_by');
     }
 
+    // DP Settlement History relationship
+    public function dpSettlementHistory()
+    {
+        return $this->hasMany(DpSettlementHistory::class);
+    }
+
     // Scopes for approval status
     public function scopePending($query)
     {

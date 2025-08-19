@@ -619,7 +619,7 @@
                         ${bonusProducts.length > 2 ? `<p class="text-xs text-gray-500">+${bonusProducts.length - 2} lainnya</p>` : ''}
                     </div>
                 </td>
-                <td class="py-4 font-medium">${parseFloat(Number(totalItems)).toFixed(2)} item</td>
+                <td class="py-4 font-medium">${formatBonusQuantity(totalItems, bonus)} item</td>
                 <td class="py-4">
                     <span class="px-2 py-1 ${getBonusStatusBadgeClass(bonus.status)} rounded-full text-xs font-medium">
                         ${getBonusStatusText(bonus.status)}
@@ -1512,6 +1512,45 @@
         modal.classList.remove('flex');
     }
 
+    // Helper function to format bonus quantity based on unit_type
+    function formatBonusQuantity(quantity, bonus) {
+        if (!quantity && quantity !== 0) return '0';
+        
+        // Convert to number for proper formatting
+        const numQuantity = parseFloat(quantity);
+        
+        // Check if any bonus item has unit_type 'meter'
+        let hasMeters = false;
+        if (bonus && bonus.bonus_items && Array.isArray(bonus.bonus_items)) {
+            hasMeters = bonus.bonus_items.some(item => 
+                item.product && item.product.unit_type && 
+                item.product.unit_type.toLowerCase() === 'meter'
+            );
+        }
+        
+        // If any item has meter unit_type, show decimal places, otherwise show as integer
+        if (hasMeters) {
+            return numQuantity % 1 === 0 ? numQuantity.toString() : numQuantity.toFixed(1);
+        } else {
+            return Math.floor(numQuantity).toString();
+        }
+    }
+
+    // Helper function to format individual item quantity
+    function formatItemQuantity(quantity, unit_type) {
+        if (!quantity && quantity !== 0) return '0';
+        
+        // Convert to number for proper formatting
+        const numQuantity = parseFloat(quantity);
+        
+        // If unit_type is 'meter', show decimal places, otherwise show as integer
+        if (unit_type && unit_type.toLowerCase() === 'meter') {
+            return numQuantity % 1 === 0 ? numQuantity.toString() : numQuantity.toFixed(1);
+        } else {
+            return Math.floor(numQuantity).toString();
+        }
+    }
+
     // Helper functions untuk bonus
     function getBonusTypeText(type) {
         const typeMap = {
@@ -1590,10 +1629,11 @@
                         <div class="flex justify-between">
                             <div>
                                 <p class="font-medium">${item.product?.name || 'Produk'}</p>
-                                <p class="text-sm text-gray-500">${item.quantity || 0} × ${formatCurrency(item.product?.price || 0)}</p>
+                                <p class="text-sm text-gray-500">${formatItemQuantity(item.quantity || 0, item.product?.unit_type)} × ${formatCurrency(item.product?.price || 0)}</p>
                             </div>
                             <div class="text-right">
                                 <p class="font-medium">${formatCurrency((item.quantity || 0) * (item.product?.price || 0))}</p>
+                                <p class="text-xs text-gray-500">${formatItemQuantity(item.quantity || 0, item.product?.unit_type)} ${item.product?.unit_type || 'pcs'}</p>
                                 <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">BONUS</span>
                             </div>
                         </div>

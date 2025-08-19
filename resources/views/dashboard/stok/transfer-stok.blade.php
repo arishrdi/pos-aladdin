@@ -223,7 +223,7 @@
     }
 
     // Fungsi untuk membuka modal transfer
-    async function openModalTransfer(productId, sku, produk, outletId, outlet, stok) {
+    async function openModalTransfer(productId, sku, produk, outletId, outlet, stok, unitType) {
         const modal = document.getElementById('modalTransferStock');
         
         // Set data ke form
@@ -237,6 +237,16 @@
         document.getElementById('jumlahTransfer').max = stok;
         document.getElementById('jumlahTransfer').value = '';
         document.getElementById('catatanTransfer').value = '';
+        
+        // Set validation based on unit type
+        const quantityInput = document.getElementById('jumlahTransfer');
+        if (unitType === 'meter') {
+            quantityInput.step = '0.1';
+            quantityInput.setAttribute('data-unit-type', 'meter');
+        } else {
+            quantityInput.step = '1';
+            quantityInput.setAttribute('data-unit-type', unitType || 'pcs');
+        }
         
         // Load dan isi dropdown outlet tujuan
         const outlets = await loadOutlets();
@@ -329,8 +339,27 @@
     }
 
     function validateTransferAmount(input) {
-        const max = parseInt(input.max);
-        const value = parseInt(input.value);
+        const max = parseFloat(input.max);
+        const value = parseFloat(input.value);
+        const unitType = input.getAttribute('data-unit-type') || 'pcs';
+        
+        // Validate quantity based on unit type
+        if (unitType === 'meter') {
+            // Allow decimal for meter
+            if (isNaN(value) || value < 0) {
+                input.setCustomValidity('Masukkan angka positif');
+                return;
+            }
+        } else {
+            // Only integers for pcs and unit
+            if (input.value.includes('.') || isNaN(value) || value !== Math.floor(value) || value < 0) {
+                input.setCustomValidity('Untuk satuan pcs/unit, hanya angka bulat yang diperbolehkan');
+                input.value = Math.floor(value) || '';
+                return;
+            }
+        }
+        
+        input.setCustomValidity('');
         
         if (value > max) {
             input.value = max;
@@ -493,9 +522,10 @@
                             '${product.name}', 
                             ${outletId}, 
                             '${outletName.replace(/'/g, "\\'")}', // Handle apostrophes
-                            ${product.quantity})" 
-                            class="...">
-                            <i data-lucide="truck" class="..."></i> Transfer
+                            ${product.quantity},
+                            '${product.unit_type || 'pcs'}')" 
+                            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600">
+                            <i data-lucide="truck" class="w-4 h-4"></i> Transfer
                         </button>
                     </td>
                 </tr>

@@ -384,7 +384,7 @@ class InventoryHistoryController extends Controller
         $startDate = Carbon::parse($request->start_date)->startOfDay();
 
 
-        $histories = InventoryHistory::with('product:id,name,sku,price,unit')
+        $histories = InventoryHistory::with('product:id,name,sku,price,unit_type')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->where('outlet_id', $outletId)
             ->get();
@@ -407,7 +407,7 @@ class InventoryHistoryController extends Controller
                         'product_name' => $first->product->name ?? null,
                         'sku' => $first->product->sku ?? null,
                         'price' => $first->product->price ?? null,
-                        'unit' => $first->product->unit ?? null,
+                        'unit_type' => $first->product->unit_type ?? null,
                         'stock_as_of_end_date' => $stockHistories[$first->product_id] ?? 0,
                         'total_quantity_changed' => $itemsByProduct->sum('quantity_change'),
                         'total_entries' => $itemsByProduct->count(),

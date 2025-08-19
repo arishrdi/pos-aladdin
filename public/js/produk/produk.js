@@ -361,6 +361,30 @@ const ProductManager = (() => {
             }
         });
 
+        // Unit type validation for quantity inputs
+        const unitTypeSelect = document.getElementById('unitType');
+        const stokInput = document.getElementById('stok');
+        const editUnitTypeSelect = document.getElementById('editUnitType');
+        const editStokInput = document.getElementById('editStok');
+
+        if (unitTypeSelect && stokInput) {
+            unitTypeSelect.addEventListener('change', function() {
+                validateQuantityInput(stokInput, this.value);
+            });
+            stokInput.addEventListener('input', function() {
+                validateQuantityInput(this, unitTypeSelect.value);
+            });
+        }
+
+        if (editUnitTypeSelect && editStokInput) {
+            editUnitTypeSelect.addEventListener('change', function() {
+                validateQuantityInput(editStokInput, this.value);
+            });
+            editStokInput.addEventListener('input', function() {
+                validateQuantityInput(this, editUnitTypeSelect.value);
+            });
+        }
+
         // Image preview handlers
         setupImagePreview(elements.inputs.image, "gambarPreview");
         setupImagePreview(elements.inputs.editImage, "editGambarPreview");
@@ -622,10 +646,15 @@ const ProductManager = (() => {
                     product.price || 0
                 )}</td>
                 <td class="py-3 px-4">
+                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+                        ${product.unit_type || '-'}
+                    </span>
+                </td>
+                <td class="py-3 px-4">
                     <div class="flex flex-col">
-                        <span class="font-medium">${quantity}</span>
+                        <span class="font-medium">${formatQuantityBasedOnUnit(quantity, product.unit_type)}</span>
                         <div class="text-xs text-gray-500">
-                            <span>Min: ${min_stock}</span><br>
+                            <span>Min: ${formatQuantityBasedOnUnit(min_stock, product.unit_type)}</span><br>
                         </div>
                     </div>
                 </td>
@@ -672,6 +701,51 @@ const ProductManager = (() => {
 
     // Format number for currency display
     const formatNumber = (num) => new Intl.NumberFormat("id-ID").format(num);
+
+    // Format quantity based on unit type
+    const formatQuantityBasedOnUnit = (quantity, unitType) => {
+        if (!quantity && quantity !== 0) return '-';
+        
+        const numValue = parseFloat(quantity);
+        
+        if (unitType === 'meter') {
+            // For meter, show decimal if exists, otherwise show as integer
+            return numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(1);
+        } else {
+            // For pcs and unit, always show as integer
+            return Math.floor(numValue).toString();
+        }
+    };
+
+    // Validate quantity input based on unit type
+    const validateQuantityInput = (input, unitType) => {
+        if (!input || !unitType) return;
+        
+        const value = input.value;
+        
+        if (unitType === 'meter') {
+            // Allow decimal for meter
+            input.step = '0.1';
+            input.pattern = '[0-9]+(\\.[0-9]+)?';
+            // Remove any existing validation messages
+            input.setCustomValidity('');
+        } else {
+            // Only integers for pcs and unit
+            input.step = '1';
+            input.pattern = '[0-9]+';
+            
+            // Check if current value has decimal
+            if (value && value.includes('.')) {
+                input.setCustomValidity('Untuk satuan pcs/unit, hanya angka bulat yang diperbolehkan');
+                input.value = Math.floor(parseFloat(value));
+            } else {
+                input.setCustomValidity('');
+            }
+        }
+        
+        // Report validity
+        input.reportValidity();
+    };
 
     // Filter products by search term
     const filterProducts = async (searchTerm) => {
@@ -905,6 +979,12 @@ const ProductManager = (() => {
                     categorySelect.value = product.category.id;
                 }
             }
+
+            // Set unit type
+            const unitTypeSelect = document.getElementById("editUnitType");
+            if (unitTypeSelect) {
+                unitTypeSelect.value = product.unit_type || 'pcs';
+            }
     
             document.getElementById("editStatus").value = product.is_active ? "active" : "inactive";
     
@@ -1062,6 +1142,7 @@ const ProductManager = (() => {
             formData.append("description", document.getElementById("editDeskripsi").value);
             formData.append("price", harga);
             formData.append("category_id", kategori);
+            formData.append("unit_type", document.getElementById("editUnitType").value || 'meter');
             formData.append("is_active", document.getElementById("editStatus").value === "active" ? 1 : 0);
             formData.append("min_stock", minStock);
             formData.append("outlet_id", currentOutletId.toString());
@@ -1437,8 +1518,8 @@ const ProductManager = (() => {
                                             product.category?.name ||
                                             "Tanpa Kategori"
                                         }</td>
-                                        <td>${stok}</td>
-                                        <td>${minStok}</td>
+                                        <td>${formatQuantityBasedOnUnit(stok, product.unit_type)}</td>
+                                        <td>${formatQuantityBasedOnUnit(minStok, product.unit_type)}</td>
                                         <td>Rp ${formatNumber(
                                             product.price || 0
                                         )}</td>
@@ -1550,7 +1631,7 @@ const ProductManager = (() => {
                     product.name || ""
                 }","${
                     product.category?.name || "Tanpa Kategori"
-                }","${minStok}","${stok}","Rp ${formatNumber(
+                }","${formatQuantityBasedOnUnit(minStok, product.unit_type)}","${formatQuantityBasedOnUnit(stok, product.unit_type)}","Rp ${formatNumber(
                     product.price || 0
                 )}","${product.is_active ? "Aktif" : "Nonaktif"}"\n`;
             });
