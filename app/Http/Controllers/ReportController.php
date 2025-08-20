@@ -205,7 +205,7 @@ class ReportController extends Controller
             ->where('orders.outlet_id', $outlet->id)
             ->whereBetween('orders.created_at', [$startDate, $endDate])
             ->where('orders.status', 'completed')
-            ->groupBy('products.id', 'products.name', 'products.sku', 'categories.name')
+            ->groupBy('products.id', 'products.name', 'products.sku', 'products.unit_type', 'categories.name')
             ->orderBy('total_sales', 'desc')
             ->get();
 

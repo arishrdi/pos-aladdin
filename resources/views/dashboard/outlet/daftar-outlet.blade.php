@@ -424,26 +424,39 @@
             }
 
             const formData = new FormData();
-            formData.append('name', document.getElementById('namaOutlet').value);
-            formData.append('phone', document.getElementById('teleponOutlet').value);
-            formData.append('address', document.getElementById('alamatOutlet').value);
-            formData.append('email', document.getElementById('emailOutlet').value);
-            formData.append('tax', document.getElementById('pajakOutlet').value || '0.00');
-            formData.append('tax_type', document.getElementById('taxType').value);
-            formData.append('nomor_transaksi_bank', document.getElementById('nomorTransaksi').value);
-            formData.append('nama_bank', document.getElementById('namaBank').value);
-            formData.append('atas_nama_bank', document.getElementById('atasNama').value);
-            formData.append('is_active', document.getElementById('statusAktif').checked ? '1' : '0');
+            
+            // Helper function to safely get element value
+            const getElementValue = (id, defaultValue = '') => {
+                const element = document.getElementById(id);
+                return element ? element.value : defaultValue;
+            };
+            
+            // Helper function to safely get checkbox state
+            const getCheckboxState = (id, defaultValue = false) => {
+                const element = document.getElementById(id);
+                return element ? element.checked : defaultValue;
+            };
+            
+            formData.append('name', getElementValue('namaOutlet'));
+            formData.append('phone', getElementValue('teleponOutlet'));
+            formData.append('address', getElementValue('alamatOutlet'));
+            formData.append('email', getElementValue('emailOutlet'));
+            formData.append('tax', getElementValue('pajakOutlet', '0.00'));
+            formData.append('tax_type', getElementValue('taxType'));
+            formData.append('nomor_transaksi_bank', getElementValue('nomorTransaksi'));
+            formData.append('nama_bank', getElementValue('namaBank'));
+            formData.append('atas_nama_bank', getElementValue('atasNama'));
+            formData.append('is_active', getCheckboxState('statusAktif', true) ? '1' : '0');
             
             // Add PKP banking fields
-            formData.append('pkp_atas_nama_bank', document.getElementById('pkpAtasNama').value);
-            formData.append('pkp_nama_bank', document.getElementById('pkpNamaBank').value);
-            formData.append('pkp_nomor_transaksi_bank', document.getElementById('pkpNomorTransaksi').value);
+            formData.append('pkp_atas_nama_bank', getElementValue('pkpAtasNama'));
+            formData.append('pkp_nama_bank', getElementValue('pkpNamaBank'));
+            formData.append('pkp_nomor_transaksi_bank', getElementValue('pkpNomorTransaksi'));
             
             // Add NonPKP banking fields
-            formData.append('non_pkp_atas_nama_bank', document.getElementById('nonPkpAtasNama').value);
-            formData.append('non_pkp_nama_bank', document.getElementById('nonPkpNamaBank').value);
-            formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('nonPkpNomorTransaksi').value);
+            formData.append('non_pkp_atas_nama_bank', getElementValue('nonPkpAtasNama'));
+            formData.append('non_pkp_nama_bank', getElementValue('nonPkpNamaBank'));
+            formData.append('non_pkp_nomor_transaksi_bank', getElementValue('nonPkpNomorTransaksi'));
             
             const fileInput = document.getElementById('fotoOutlet');
             if (fileInput.files[0]) {
@@ -847,32 +860,39 @@
 
         // Fungsi untuk reset form tambah
         function resetForm() {
-            document.getElementById('namaOutlet').value = '';
-            document.getElementById('teleponOutlet').value = '';
-            document.getElementById('alamatOutlet').value = '';
-            document.getElementById('emailOutlet').value = '';
-            document.getElementById('pajakOutlet').value = '';
-            document.getElementById('taxType').value = '';
-            document.getElementById('nomorTransaksi').value = '';
-            document.getElementById('namaBank').value = '';
-            document.getElementById('atasNama').value = '';
-            document.getElementById('fotoOutlet').value = '';
-            document.getElementById('statusAktif').checked = true;
+            const elementIds = [
+                'namaOutlet', 'teleponOutlet', 'alamatOutlet', 'emailOutlet', 
+                'pajakOutlet', 'taxType', 'fotoOutlet', 'pkpAtasNama', 
+                'pkpNamaBank', 'pkpNomorTransaksi', 'nonPkpAtasNama', 
+                'nonPkpNamaBank', 'nonPkpNomorTransaksi'
+            ];
             
-            // Reset PKP banking fields
-            document.getElementById('pkpAtasNama').value = '';
-            document.getElementById('pkpNamaBank').value = '';
-            document.getElementById('pkpNomorTransaksi').value = '';
+            // Reset only existing elements
+            elementIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = '';
+                }
+            });
             
-            // Reset NonPKP banking fields
-            document.getElementById('nonPkpAtasNama').value = '';
-            document.getElementById('nonPkpNamaBank').value = '';
-            document.getElementById('nonPkpNomorTransaksi').value = '';
+            // Reset checkbox
+            const statusAktif = document.getElementById('statusAktif');
+            if (statusAktif) {
+                statusAktif.checked = true;
+            }
             
-            document.getElementById('currentFotoOutlet').src = '#';
-            document.getElementById('currentFotoOutlet').classList.add('hidden');
-            document.getElementById('defaultIcon').classList.remove('hidden');
+            // Reset photo preview
+            const currentFoto = document.getElementById('currentFotoOutlet');
+            const defaultIcon = document.getElementById('defaultIcon');
+            if (currentFoto) {
+                currentFoto.src = '#';
+                currentFoto.classList.add('hidden');
+            }
+            if (defaultIcon) {
+                defaultIcon.classList.remove('hidden');
+            }
             
+            // Reset error messages and border colors
             document.querySelectorAll('[id^="error"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
         }
