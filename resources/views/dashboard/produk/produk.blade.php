@@ -11,6 +11,7 @@
 @include('partials.produk.modal-konfirmasi-hapus')
 @include('partials.produk.modal-tambah-produk')
 @include('partials.produk.modal-edit-produk')
+@include('partials.produk.modal-bulk-update-distribusi')
 
 <!-- Page Title + Action -->
 <div class="mb-6">
@@ -49,7 +50,7 @@
 
 <!-- Card: Tabel Produk -->
 <div class="bg-white rounded-lg shadow p-4">
-    <!-- Header Table: Search -->
+    <!-- Header Table: Search + Bulk Actions -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
         <input 
             type="text" 
@@ -57,6 +58,11 @@
             class="w-full md:w-1/3 border rounded px-3 py-2 text-sm mb-2 md:mb-0" 
             id="searchProduk"
         />
+        <div id="bulkActionsContainer" class="hidden">
+            <button id="btnBulkUpdateDistribusi" class="flex items-center px-4 py-2 text-sm font-medium bg-green-600 text-white rounded shadow hover:bg-green-700">
+                <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Update Distribusi (<span id="selectedCount">0</span>)
+            </button>
+        </div>
     </div>
 
     <!-- Table -->
@@ -64,6 +70,9 @@
         <table class="w-full text-base">
             <thead class="text-left text-base text-gray-600 border-b">
                 <tr>
+                    <th class="py-2 font-semibold w-8">
+                        <input type="checkbox" id="selectAllProducts" class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded">
+                    </th>
                     <th class="py-2 font-semibold">No.</th>
                     <th class="py-2 font-semibold">Nama Produk</th>
                     <th class="py-2 font-semibold">Bar Code</th>
@@ -79,7 +88,7 @@
             <tbody class="text-gray-700" id="produkTableBody">
                 <!-- Loading indicator -->
                 <tr class="border-b">
-                    <td colspan="10" class="py-8 text-center">
+                    <td colspan="11" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

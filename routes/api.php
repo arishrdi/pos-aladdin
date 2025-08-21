@@ -72,14 +72,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(ProductController::class)->group(function () {
             Route::get('/products', 'index');
             Route::post('/products', 'store')->middleware('role:admin');
+            Route::post('/products/bulk-update-distribution', 'bulkUpdateDistribution')->middleware('role:admin');
+            Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
+            Route::get('/products/outlet/{outletId}', 'getOutletProducts');
+            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:kasir');
+            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:kasir');
+            Route::get('products/{product}/detail', [ProductController::class, 'getProductDetail']);
             Route::get('/products/{product}', 'show');
             Route::post('/products/{product}', 'update')->middleware('role:admin');
             Route::delete('/products/{product}', 'destroy')->middleware('role:admin');
-            Route::get('/products/outlet/{outletId}', 'getOutletProducts');
-            Route::get('/products/barcode/{barcode}', 'findByBarcode')->middleware('role:kasir');
-            Route::get('/products/generate-barcode', 'generateBarcode')->middleware('role:admin');
-            Route::get('/outlets/{outletId}/products/barcode/{barcode}', 'posFindByBarcode')->middleware('role:kasir');
-            Route::get('products/{product}/detail', [ProductController::class, 'getProductDetail']);
         });
 
         Route::controller(InventoryController::class)->group(function () {

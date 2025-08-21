@@ -235,7 +235,7 @@
         @endif
 
         <!-- Stock Dropdown -->
-        <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="stockDropdown"
+        {{-- <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="stockDropdown"
             data-tooltip="Stok">
             <div class="flex items-center justify-between w-full cursor-pointer">
                 <div class="flex items-center">
@@ -267,7 +267,7 @@
                     <span class="sidebar-text">Approve Stok</span>
                 </a>
             </div>
-        </div>
+        </div> --}}
 
         <!-- User Dropdown -->
         <div class="menu-item px-4 py-2 group rounded-lg transition-all flex flex-col" data-dropdown="userDropdown"
@@ -353,14 +353,14 @@
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Per Member</span>
                 </a>
-                <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="package" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Stock</span>
                 </a>
                 <a href="/laporan-riwayat-stok" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
-                </a>
+                </a> --}}
                 <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>

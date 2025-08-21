@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aladdin Karpet - POS System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -66,7 +66,44 @@
             border-bottom: 1px solid #f3f4f6;
         }
 
-        @media (max-width: 1024px) {
+        /* Mobile cart item layout */
+        .cart-item-mobile {
+            display: none;
+            flex-direction: column;
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            gap: 8px;
+        }
+
+        .cart-item-mobile .product-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .cart-item-mobile .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cart-item-mobile .qty-discount {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item-grid {
+                display: none;
+            }
+            .cart-item-mobile {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
             .cart-item-grid {
                 grid-template-columns: minmax(120px, 2fr) 100px 70px 90px 40px;
             }
@@ -84,6 +121,7 @@
             border: 1px solid #d1d5db;
             border-radius: 4px;
             padding: 4px;
+            min-height: 36px;
         }
 
         .discount-input {
@@ -92,6 +130,29 @@
             border: 1px solid #d1d5db;
             border-radius: 4px;
             padding: 4px;
+            min-height: 36px;
+        }
+
+        /* Touch-friendly quantity controls */
+        .qty-btn {
+            min-width: 36px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .qty-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .qty-btn:active {
+            background: #e5e7eb;
         }
 
         /* New styles for sticky cart footer */
@@ -110,6 +171,285 @@
         .products-list-container {
             overflow-y: auto;
             flex-grow: 1;
+        }
+
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: calc(100vh - 60px) !important;
+            }
+            
+            .products-section {
+                width: 100% !important;
+                height: 60% !important;
+                border-right: none !important;
+                border-bottom: 2px solid #b3c5ba !important;
+                min-height: 280px;
+            }
+            
+            .cart-section {
+                width: 100% !important;
+                height: 40% !important;
+                border-left: none !important;
+                min-height: 300px;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .navbar {
+                padding: 8px 12px !important;
+                min-height: 60px;
+            }
+            
+            .navbar .flex {
+                gap: 4px !important;
+            }
+            
+            .navbar button {
+                padding: 4px 6px !important;
+                font-size: 11px !important;
+                min-height: 32px !important;
+            }
+            
+            .navbar button i {
+                font-size: 12px !important;
+                margin-right: 2px !important;
+            }
+            
+            .navbar a {
+                font-size: 16px !important;
+            }
+            
+            /* Stack navbar buttons on very small screens */
+            @media (max-width: 480px) {
+                .navbar .flex.flex-wrap {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                
+                .navbar .flex.flex-wrap > * {
+                    margin-bottom: 4px;
+                }
+            }
+            
+            /* Product cards mobile optimization */
+            .product-card {
+                padding: 12px !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 12px !important;
+            }
+            
+            .product-card .flex.items-center {
+                justify-content: flex-start !important;
+            }
+            
+            .product-card .flex.items-center.space-x-3 {
+                width: 100% !important;
+            }
+            
+            .product-card button {
+                width: 100% !important;
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Cart item mobile layout - use mobile specific layout */
+            .cart-item-grid {
+                display: none !important;
+            }
+            
+            .cart-column-headers {
+                display: none !important;
+            }
+            
+            /* Mobile specific product grid */
+            .product-item {
+                margin-bottom: 8px !important;
+            }
+            
+            /* Touch-friendly buttons */
+            button {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+            
+            /* Category tabs mobile */
+            .category-container {
+                padding: 0 !important;
+            }
+            
+            .nav-link {
+                white-space: nowrap !important;
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+            }
+            
+            /* Search input mobile */
+            #searchInput {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+                padding: 12px !important;
+            }
+            
+            /* Payment section mobile */
+            .payment-section {
+                padding: 12px 8px !important;
+                flex-shrink: 0;
+                margin-top: auto;
+            }
+            
+            .payment-section .space-y-2 > * {
+                margin-bottom: 6px !important;
+            }
+            
+            /* Tax selection mobile - make more compact */
+            .payment-section .flex.space-x-3 {
+                flex-direction: row !important;
+                gap: 8px !important;
+                justify-content: space-around;
+            }
+            
+            .payment-section .flex.space-x-3 label {
+                font-size: 12px !important;
+                flex: 1;
+                text-align: center;
+            }
+            
+            /* Make tax selection area more compact */
+            .payment-section .mb-4 {
+                margin-bottom: 8px !important;
+                padding: 8px !important;
+            }
+            
+            /* Summary text mobile */
+            .summary-item {
+                font-size: 13px !important;
+            }
+            
+            #total {
+                font-size: 18px !important;
+            }
+            
+            /* Cart items container mobile */
+            .cart-items-container {
+                flex: 1;
+                overflow-y: auto;
+                min-height: 120px;
+            }
+            
+            /* Cart header mobile */
+            .cart-header {
+                padding: 8px 12px !important;
+                flex-shrink: 0;
+            }
+            
+            .cart-header h4 {
+                font-size: 16px !important;
+                margin: 0 !important;
+            }
+            
+            /* Summary section mobile */
+            .summary-section {
+                margin-bottom: 12px !important;
+            }
+            
+            .summary-section .flex {
+                margin-bottom: 4px !important;
+            }
+            
+            .summary-section .mb-3 {
+                margin-bottom: 8px !important;
+            }
+            
+            /* Action buttons mobile */
+            .space-y-2 button {
+                padding: 10px 16px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Prevent horizontal scroll */
+            body {
+                overflow-x: hidden !important;
+            }
+            
+            /* Mobile specific adjustments */
+            .container-fluid {
+                padding: 0 !important;
+            }
+            
+            /* Ensure content fits in viewport */
+            * {
+                box-sizing: border-box;
+            }
+            
+            /* Better scrolling on mobile */
+            .cart-items-container, .products-list-container {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Improve text readability */
+            .product-name {
+                line-height: 1.3 !important;
+            }
+            
+            /* Better spacing for mobile */
+            .p-4 {
+                padding: 12px !important;
+            }
+            
+            .p-5 {
+                padding: 16px !important;
+            }
+            
+            /* Force all content to be visible */
+            .payment-section {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            /* Ensure buttons are accessible */
+            .payment-section button {
+                margin-bottom: 4px !important;
+            }
+            
+            /* Compact margins for mobile */
+            .mb-1 {
+                margin-bottom: 2px !important;
+            }
+            
+            .mb-2 {
+                margin-bottom: 4px !important;
+            }
+            
+            .mb-3 {
+                margin-bottom: 6px !important;
+            }
+            
+            .my-2 {
+                margin-top: 4px !important;
+                margin-bottom: 4px !important;
+            }
+        }
+
+        /* Tablet responsive improvements */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .products-section {
+                width: 60% !important;
+            }
+            
+            .cart-section {
+                width: 40% !important;
+            }
+            
+            .product-card {
+                padding: 14px !important;
+            }
+            
+            .cart-item-grid {
+                grid-template-columns: minmax(140px, 2fr) 90px 80px 90px 35px !important;
+                gap: 8px !important;
+            }
         }
 
         /* Payment method selection */
@@ -313,16 +653,16 @@
 <body class="bg-white font-sans overflow-x-hidden">
     <div class="container-fluid p-0">
         <!-- Enhanced Navbar -->
-        <nav class="navbar bg-white shadow-sm border-b py-4 px-5">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-3">
+        <nav class="navbar bg-white shadow-sm border-b py-2 px-3">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-2">
                 <a href="#" class="text-green-500 font-bold text-xl md:text-2xl">
                     <span id="outletName">Loading ...</span>
                 </a>
                 <div class="flex flex-wrap gap-2 items-center">
-                    <button id="btnStockModal"
+                    {{-- <button id="btnStockModal"
                         class="px-3 py-1.5 text-sm text-black font-bold bg-green-50 border border-green-300 rounded-md hover:bg-green-100 transition-colors">
                         <i class="fas fa-box mr-1.5 text-green-500 text-base"></i> Stok
-                    </button>
+                    </button> --}}
 
                     <button id="btnIncomeModal"
                         class="px-3 py-1.5 text-sm text-black font-bold bg-green-50 border border-green-300 rounded-md hover:bg-green-100 transition-colors">
@@ -349,7 +689,7 @@
             </div>
         </nav>
 
-        <div class="main-container flex h-[calc(100vh-68px)] overflow-hidden">
+        <div class="main-container flex h-[calc(100vh-60px)] overflow-hidden">
             <!-- Products Section -->
             <div class="products-section w-3/5 bg-white flex flex-col border-r-2 border-green-200">
                 <!-- Search and Categories Section -->
@@ -386,7 +726,7 @@
                     </h4>
                 </div>
 
-                <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50">
+                <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50 hidden md:block">
                     <div class="grid grid-cols-12">
                         <div class="col-span-5">Produk</div>
                         <div class="col-span-2 text-center">Qty</div>
@@ -422,41 +762,43 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-between mb-1">
-                        <div class="summary-item text-base text-gray-700">Subtotal</div>
-                        <div id="subtotal" class="summary-item text-base text-gray-700">Rp 0</div>
-                    </div>
-                    <div class="flex justify-between mb-1">
-                        <div class="summary-item text-base text-gray-700">Diskon</div>
-                        <div id="totalDiscount" class="summary-item text-base text-gray-700">Rp 0</div>
-                    </div>
-                    <div class="flex justify-between mb-1">
-                        <div class="summary-item text-base text-gray-700">Subtotal Qty</div>
-                        <div id="totalQty" class="summary-item text-base text-gray-700">0</div>
-                    </div>
-                    <div class="flex justify-between mb-3">
-                        <div class="summary-item text-base text-gray-500">
-                            <span id="taxLabel">Pajak (0%)</span>
-                            <span id="taxTypeIndicator"
-                                class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"></span>
+                    <div class="summary-section">
+                        <div class="flex justify-between mb-1">
+                            <div class="summary-item text-base text-gray-700">Subtotal</div>
+                            <div id="subtotal" class="summary-item text-base text-gray-700">Rp 0</div>
                         </div>
-                        <div id="taxAmount" class="summary-item text-base text-gray-500">Rp 0</div>
-                    </div>
+                        <div class="flex justify-between mb-1">
+                            <div class="summary-item text-base text-gray-700">Diskon</div>
+                            <div id="totalDiscount" class="summary-item text-base text-gray-700">Rp 0</div>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <div class="summary-item text-base text-gray-700">Subtotal Qty</div>
+                            <div id="totalQty" class="summary-item text-base text-gray-700">0</div>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <div class="summary-item text-base text-gray-500">
+                                <span id="taxLabel">Pajak (0%)</span>
+                                <span id="taxTypeIndicator"
+                                    class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"></span>
+                            </div>
+                            <div id="taxAmount" class="summary-item text-base text-gray-500">Rp 0</div>
+                        </div>
 
-                    <!-- Divider -->
-                    <div class="border-t border-green-200 my-3"></div>
+                        <!-- Divider -->
+                        <div class="border-t border-green-200 my-2"></div>
 
-                    <div class="flex justify-between mb-5">
-                        <div class="summary-item text-lg text-gray-800 font-bold">Total</div>
-                        <div id="total" class="text-green-500 font-extrabold text-2xl">Rp 0</div>
+                        <div class="flex justify-between mb-3">
+                            <div class="summary-item text-lg text-gray-800 font-bold">Total</div>
+                            <div id="total" class="text-green-500 font-extrabold text-2xl">Rp 0</div>
+                        </div>
+                        <div class="border-t border-green-200 mb-2"></div>
                     </div>
-                    <div class="border-t border-green-200 my-3 mb-3"></div>
 
                     <!-- Action Buttons -->
                     <div class="space-y-2">
                         <!-- Tombol Pembayaran -->
                         <button id="btnPaymentModal"
-                            class="bg-green-500 text-white border border-green-500 w-full py-2 font-semibold rounded-md text-sm hover:bg-green-600 transition-colors">
+                            class="bg-green-500 text-white border border-green-500 w-full py-4 font-semibold rounded-md text-sm hover:bg-green-600 transition-colors">
                             <i class="fas fa-money-bill-wave mr-2"></i> Pembayaran
                         </button>
 
@@ -700,7 +1042,7 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
         const cartItem = window.cartManager.cart.find(item => item.id === product.id);
         const reservedInCart = cartItem ? cartItem.quantity : 0;
         const availableStock = (product.quantity || 0) - reservedInCart;
-        const isOutOfStock = availableStock <= 0;
+        const isOutOfStock = false; // Allow selling products even with 0 stock
         
         return `
             <div class="product-item mb-3">
@@ -714,7 +1056,7 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
                             <div class="product-name text-base font-medium">${product.name}</div>
                             <div class="product-price text-green-500 font-semibold text-base">${formatCurrency(product.price, true)}</div>
                             <div class="text-sm text-gray-500">
-                                <span>Stok: ${formatQuantity(availableStock)}</span>
+                                <!-- <span>Stok: ${formatQuantity(availableStock)}</span> -->
                                 <span class="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">${product.unit_type || 'pcs'}</span>
                             </div>
                         </div>

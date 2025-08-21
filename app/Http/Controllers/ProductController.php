@@ -82,7 +82,7 @@ class ProductController extends Controller
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
                 'quantity' => 'required|numeric',
-                'min_stock' => 'required|numeric',
+                'min_stock' => 'nullable|numeric',
             ]);
 
             DB::beginTransaction();
@@ -107,16 +107,16 @@ class ProductController extends Controller
                 Inventory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
-                    'quantity' => $request->quantity,
-                    'min_stock' => $request->min_stock,
+                    'quantity' => $request->quantity ?? 0,
+                    'min_stock' => $request->min_stock ?? 0,
                 ]);
 
                 InventoryHistory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
-                    'quantity_change' => $request->quantity,
+                    'quantity_change' => $request->quantity ?? 0,
                     'quantity_before' => 0,
-                    'quantity_after' => $request->quantity,
+                    'quantity_after' => $request->quantity ?? 0,
                     'type' => 'adjustment',
                     'notes' => 'Stok awal produk baru',
                     'user_id' => $request->user()->id,
@@ -172,14 +172,14 @@ class ProductController extends Controller
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
                 'unit_type' => 'required|in:meter,pcs,unit',
-                'min_stock' => 'required|numeric',
+                'min_stock' => 'nullable|numeric',
             ];
 
             // Validasi quantity berdasarkan unit_type
             if ($request->unit_type === 'meter') {
-                $validationRules['quantity'] = 'required|numeric|regex:/^\d+(\.\d+)?$/';
+                $validationRules['quantity'] = 'nullable|numeric|regex:/^\d+(\.\d+)?$/';
             } else {
-                $validationRules['quantity'] = 'required|integer|min:0';
+                $validationRules['quantity'] = 'nullable|integer|min:0';
             }
 
             $request->validate($validationRules);
@@ -226,16 +226,16 @@ class ProductController extends Controller
                 Inventory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
-                    'quantity' => $request->quantity,
-                    'min_stock' => $request->min_stock,
+                    'quantity' => $request->quantity ?? 0,
+                    'min_stock' => $request->min_stock ?? 0,
                 ]);
 
                 InventoryHistory::create([
                     'product_id' => $product->id,
                     'outlet_id' => $outletId,
-                    'quantity_change' => $request->quantity,
+                    'quantity_change' => $request->quantity ?? 0,
                     'quantity_before' => 0,
-                    'quantity_after' => $request->quantity,
+                    'quantity_after' => $request->quantity ?? 0,
                     'type' => 'adjustment',
                     'notes' => 'Stok awal produk baru',
                     'user_id' => $request->user()->id,
@@ -302,7 +302,7 @@ class ProductController extends Controller
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
                 'unit_type' => 'required|in:meter,pcs,unit',
-                'min_stock' => 'required|numeric',
+                'min_stock' => 'nullable|numeric',
             ];
 
             $request->validate($validationRules);
@@ -731,6 +731,88 @@ class ProductController extends Controller
             ]);
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
+        }
+    }
+
+    public function bulkUpdateDistribution(Request $request)
+    {
+        try {
+            $request->validate([
+                'product_ids' => 'required|array|min:1',
+                'product_ids.*' => 'exists:products,id',
+                'outlet_ids' => 'required|array|min:1', 
+                'outlet_ids.*' => 'exists:outlets,id',
+                'mode' => 'required|in:add,replace,remove'
+            ]);
+
+            $productIds = $request->product_ids;
+            $outletIds = $request->outlet_ids;
+            $mode = $request->mode;
+
+            DB::beginTransaction();
+
+            foreach ($productIds as $productId) {
+                $product = Product::findOrFail($productId);
+                
+                switch ($mode) {
+                    case 'add':
+                        // Tambah ke outlet yang dipilih (tidak mengubah distribusi existing)
+                        foreach ($outletIds as $outletId) {
+                            $existingInventory = Inventory::where('product_id', $productId)
+                                ->where('outlet_id', $outletId)
+                                ->first();
+                                
+                            if (!$existingInventory) {
+                                Inventory::create([
+                                    'product_id' => $productId,
+                                    'outlet_id' => $outletId,
+                                    'quantity' => 0,
+                                    'min_stock' => 0,
+                                ]);
+                            }
+                        }
+                        break;
+                        
+                    case 'replace':
+                        // Hapus semua distribusi existing, lalu tambah yang dipilih
+                        Inventory::where('product_id', $productId)->delete();
+                        
+                        foreach ($outletIds as $outletId) {
+                            Inventory::create([
+                                'product_id' => $productId,
+                                'outlet_id' => $outletId,
+                                'quantity' => 0,
+                                'min_stock' => 0,
+                            ]);
+                        }
+                        break;
+                        
+                    case 'remove':
+                        // Hapus distribusi dari outlet yang dipilih
+                        Inventory::where('product_id', $productId)
+                            ->whereIn('outlet_id', $outletIds)
+                            ->delete();
+                        break;
+                }
+            }
+
+            DB::commit();
+
+            $message = match($mode) {
+                'add' => 'Produk berhasil ditambahkan ke outlet yang dipilih',
+                'replace' => 'Distribusi produk berhasil diganti dengan outlet yang dipilih',
+                'remove' => 'Produk berhasil dihapus dari outlet yang dipilih'
+            };
+
+            return $this->successResponse(null, $message);
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return $this->errorResponse('Validasi gagal', $e->errors(), 422);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Bulk update distribution error: ' . $th->getMessage());
+            return $this->errorResponse('Gagal melakukan bulk update distribusi: ' . $th->getMessage());
         }
     }
 }

@@ -575,7 +575,7 @@ const ProductManager = (() => {
         if (products.length === 0) {
             tbody.innerHTML = `
                 <tr class="border-b">
-                    <td colspan="8" class="py-4 text-center text-gray-500">
+                    <td colspan="11" class="py-4 text-center text-gray-500">
                         Tidak ada data produk
                     </td>
                 </tr>
@@ -614,6 +614,11 @@ const ProductManager = (() => {
             const row = document.createElement("tr");
             row.className = "border-b hover:bg-gray-50";
             row.innerHTML = `
+                <td class="py-3 px-4">
+                    <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded" 
+                           data-product-id="${product.id}" data-product-name="${product.name || ''}" 
+                           onchange="BulkManager.updateSelection()">
+                </td>
                 <td class="py-3 px-4">${index + 1}</td>
                 <td class="py-3 px-4 flex items-center space-x-3">
                     <img src="${
@@ -1674,5 +1679,234 @@ const ProductManager = (() => {
     };
 })();
 
+// Bulk Operations Manager
+const BulkManager = (() => {
+    let selectedProducts = new Set();
+
+    // Initialize bulk operations
+    const init = () => {
+        // Setup select all checkbox
+        const selectAllCheckbox = document.getElementById('selectAllProducts');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', handleSelectAll);
+        }
+
+        // Setup bulk update button
+        const bulkUpdateBtn = document.getElementById('btnBulkUpdateDistribusi');
+        if (bulkUpdateBtn) {
+            bulkUpdateBtn.addEventListener('click', openBulkUpdateModal);
+        }
+
+        // Setup modal buttons
+        const cancelBtn = document.getElementById('btnBatalBulkUpdate');
+        const saveBtn = document.getElementById('btnSimpanBulkUpdate');
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => ProductManager.closeModal('modalBulkUpdateDistribusi'));
+        }
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveBulkUpdate);
+        }
+    };
+
+    // Handle select all checkbox
+    const handleSelectAll = (event) => {
+        const isChecked = event.target.checked;
+        const productCheckboxes = document.querySelectorAll('.product-checkbox');
+        
+        productCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+            const productId = checkbox.dataset.productId;
+            if (isChecked) {
+                selectedProducts.add(productId);
+            } else {
+                selectedProducts.delete(productId);
+            }
+        });
+        
+        updateBulkActionsUI();
+    };
+
+    // Update selection when individual checkbox changes
+    const updateSelection = () => {
+        const checkbox = event.target;
+        const productId = checkbox.dataset.productId;
+        
+        if (checkbox.checked) {
+            selectedProducts.add(productId);
+        } else {
+            selectedProducts.delete(productId);
+        }
+        
+        // Update select all checkbox state
+        const selectAllCheckbox = document.getElementById('selectAllProducts');
+        const productCheckboxes = document.querySelectorAll('.product-checkbox');
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        
+        if (selectAllCheckbox) {
+            selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < productCheckboxes.length;
+            selectAllCheckbox.checked = checkedBoxes.length === productCheckboxes.length;
+        }
+        
+        updateBulkActionsUI();
+    };
+
+    // Update bulk actions UI visibility and count
+    const updateBulkActionsUI = () => {
+        const bulkContainer = document.getElementById('bulkActionsContainer');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        
+        if (bulkContainer && selectedCountSpan) {
+            if (selectedProducts.size > 0) {
+                bulkContainer.classList.remove('hidden');
+                selectedCountSpan.textContent = selectedProducts.size;
+            } else {
+                bulkContainer.classList.add('hidden');
+            }
+        }
+    };
+
+    // Open bulk update modal
+    const openBulkUpdateModal = async () => {
+        if (selectedProducts.size === 0) {
+            ProductManager.showAlert('warning', 'Pilih minimal satu produk untuk update distribusi');
+            return;
+        }
+
+        try {
+            // Load selected products info
+            await loadSelectedProductsInfo();
+            
+            // Load outlets
+            await loadOutletsForBulkUpdate();
+            
+            // Show modal
+            ProductManager.openModal('modalBulkUpdateDistribusi');
+        } catch (error) {
+            console.error('Error opening bulk update modal:', error);
+            ProductManager.showAlert('error', 'Gagal membuka modal bulk update');
+        }
+    };
+
+    // Load selected products information
+    const loadSelectedProductsInfo = async () => {
+        const selectedProductsList = document.getElementById('bulkSelectedProductsList');
+        const bulkSelectedCount = document.getElementById('bulkSelectedCount');
+        
+        if (!selectedProductsList || !bulkSelectedCount) return;
+        
+        bulkSelectedCount.textContent = selectedProducts.size;
+        
+        // Get product names from checkboxes
+        const productInfo = [];
+        selectedProducts.forEach(productId => {
+            const checkbox = document.querySelector(`[data-product-id="${productId}"]`);
+            if (checkbox) {
+                productInfo.push({
+                    id: productId,
+                    name: checkbox.dataset.productName || 'Unknown Product'
+                });
+            }
+        });
+        
+        selectedProductsList.innerHTML = productInfo.map(product => 
+            `<div class="flex items-center justify-between py-1 px-2 bg-blue-50 rounded text-sm">
+                <span>${product.name}</span>
+                <span class="text-gray-500">#${product.id}</span>
+            </div>`
+        ).join('');
+    };
+
+    // Load outlets for bulk update
+    const loadOutletsForBulkUpdate = async () => {
+        try {
+            const response = await fetch('/api/outlets');
+            const outlets = await response.json();
+            
+            const bulkOutletList = document.getElementById('bulkOutletList');
+            if (!bulkOutletList || !outlets.data) return;
+            
+            bulkOutletList.innerHTML = outlets.data.map(outlet => 
+                `<label class="flex items-center">
+                    <input type="checkbox" class="bulk-outlet-checkbox mr-2" value="${outlet.id}">
+                    <span>${outlet.name}</span>
+                </label>`
+            ).join('');
+        } catch (error) {
+            console.error('Error loading outlets:', error);
+            ProductManager.showAlert('error', 'Gagal memuat data outlet');
+        }
+    };
+
+    // Save bulk update
+    const saveBulkUpdate = async () => {
+        try {
+            const selectedOutlets = Array.from(document.querySelectorAll('.bulk-outlet-checkbox:checked'))
+                .map(cb => cb.value);
+            const updateMode = document.querySelector('input[name="bulkUpdateMode"]:checked')?.value;
+            
+            if (selectedOutlets.length === 0) {
+                ProductManager.showAlert('warning', 'Pilih minimal satu outlet');
+                return;
+            }
+            
+            const requestData = {
+                product_ids: Array.from(selectedProducts),
+                outlet_ids: selectedOutlets,
+                mode: updateMode || 'add'
+            };
+            
+            const response = await fetch('/api/products/bulk-update-distribution', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                ProductManager.showAlert('success', 'Distribusi produk berhasil diupdate');
+                ProductManager.closeModal('modalBulkUpdateDistribusi');
+                
+                // Clear selections
+                clearSelections();
+                
+                // Reload products
+                await ProductManager.init();
+            } else {
+                throw new Error(result.message || 'Gagal mengupdate distribusi');
+            }
+        } catch (error) {
+            console.error('Error saving bulk update:', error);
+            ProductManager.showAlert('error', error.message || 'Gagal menyimpan perubahan');
+        }
+    };
+
+    // Clear all selections
+    const clearSelections = () => {
+        selectedProducts.clear();
+        
+        // Uncheck all checkboxes
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('selectAllProducts').checked = false;
+        document.getElementById('selectAllProducts').indeterminate = false;
+        
+        updateBulkActionsUI();
+    };
+
+    // Public API
+    return {
+        init,
+        updateSelection,
+        clearSelections
+    };
+})();
+
 // Initialize when DOM is loaded
-document.addEventListener("DOMContentLoaded", ProductManager.init);
+document.addEventListener("DOMContentLoaded", () => {
+    ProductManager.init();
+    BulkManager.init();
+});

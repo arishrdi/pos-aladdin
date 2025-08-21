@@ -19,22 +19,16 @@ class CartManager {
             const qty = parseQuantity(quantity);
             const existingIndex = this.cart.findIndex(item => item.id === product.id);
             
-            // Validasi stok total yang tersedia
+            // Validasi stok total yang tersedia - disabled untuk allow selling with 0 stock
             const currentStock = product.quantity || 0;
             
             if (existingIndex >= 0) {
                 const newQty = this.cart[existingIndex].quantity + qty;
-                if (newQty > currentStock) {
-                    showNotification('Stok tidak mencukupi', 'error');
-                    return false;
-                }
+                // Removed stock validation
                 this.cart[existingIndex].quantity = newQty;
                 this.cart[existingIndex].subtotal = this.calculateItemSubtotal(this.cart[existingIndex]);
             } else {
-                if (qty > currentStock) {
-                    showNotification('Stok tidak mencukupi', 'error');
-                    return false;
-                }
+                // Removed stock validation
                 
                 this.cart.push({
                     id: product.id,
@@ -84,10 +78,7 @@ class CartManager {
                 return false;
             }
             
-            if (qty > item.stock) {
-                showNotification(`Stok hanya tersedia ${formatQuantity(item.stock)}`, 'error');
-                return false;
-            }
+            // Removed stock validation - allow selling with 0 stock
             
             if (qty <= 0) {
                 this.removeItem(index);
@@ -135,7 +126,7 @@ class CartManager {
     }
 
     // Add bonus item (using regular product stock)
-    addBonusItem(product, quantity = 1) {
+    addBonusItemOld(product, quantity = 1) {
         try {
             const qty = parseQuantity(quantity);
             const existingIndex = this.bonusItems.findIndex(item => item.id === product.id);
@@ -182,6 +173,38 @@ class CartManager {
             return false;
         }
     }
+
+    addBonusItem(product, quantity = 1) {
+    try {
+        const qty = parseQuantity(quantity);
+        const existingIndex = this.bonusItems.findIndex(item => item.id === product.id);
+
+        if (existingIndex >= 0) {
+            const newQty = this.bonusItems[existingIndex].quantity + qty;
+            this.bonusItems[existingIndex].quantity = newQty;
+        } else {
+            this.bonusItems.push({
+                id: product.id,
+                name: product.name,
+                quantity: qty,
+                stock: product.quantity || 0,
+                image_url: product.image_url || null,
+                type: 'bonus'
+            });
+        }
+
+        this.updateCartDisplay();
+        this.triggerProductListUpdate();
+        showNotification(`Bonus ${product.name} ditambahkan`, 'success');
+        return true;
+
+    } catch (error) {
+        console.error('Error adding bonus item:', error);
+        showNotification('Gagal menambahkan bonus', 'error');
+        return false;
+    }
+}
+
 
     // Update bonus quantity
     updateBonusQuantity(index, newQuantity) {
@@ -952,7 +975,8 @@ class CartManager {
             const totalReserved = reservedInCart + reservedInBonus;
             const availableStock = (product.quantity || 0) - totalReserved;
             
-            return matchSearch && availableStock > 0;
+            // return matchSearch && availableStock > 0;
+            return matchSearch;
         });
 
         if (availableProducts.length === 0) {
@@ -986,7 +1010,7 @@ class CartManager {
                             }
                             <div>
                                 <div class="font-medium text-gray-900">${product.name}</div>
-                                <div class="text-sm text-green-600">Tersedia: ${formatQuantity(availableStock)}</div>
+                                <!-- <div class="text-sm text-green-600">Tersedia: ${formatQuantity(availableStock)}</div> -->
                                 <div class="text-xs text-gray-500">${(product.category?.name || 'UNCATEGORIZED').toUpperCase()}</div>
                                 ${reservedInCart > 0 ? `<div class="text-xs text-blue-500">Di keranjang: ${formatQuantity(reservedInCart)}</div>` : ''}
                                 ${reservedInBonus > 0 ? `<div class="text-xs text-green-500">Bonus: ${formatQuantity(reservedInBonus)}</div>` : ''}
@@ -995,9 +1019,14 @@ class CartManager {
                         <div class="flex items-center space-x-2">
                             <input type="number" class="bonus-qty-select w-20 px-2 py-1 text-sm border border-gray-300 rounded text-center" 
                                    min="0.01" step="0.01" max="${availableStock}" value="1" placeholder="Qty">
-                            <button class="btn-add-bonus-product px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm" 
+                            <!-- <button class="btn-add-bonus-product px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm" 
                                     data-product-id="${product.id}" ${availableStock <= 0 ? 'disabled' : ''}>
                                 ${availableStock <= 0 ? 'Habis' : 'Tambah'}
+                            </button> -->
+
+                              <button class="btn-add-bonus-product px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm" 
+                                    data-product-id="${product.id}">
+                                Tambah
                             </button>
                         </div>
                     </div>
