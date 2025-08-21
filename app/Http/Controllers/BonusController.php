@@ -106,24 +106,24 @@ class BonusController extends Controller
                 ], 400);
             }
 
-            foreach ($data['items'] as $item) {
-                $product = Product::find($item['product_id']);
-                if (!$product) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Produk tidak ditemukan: {$item['product_id']}"
-                    ], 404);
-                }
+            // foreach ($data['items'] as $item) {
+            //     $product = Product::find($item['product_id']);
+            //     if (!$product) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => "Produk tidak ditemukan: {$item['product_id']}"
+            //         ], 404);
+            //     }
 
-                // Check available stock (considering reserved in cart and other pending bonuses)
-                $availableStock = $this->getAvailableStock($product->id, $data['outlet_id']);
-                if ($item['quantity'] > $availableStock) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Stok tidak mencukupi untuk {$product->name}. Tersedia: {$availableStock}"
-                    ], 400);
-                }
-            }
+            //     // Check available stock (considering reserved in cart and other pending bonuses)
+            //     $availableStock = $this->getAvailableStock($product->id, $data['outlet_id']);
+            //     if ($item['quantity'] > $availableStock) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => "Stok tidak mencukupi untuk {$product->name}. Tersedia: {$availableStock}"
+            //         ], 400);
+            //     }
+            // }
 
             DB::beginTransaction();
             
