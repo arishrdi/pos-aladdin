@@ -405,7 +405,11 @@
                     cancellation_request: transaksi.cancellation_request || null,
                     has_pending_cancellation: transaksi.has_pending_cancellation || false,
                     // Tambahkan bonus items
-                    bonus_items: transaksi.bonus_items || []
+                    bonus_items: transaksi.bonus_items || [],
+                    // Tambahkan carpet service information
+                    service_type: transaksi.service_type || null,
+                    installation_date: transaksi.installation_date || null,
+                    installation_notes: transaksi.installation_notes || null
                     };
                 });
                 
@@ -1086,6 +1090,29 @@
                 </div>
                 ` : ''}
                 ` : ''}
+
+                ${safeTransaction.service_type ? `
+                <div class="divider"></div>
+                <div class="text-center" style="font-weight: bold; margin-bottom: 8px;">LAYANAN KARPET MASJID</div>
+                <div class="info-row">
+                    <span class="info-label">Jenis Layanan:</span>
+                    <span>${safeTransaction.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat'}</span>
+                </div>
+                ${safeTransaction.installation_date ? `
+                <div class="info-row">
+                    <span class="info-label">Estimasi Pemasangan:</span>
+                    <span>${new Date(safeTransaction.installation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+                ` : ''}
+                ${safeTransaction.installation_notes ? `
+                <div class="info-row" style="margin-top: 5px;">
+                    <span class="info-label">Rincian Pemasangan:</span>
+                </div>
+                <div style="margin-top: 3px; font-size: 14px; line-height: 1.3;">
+                    ${safeTransaction.installation_notes}
+                </div>
+                ` : ''}
+                ` : ''}
                 
                 <!-- Footer -->
                 <div class="divider"></div>
@@ -1262,6 +1289,55 @@
             bonusSection.classList.remove('hidden');
         } else {
             bonusSection.classList.add('hidden');
+        }
+
+        // Carpet Service Information
+        const carpetServiceSection = document.getElementById('modalCarpetServiceSection');
+        const serviceTypeInfo = document.getElementById('modalServiceTypeInfo');
+        const installationDateInfo = document.getElementById('modalInstallationDateInfo');
+        const installationNotesInfo = document.getElementById('modalInstallationNotesInfo');
+
+        let showCarpetServiceSection = false;
+
+        // Show service type if available
+        if (t.service_type) {
+            const serviceTypeText = t.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat';
+            document.getElementById('modalServiceType').textContent = serviceTypeText;
+            serviceTypeInfo.classList.remove('hidden');
+            showCarpetServiceSection = true;
+        } else {
+            serviceTypeInfo.classList.add('hidden');
+        }
+
+        // Show installation date if available
+        if (t.installation_date) {
+            const installationDate = new Date(t.installation_date);
+            const formattedDate = installationDate.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            document.getElementById('modalInstallationDate').textContent = formattedDate;
+            installationDateInfo.classList.remove('hidden');
+            showCarpetServiceSection = true;
+        } else {
+            installationDateInfo.classList.add('hidden');
+        }
+
+        // Show installation notes if available
+        if (t.installation_notes) {
+            document.getElementById('modalInstallationNotes').textContent = t.installation_notes;
+            installationNotesInfo.classList.remove('hidden');
+            showCarpetServiceSection = true;
+        } else {
+            installationNotesInfo.classList.add('hidden');
+        }
+
+        // Show/hide carpet service section
+        if (showCarpetServiceSection) {
+            carpetServiceSection.classList.remove('hidden');
+        } else {
+            carpetServiceSection.classList.add('hidden');
         }
 
         bukaModal('transactionModal');

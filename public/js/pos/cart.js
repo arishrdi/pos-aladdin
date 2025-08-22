@@ -707,7 +707,7 @@ class CartManager {
                             <button class="btn-decrease px-1 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 text-xs" data-index="${index}">
                                 <i data-lucide="minus" class="w-3 h-3"></i>
                             </button>
-                            <input type="text" class="qty-input w-12 px-1 py-1 text-center text-xs border border-gray-300 rounded" value="${formatQuantity(item.quantity)}" data-index="${index}" data-unit-type="${item.unit_type || 'pcs'}"${item.unit_type === 'meter' ? ' step="0.1"' : ' step="1"'}${item.unit_type !== 'meter' ? ' pattern="[0-9]+"' : ''}>
+                            <input type="text" class="qty-input w-12 px-1 py-1 text-center text-xs border border-gray-300 rounded" value="${formatQuantity(item.quantity)}" data-index="${index}" data-unit-type="${item.unit_type || 'pcs'}" tabindex="${(index * 3) + 1}"${item.unit_type === 'meter' ? ' step="0.1"' : ' step="1"'}${item.unit_type !== 'meter' ? ' pattern="[0-9]+"' : ''}>
                             <button class="btn-increase px-1 py-1 border border-gray-300 bg-gray-100 rounded hover:bg-gray-200 text-xs" data-index="${index}">
                                 <i data-lucide="plus" class="w-3 h-3"></i>
                             </button>
@@ -717,7 +717,7 @@ class CartManager {
                     
                     <!-- Discount (col-span-3) -->
                     <div class="col-span-3">
-                        <input type="text" class="discount-input w-full px-2 py-1 text-xs border border-gray-300 rounded text-center" value="${formatCurrency(item.discount)}" data-index="${index}" placeholder="Rp 0">
+                        <input type="text" class="discount-input w-full px-2 py-1 text-xs border border-gray-300 rounded text-center" value="${formatCurrency(item.discount)}" data-index="${index}" tabindex="${(index * 3) + 2}" placeholder="Rp 0">
                     </div>
                     
                     <!-- Subtotal (col-span-2) -->
@@ -725,7 +725,7 @@ class CartManager {
                         <div class="font-medium text-sm">
                             ${formatCurrency(item.subtotal)}
                         </div>
-                        <button class="btn-remove text-gray-400 hover:text-red-500 text-xs mt-1" data-index="${index}">
+                        <button class="btn-remove text-gray-400 hover:text-red-500 text-xs mt-1" data-index="${index}" tabindex="${(index * 3) + 3}">
                             <i data-lucide="trash-2" class="w-3 h-3"></i>
                         </button>
                     </div>
@@ -779,6 +779,19 @@ class CartManager {
                 input.addEventListener('input', (e) => {
                     const unitType = e.target.getAttribute('data-unit-type') || 'pcs';
                     this.validateQuantityInput(e.target, unitType, e.target.value);
+                });
+
+                // Add Enter key navigation
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        const discountInput = document.querySelector(`#cartItems .discount-input[data-index="${index}"]`);
+                        if (discountInput) {
+                            discountInput.focus();
+                            discountInput.select();
+                        }
+                    }
                 });
             });
 
@@ -834,6 +847,31 @@ class CartManager {
                     if (this.cart[index]) {
                         const currentDiscount = this.cart[index].discount || 0;
                         e.target.value = currentDiscount.toString();
+                    }
+                });
+
+                // Add Enter key navigation for discount inputs
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        // Apply the discount first
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        const discount = e.target.value;
+                        this.updateDiscount(index, discount);
+                        
+                        // Move to next item's quantity input or payment button
+                        const nextIndex = index + 1;
+                        const nextQtyInput = document.querySelector(`#cartItems .qty-input[data-index="${nextIndex}"]`);
+                        if (nextQtyInput) {
+                            nextQtyInput.focus();
+                            nextQtyInput.select();
+                        } else {
+                            // No more items, focus on payment button
+                            const paymentBtn = document.getElementById('btnPaymentModal');
+                            if (paymentBtn) {
+                                paymentBtn.focus();
+                            }
+                        }
                     }
                 });
             });
@@ -972,8 +1010,8 @@ class CartManager {
             const reservedInCart = cartItem ? cartItem.quantity : 0;
             const existingBonus = this.bonusItems.find(item => item.id === product.id);
             const reservedInBonus = existingBonus ? existingBonus.quantity : 0;
-            const totalReserved = reservedInCart + reservedInBonus;
-            const availableStock = (product.quantity || 0) - totalReserved;
+            // const totalReserved = reservedInCart + reservedInBonus;
+            // const availableStock = (product.quantity || 0) - totalReserved;
             
             // return matchSearch && availableStock > 0;
             return matchSearch;
@@ -1132,6 +1170,7 @@ class CartManager {
     clear() {
         this.cart = [];
         this.bonusItems = [];
+        this.clearCarpetServiceForm();
         this.updateCartDisplay();
         this.triggerProductListUpdate();
     }
@@ -1154,6 +1193,8 @@ class CartManager {
 
     // Get cart data untuk API
     getCartData() {
+        const serviceData = this.getCarpetServiceData();
+        
         return {
             items: this.cart.map(item => ({
                 product_id: item.id,
@@ -1169,8 +1210,49 @@ class CartManager {
             member: this.selectedMember,
             transaction_type: this.transactionType,
             tax_type: this.taxType,
+            service_type: serviceData.service_type,
+            installation_date: serviceData.installation_date,
+            installation_notes: serviceData.installation_notes,
             totals: this.calculateTotals()
         };
+    }
+
+    // Get carpet service data from form
+    getCarpetServiceData() {
+        const serviceTypeSelect = document.getElementById('serviceType');
+        const installationDateInput = document.getElementById('installationDate');
+        const installationNotesInput = document.getElementById('installationNotes');
+        
+        const serviceType = serviceTypeSelect ? serviceTypeSelect.value : null;
+        const installationDate = installationDateInput ? installationDateInput.value : null;
+        const installationNotes = installationNotesInput ? installationNotesInput.value : null;
+        
+        return {
+            service_type: serviceType || null,
+            installation_date: installationDate || null,
+            installation_notes: installationNotes || null
+        };
+    }
+
+    // Clear carpet service form
+    clearCarpetServiceForm() {
+        const serviceTypeSelect = document.getElementById('serviceType');
+        const installationDateInput = document.getElementById('installationDate');
+        const installationNotesInput = document.getElementById('installationNotes');
+        const serviceContent = document.getElementById('serviceContent');
+        const serviceChevron = document.getElementById('serviceChevron');
+        
+        if (serviceTypeSelect) serviceTypeSelect.value = '';
+        if (installationDateInput) installationDateInput.value = '';
+        if (installationNotesInput) installationNotesInput.value = '';
+        
+        // Collapse the service section when clearing
+        if (serviceContent && serviceContent.classList.contains('expanded')) {
+            serviceContent.classList.remove('expanded');
+        }
+        if (serviceChevron && serviceChevron.classList.contains('rotated')) {
+            serviceChevron.classList.remove('rotated');
+        }
     }
 
     // Validate quantity input based on unit type

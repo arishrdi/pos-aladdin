@@ -37,13 +37,17 @@ class Order extends Model
         'cancellation_requested_at',
         'cancellation_processed_by',
         'cancellation_processed_at',
-        'cancellation_admin_notes'
+        'cancellation_admin_notes',
+        'service_type',
+        'installation_date',
+        'installation_notes'
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
         'cancellation_requested_at' => 'datetime',
-        'cancellation_processed_at' => 'datetime'
+        'cancellation_processed_at' => 'datetime',
+        'installation_date' => 'date'
     ];
 
     protected $appends = ['payment_proof_url'];

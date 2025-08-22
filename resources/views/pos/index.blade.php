@@ -59,8 +59,8 @@
 
         .cart-item-grid {
             display: grid;
-            grid-template-columns: minmax(150px, 2fr) 120px 80px 100px 40px;
-            gap: 10px;
+            grid-template-columns: minmax(150px, 2fr) 120px 100px 120px 40px;
+            gap: 12px;
             align-items: center;
             padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
@@ -105,7 +105,8 @@
 
         @media (max-width: 1024px) and (min-width: 769px) {
             .cart-item-grid {
-                grid-template-columns: minmax(120px, 2fr) 100px 70px 90px 40px;
+                grid-template-columns: minmax(120px, 2fr) 100px 90px 110px 35px;
+                gap: 10px;
             }
         }
 
@@ -116,21 +117,37 @@
         }
 
         .qty-input {
-            width: 40px;
+            width: 60px;
             text-align: center;
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 4px;
+            padding: 6px;
             min-height: 36px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .qty-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
         .discount-input {
-            width: 70px;
+            width: 100px;
             text-align: right;
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            padding: 4px;
+            padding: 6px;
             min-height: 36px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .discount-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
         /* Touch-friendly quantity controls */
@@ -647,6 +664,50 @@
         .border-green-900 {
             border-color: #18241d !important;
         }
+
+        /* Carpet service collapsible styles */
+        .carpet-service-section {
+            transition: all 0.3s ease;
+        }
+
+        .service-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .service-content.expanded {
+            max-height: 300px; /* Adjust based on content height */
+        }
+
+        .service-toggle {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .service-toggle:hover {
+            background-color: #f3f4f6;
+        }
+
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .chevron-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Mobile responsive for service section */
+        @media (max-width: 768px) {
+            .service-content.expanded {
+                max-height: 250px;
+            }
+            
+            .carpet-service-section {
+                padding: 12px 8px !important;
+            }
+        }
     </style>
 </head>
 
@@ -691,7 +752,7 @@
 
         <div class="main-container flex h-[calc(100vh-60px)] overflow-hidden">
             <!-- Products Section -->
-            <div class="products-section w-3/5 bg-white flex flex-col border-r-2 border-green-200">
+            <div class="products-section w-1/2 bg-white flex flex-col border-r-2 border-green-200">
                 <!-- Search and Categories Section -->
                 <div class="p-4">
                     <div class="search-bar mb-3">
@@ -719,7 +780,7 @@
             </div>
 
             <!-- Cart Section -->
-            <div class="cart-section w-2/5 bg-white flex flex-col overflow-hidden border-l-2 border-green-200">
+            <div class="cart-section w-1/2 bg-white flex flex-col overflow-hidden border-l-2 border-green-200">
                 <div class="cart-header p-4 border-b-2 border-green-200">
                     <h4 class="text-lg m-0 flex items-center font-semibold">
                         <i class="fas fa-shopping-cart text-green-500 mr-3"></i> Keranjang
@@ -728,8 +789,8 @@
 
                 <div class="cart-column-headers p-4 text-sm font-semibold text-gray-600 bg-gray-50 hidden md:block">
                     <div class="grid grid-cols-12">
-                        <div class="col-span-5">Produk</div>
-                        <div class="col-span-2 text-center">Qty</div>
+                        <div class="col-span-4">Produk</div>
+                        <div class="col-span-3 text-center">Qty</div>
                         <div class="col-span-3 text-center">Diskon</div>
                         <div class="col-span-2 text-right">Subtotal</div>
                     </div>
@@ -741,6 +802,44 @@
                         <i class="fas fa-shopping-cart text-gray-300"></i>
                         <p class="text-gray-500 text-lg font-medium">Keranjang kosong</p>
                         <p class="text-gray-400 text-sm mt-1">Tambahkan produk ke keranjang</p>
+                    </div>
+                </div>
+
+                <!-- Carpet Service Section -->
+                <div class="carpet-service-section border-t border-green-200 bg-gray-50">
+                    <!-- Collapsible Header -->
+                    <div class="service-toggle p-3 flex items-center justify-between" onclick="toggleServiceSection()">
+                        <h5 class="text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-rug mr-2 text-green-500"></i>Layanan Karpet Masjid
+                        </h5>
+                        <i class="fas fa-chevron-down chevron-icon text-gray-500 text-xs" id="serviceChevron"></i>
+                    </div>
+                    
+                    <!-- Collapsible Content -->
+                    <div class="service-content" id="serviceContent">
+                        <div class="px-3 pb-3 space-y-3">
+                            <!-- Service Type Selection -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Jenis Layanan</label>
+                                <select id="serviceType" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                    <option value="">Pilih layanan...</option>
+                                    <option value="potong_obras_kirim">Potong, Obras & Kirim</option>
+                                    <option value="pasang_ditempat">Pasang di Tempat</option>
+                                </select>
+                            </div>
+
+                            <!-- Installation Date - Always visible when expanded -->
+                            <div id="installationDateContainer">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Estimasi Pemasangan</label>
+                                <input type="date" id="installationDate" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            </div>
+
+                            <!-- Installation Notes - Always visible when expanded -->
+                            <div id="installationNotesContainer">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Rincian Pemasangan</label>
+                                <textarea id="installationNotes" rows="3" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none" placeholder="Masukkan rincian pemasangan..."></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1186,6 +1285,52 @@ function attachEventListeners() {
             }
         });
     });
+
+    // Carpet service type selection - Updated logic
+    const serviceTypeSelect = document.getElementById('serviceType');
+    
+    if (serviceTypeSelect) {
+        serviceTypeSelect.addEventListener('change', (e) => {
+            const selectedValue = e.target.value;
+            
+            // Auto-expand service section when user selects a service type
+            if (selectedValue) {
+                const serviceContent = document.getElementById('serviceContent');
+                const serviceChevron = document.getElementById('serviceChevron');
+                
+                if (serviceContent && !serviceContent.classList.contains('expanded')) {
+                    toggleServiceSection();
+                }
+            }
+            
+            // Clear values when service type changes, but keep fields visible
+            if (selectedValue !== '') {
+                // Only clear if switching between different service types
+                document.getElementById('installationDate').value = '';
+                document.getElementById('installationNotes').value = '';
+            }
+        });
+    }
+}
+
+// Toggle service section visibility
+function toggleServiceSection() {
+    const serviceContent = document.getElementById('serviceContent');
+    const serviceChevron = document.getElementById('serviceChevron');
+    
+    if (serviceContent && serviceChevron) {
+        const isExpanded = serviceContent.classList.contains('expanded');
+        
+        if (isExpanded) {
+            // Collapse
+            serviceContent.classList.remove('expanded');
+            serviceChevron.classList.remove('rotated');
+        } else {
+            // Expand
+            serviceContent.classList.add('expanded');
+            serviceChevron.classList.add('rotated');
+        }
+    }
 }
 
 // Update tax display based on selected tax type

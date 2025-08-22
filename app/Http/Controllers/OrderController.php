@@ -77,6 +77,9 @@ class OrderController extends Controller
             'discount' => 'required|numeric|min:0',
             'member_id' => 'nullable|exists:members,id',
             'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // Wajib upload bukti (max 5MB)
+            'service_type' => 'nullable|string|in:potong_obras_kirim,pasang_ditempat',
+            'installation_date' => 'nullable|date|after_or_equal:today',
+            'installation_notes' => 'nullable|string|max:1000',
         ]);
 
         try {
@@ -160,7 +163,10 @@ class OrderController extends Controller
                 'payment_proof' => $paymentProofPath,
                 'transaction_category' => $request->transaction_category,
                 'notes' => $request->notes,
-                'member_id' => $request->member_id
+                'member_id' => $request->member_id,
+                'service_type' => $request->service_type,
+                'installation_date' => $request->installation_date,
+                'installation_notes' => $request->installation_notes
             ]);
 
             // Buat order items
@@ -764,6 +770,9 @@ class OrderController extends Controller
                     'change' => $order->change,
                     'payment_method' => $order->payment_method,
                     'created_at' => $order->created_at->format('d/m/Y H:i'),
+                    'service_type' => $order->service_type,
+                    'installation_date' => $order->installation_date,
+                    'installation_notes' => $order->installation_notes,
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',

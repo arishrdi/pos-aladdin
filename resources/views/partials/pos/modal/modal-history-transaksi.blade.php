@@ -76,6 +76,33 @@
         </div>
       </div>
 
+      {{-- Layanan Karpet Masjid --}}
+      <div id="modalCarpetServiceSection" class="hidden">
+        <h4 class="font-medium text-green-600 mb-2">
+          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid
+        </h4>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+          <div class="space-y-2 text-sm">
+            <div id="modalServiceTypeInfo" class="hidden">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Jenis Layanan:</span>
+                <span id="modalServiceType" class="font-medium">-</span>
+              </div>
+            </div>
+            <div id="modalInstallationDateInfo" class="hidden">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Estimasi Pemasangan:</span>
+                <span id="modalInstallationDate" class="font-medium">-</span>
+              </div>
+            </div>
+            <div id="modalInstallationNotesInfo" class="hidden">
+              <div class="text-gray-600 mb-1">Rincian Pemasangan:</div>
+              <div id="modalInstallationNotes" class="bg-white border rounded p-2 text-gray-700 text-xs leading-relaxed">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {{-- Ringkasan Harga --}}
       <div class="space-y-2">
         <div class="flex justify-between text-sm">

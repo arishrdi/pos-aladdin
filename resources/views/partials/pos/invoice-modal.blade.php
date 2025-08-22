@@ -853,6 +853,29 @@
                     <span>${safeOrder.member.name || ''} (${safeOrder.member.member_code || ''})</span>
                 </div>
                 ` : ''}
+
+                ${safeOrder.service_type ? `
+                <div class="divider"></div>
+                <div class="text-center" style="font-weight: bold; margin-bottom: 8px;">LAYANAN KARPET MASJID</div>
+                <div class="info-row">
+                    <span class="info-label">Jenis Layanan:</span>
+                    <span>${safeOrder.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat'}</span>
+                </div>
+                ${safeOrder.installation_date ? `
+                <div class="info-row">
+                    <span class="info-label">Estimasi Pemasangan:</span>
+                    <span>${new Date(safeOrder.installation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+                ` : ''}
+                ${safeOrder.installation_notes ? `
+                <div class="info-row" style="margin-top: 5px;">
+                    <span class="info-label">Rincian Pemasangan:</span>
+                </div>
+                <div style="margin-top: 3px; font-size: 14px; line-height: 1.3;">
+                    ${safeOrder.installation_notes}
+                </div>
+                ` : ''}
+                ` : ''}
                 
                 <!-- Footer -->
                 <div class="divider"></div>

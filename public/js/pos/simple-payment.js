@@ -486,6 +486,7 @@ class SimplePaymentManager {
 
     try {
         const cartData = this.cartManager.getCartData();
+        console.log('Cart data with service:', cartData); // Debug log
         
         // Prepare transaction data as FormData
         formData.append('outlet_id', outletInfo.id);
@@ -511,6 +512,17 @@ class SimplePaymentManager {
         formData.append('order_number', generateOrderNumber());
         formData.append('invoice_number', generateInvoiceNumber(outletInfo.name.toUpperCase()));
         formData.append('total', totals.grandTotal);
+        
+        // Add carpet service data
+        if (cartData.service_type) {
+            formData.append('service_type', cartData.service_type);
+        }
+        if (cartData.installation_date) {
+            formData.append('installation_date', cartData.installation_date);
+        }
+        if (cartData.installation_notes) {
+            formData.append('installation_notes', cartData.installation_notes);
+        }
 
         // Handle payment amounts
         if (this.transactionCategory === 'dp') {

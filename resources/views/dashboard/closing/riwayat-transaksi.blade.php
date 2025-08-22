@@ -115,6 +115,7 @@
                     <th class="px-4 py-3 font-bold min-w-[140px]">Waktu</th>
                     <th class="px-4 py-3 font-bold min-w-[100px]">Kasir</th>
                     <th class="px-4 py-3 font-bold min-w-[80px]">Kategori</th>
+                    <th class="px-4 py-3 font-bold min-w-[120px]">Layanan</th>
                     <th class="px-4 py-3 font-bold min-w-[80px]">Pajak</th>
                     <th class="px-4 py-3 font-bold min-w-[100px]">Pembayaran</th>
                     <th class="px-4 py-3 font-bold min-w-[80px]">Status</th>
@@ -127,7 +128,7 @@
             <tbody class="text-gray-700 divide-y">
                 <!-- Data akan diisi secara dinamis -->
                 <tr>
-                    <td colspan="11" class="py-8 text-center">
+                    <td colspan="12" class="py-8 text-center">
                         <div class="flex flex-col items-center justify-center gap-2 mx-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
@@ -208,7 +209,28 @@
                     </div>
                     <div id="paymentProofInfo" class="hidden">
                         <span class="text-gray-500">Bukti Pembayaran:</span>
-                        <a id="detailPaymentProofLink" href="#" class="font-medium ml-1 text-blue-600 hover:text-blue-800">Lihat Bukti</a>
+                        <a id="detailPaymentProofLink" href="#" class="font-medium ml-1 text-green-600 hover:text-green-800">Lihat Bukti</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Carpet Service Information Section -->
+            <div id="carpetServiceSection" class="hidden mb-4 p-3 bg-gray-50 rounded-lg">
+                <h4 class="font-medium mb-2 text-green-700">
+                    Layanan Karpet Masjid
+                </h4>
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                    <div id="serviceTypeInfo" class="hidden">
+                        <span class="text-gray-500">Jenis Layanan:</span>
+                        <span id="detailServiceType" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="installationDateInfo" class="hidden">
+                        <span class="text-gray-500">Estimasi Pemasangan:</span>
+                        <span id="detailInstallationDate" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="installationNotesInfo" class="hidden">
+                        <span class="text-gray-500">Rincian Pemasangan:</span>
+                        <div id="detailInstallationNotes" class="font-medium mt-1 p-2 bg-white rounded border text-gray-700"></div>
                     </div>
                 </div>
             </div>
@@ -824,7 +846,7 @@
         if (!transactions || transactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="11" class="py-4 text-center text-gray-500">
+                    <td colspan="12" class="py-4 text-center text-gray-500">
                         Tidak ada transaksi pada tanggal ini.
                     </td>
                 </tr>
@@ -844,6 +866,13 @@
                     <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getCategoryText(transaction.transaction_category)}
                     </span>
+                </td>
+                <td class="px-4 py-3">
+                    ${transaction.service_type ? `
+                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium whitespace-nowrap">
+                            ${transaction.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat'}
+                        </span>
+                    ` : '<span class="text-gray-400 text-xs">-</span>'}
                 </td>
                 <td class="px-4 py-3">
                     <span class="px-2 py-1 ${getPkpBadgeClass(transaction.tax)} rounded-full text-xs font-medium whitespace-nowrap">
@@ -1170,6 +1199,55 @@
                 bonusSection.classList.remove('hidden');
             } else {
                 bonusSection.classList.add('hidden');
+            }
+
+            // Handle carpet service information
+            const carpetServiceSection = document.getElementById('carpetServiceSection');
+            const serviceTypeInfo = document.getElementById('serviceTypeInfo');
+            const installationDateInfo = document.getElementById('installationDateInfo');
+            const installationNotesInfo = document.getElementById('installationNotesInfo');
+
+            let showCarpetServiceSection = false;
+
+            // Show service type if available
+            if (transaction.service_type) {
+                const serviceTypeText = transaction.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat';
+                document.getElementById('detailServiceType').textContent = serviceTypeText;
+                serviceTypeInfo.classList.remove('hidden');
+                showCarpetServiceSection = true;
+            } else {
+                serviceTypeInfo.classList.add('hidden');
+            }
+
+            // Show installation date if available
+            if (transaction.installation_date) {
+                const installationDate = new Date(transaction.installation_date);
+                const formattedDate = installationDate.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                document.getElementById('detailInstallationDate').textContent = formattedDate;
+                installationDateInfo.classList.remove('hidden');
+                showCarpetServiceSection = true;
+            } else {
+                installationDateInfo.classList.add('hidden');
+            }
+
+            // Show installation notes if available
+            if (transaction.installation_notes) {
+                document.getElementById('detailInstallationNotes').textContent = transaction.installation_notes;
+                installationNotesInfo.classList.remove('hidden');
+                showCarpetServiceSection = true;
+            } else {
+                installationNotesInfo.classList.add('hidden');
+            }
+
+            // Show/hide carpet service section
+            if (showCarpetServiceSection) {
+                carpetServiceSection.classList.remove('hidden');
+            } else {
+                carpetServiceSection.classList.add('hidden');
             }
 
             // Tampilkan modal
