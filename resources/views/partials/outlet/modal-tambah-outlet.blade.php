@@ -359,14 +359,15 @@ function resetForm() {
 }
 
 // Fungsi untuk submit form
-function submitForm() {
+async function submitForm() {
   if (!validateForm()) {
     return;
   }
   
-  // Simulasi loading
   const btnTambah = document.getElementById('btnTambahOutlet');
   const originalText = btnTambah.innerHTML;
+  
+  // Show loading state
   btnTambah.innerHTML = `
     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -376,45 +377,182 @@ function submitForm() {
   `;
   btnTambah.disabled = true;
   
-  // Simulasi AJAX request (di production, ganti dengan fetch/axios)
-  setTimeout(() => {
-    // Ambil nilai dari form
-    const taxType = document.getElementById('taxType').value;
-    const formData = {
-      nama: document.getElementById('namaOutlet').value,
-      telepon: document.getElementById('teleponOutlet').value,
-      alamat: document.getElementById('alamatOutlet').value,
-      email: document.getElementById('emailOutlet').value,
-      pajak: document.getElementById('pajakOutlet').value || 0,
-      tax_type: taxType,
-      nomorTransaksi: document.getElementById('nomorTransaksi').value,
-      namaBank: document.getElementById('namaBank').value,
-      atasNama: document.getElementById('atasNama').value,
-      status: document.getElementById('statusAktif').checked ? 'Aktif' : 'Tidak Aktif',
-      foto: document.getElementById('fotoOutlet').files[0]?.name || null
-    };
+  try {
+    // Prepare FormData for file upload
+    const formData = new FormData();
+    formData.append('name', document.getElementById('namaOutlet').value);
+    formData.append('phone', document.getElementById('teleponOutlet').value);
+    formData.append('address', document.getElementById('alamatOutlet').value);
+    formData.append('email', document.getElementById('emailOutlet').value);
+    formData.append('tax', document.getElementById('pajakOutlet').value || 0);
+    formData.append('tax_type', document.getElementById('taxType').value);
     
-    // Add both PKP and NonPKP banking fields
-    formData.pkp_atas_nama_bank = document.getElementById('pkpAtasNama').value;
-    formData.pkp_nama_bank = document.getElementById('pkpNamaBank').value;
-    formData.pkp_nomor_transaksi_bank = document.getElementById('pkpNomorTransaksi').value;
-    formData.non_pkp_atas_nama_bank = document.getElementById('nonPkpAtasNama').value;
-    formData.non_pkp_nama_bank = document.getElementById('nonPkpNamaBank').value;
-    formData.non_pkp_nomor_transaksi_bank = document.getElementById('nonPkpNomorTransaksi').value;
+    // PKP banking fields
+    formData.append('pkp_atas_nama_bank', document.getElementById('pkpAtasNama').value);
+    formData.append('pkp_nama_bank', document.getElementById('pkpNamaBank').value);
+    formData.append('pkp_nomor_transaksi_bank', document.getElementById('pkpNomorTransaksi').value);
     
-    console.log('Data yang akan dikirim:', formData);
+    // Non-PKP banking fields
+    formData.append('non_pkp_atas_nama_bank', document.getElementById('nonPkpAtasNama').value);
+    formData.append('non_pkp_nama_bank', document.getElementById('nonPkpNamaBank').value);
+    formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('nonPkpNomorTransaksi').value);
     
-    // Reset form dan tutup modal
-    resetForm();
-    closeModalTambah();
+    // Add QRIS file if selected
+    const fotoFile = document.getElementById('fotoOutlet').files[0];
+    if (fotoFile) {
+      formData.append('qris', fotoFile);
+    }
     
-    // Tampilkan alert sukses
-    showAlert('success', 'Outlet baru berhasil ditambahkan!');
+    // Send request to backend
+    const response = await fetch('/api/outlets', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${POS_CONFIG?.API_TOKEN || localStorage.getItem('token')}`,
+        'Accept': 'application/json'
+      },
+      body: formData
+    });
     
-    // Kembalikan tombol ke state semula
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      // Success
+      resetForm();
+      closeModalTambah();
+      showModalAlert('success', data.message || 'Outlet baru berhasil ditambahkan!');
+      
+      // Reload outlets data if function exists
+      if (typeof loadOutlets === 'function') {
+        loadOutlets();
+      }
+    } else {
+      // Handle validation errors
+      if (data.data && typeof data.data === 'object') {
+        // Clear previous errors
+        clearValidationErrors();
+        
+        // Show validation errors
+        Object.keys(data.data).forEach(field => {
+          const errors = data.data[field];
+          if (Array.isArray(errors) && errors.length > 0) {
+            showFieldError(field, errors[0]);
+          }
+        });
+        
+        showModalAlert('error', 'Terdapat kesalahan pada form. Silakan periksa kembali.');
+      } else {
+        showModalAlert('error', data.message || 'Terjadi kesalahan saat menyimpan outlet');
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    showModalAlert('error', 'Terjadi kesalahan koneksi. Silakan coba lagi.');
+  } finally {
+    // Restore button state
     btnTambah.innerHTML = originalText;
     btnTambah.disabled = false;
-  }, 1500);
+  }
+}
+
+// Helper function to show field-specific errors
+function showFieldError(fieldName, errorMessage) {
+  // Map backend field names to frontend element IDs
+  const fieldMapping = {
+    'name': 'namaOutlet',
+    'phone': 'teleponOutlet', 
+    'address': 'alamatOutlet',
+    'email': 'emailOutlet',
+    'tax_type': 'taxType',
+    'pkp_nomor_transaksi_bank': 'pkpNomorTransaksi',
+    'pkp_nama_bank': 'pkpNamaBank',
+    'pkp_atas_nama_bank': 'pkpAtasNama',
+    'non_pkp_nomor_transaksi_bank': 'nonPkpNomorTransaksi',
+    'non_pkp_nama_bank': 'nonPkpNamaBank',
+    'non_pkp_atas_nama_bank': 'nonPkpAtasNama',
+    'qris': 'fotoOutlet'
+  };
+  
+  const elementId = fieldMapping[fieldName];
+  if (elementId) {
+    const inputElement = document.getElementById(elementId);
+    const errorElementId = 'error' + elementId.charAt(0).toUpperCase() + elementId.slice(1).replace('Outlet', '');
+    const errorElement = document.getElementById(errorElementId);
+    
+    if (inputElement) {
+      inputElement.classList.add('border-red-500');
+    }
+    
+    if (errorElement) {
+      errorElement.textContent = errorMessage;
+      errorElement.classList.remove('hidden');
+    } else {
+      // Create temporary error display if element doesn't exist
+      if (inputElement && inputElement.parentNode) {
+        const tempError = document.createElement('p');
+        tempError.className = 'text-red-500 text-xs mt-1';
+        tempError.textContent = errorMessage;
+        tempError.id = 'temp-error-' + elementId;
+        inputElement.parentNode.appendChild(tempError);
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+          const temp = document.getElementById('temp-error-' + elementId);
+          if (temp) temp.remove();
+        }, 5000);
+      }
+    }
+  }
+}
+
+// Helper function to clear validation errors
+function clearValidationErrors() {
+  // Clear red borders
+  document.querySelectorAll('.border-red-500').forEach(el => {
+    el.classList.remove('border-red-500');
+  });
+  
+  // Hide error messages
+  document.querySelectorAll('[id^="error"]').forEach(el => {
+    el.classList.add('hidden');
+  });
+  
+  // Remove temporary errors
+  document.querySelectorAll('[id^="temp-error-"]').forEach(el => {
+    el.remove();
+  });
+}
+
+// Show alert function - will use parent page's showAlert if available
+function showModalAlert(type, message) {
+  // Check if parent page has showAlert function (outlet management page does)
+  if (typeof showAlert === 'function') {
+    showAlert(type, message);
+  } else if (typeof showNotification === 'function') {
+    // Use POS showNotification if available
+    showNotification(message, type);
+  } else if (typeof Swal !== 'undefined') {
+    // Fallback to SweetAlert
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+    });
+
+    Toast.fire({
+      icon: type === 'error' ? 'error' : 'success',
+      title: message,
+    });
+  } else {
+    // Ultimate fallback to browser alert
+    if (type === 'success') {
+      alert('✅ ' + message);
+    } else {
+      alert('❌ ' + message);
+    }
+  }
 }
 
 // Event listener untuk tombol tambah

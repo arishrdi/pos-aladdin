@@ -57,10 +57,10 @@ class OutletController extends Controller
                 'nomor_transaksi_bank' => 'nullable|integer',
                 'pkp_atas_nama_bank' => 'required|string|max:255',
                 'pkp_nama_bank' => 'required|string|max:255',
-                'pkp_nomor_transaksi_bank' => 'required|integer',
+                'pkp_nomor_transaksi_bank' => 'required|string',
                 'non_pkp_atas_nama_bank' => 'required|string|max:255',
                 'non_pkp_nama_bank' => 'required|string|max:255',
-                'non_pkp_nomor_transaksi_bank' => 'required|integer',
+                'non_pkp_nomor_transaksi_bank' => 'required|string',
             ]);
     
             DB::beginTransaction();
@@ -100,10 +100,18 @@ class OutletController extends Controller
             return $this->successResponse($outlet, 'Outlet created successfully');
         } catch (ValidationException $th) {
             DB::rollBack();
-            return $this->errorResponse('Validation error', $th->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terdapat kesalahan validasi pada form',
+                'data' => $th->errors()
+            ], 422);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->errorResponse($th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan outlet: ' . $th->getMessage(),
+                'data' => null
+            ], 500);
         }
     }
 
@@ -149,10 +157,10 @@ class OutletController extends Controller
                 'nomor_transaksi_bank' => 'nullable|integer',
                 'pkp_atas_nama_bank' => 'required|string|max:255',
                 'pkp_nama_bank' => 'required|string|max:255',
-                'pkp_nomor_transaksi_bank' => 'required|integer',
+                'pkp_nomor_transaksi_bank' => 'required|string',
                 'non_pkp_atas_nama_bank' => 'required|string|max:255',
                 'non_pkp_nama_bank' => 'required|string|max:255',
-                'non_pkp_nomor_transaksi_bank' => 'required|integer',
+                'non_pkp_nomor_transaksi_bank' => 'required|string',
             ]);
     
             $updateData = [
@@ -187,9 +195,17 @@ class OutletController extends Controller
             
             return $this->successResponse($outlet, 'Outlet updated successfully');
         } catch (ValidationException $th) {
-            return $this->errorResponse('Validation error', $th->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terdapat kesalahan validasi pada form',
+                'data' => $th->errors()
+            ], 422);
         } catch (\Throwable $th) {
-            return $this->errorResponse('Outlet update failed', $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengupdate outlet: ' . $th->getMessage(),
+                'data' => null
+            ], 500);
         }
     }
 

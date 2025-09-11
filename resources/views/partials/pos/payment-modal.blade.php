@@ -74,6 +74,25 @@
                         </div>
                     </div>
 
+                    <!-- Upload Akad Jual Beli - Only show for DP transactions -->
+                    <div id="akadJualBeliSection" class="mb-4 hidden">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Upload Akad Jual Beli <span class="text-red-500">*</span>
+                        </label>
+                        <div class="border-2 border-dashed border-orange-300 rounded-lg p-4 text-center bg-orange-50">
+                            <input type="file" id="akadJualBeliUpload" accept=".pdf" class="hidden" required>
+                            <div class="cursor-pointer" onclick="document.getElementById('akadJualBeliUpload').click()">
+                                <i class="fas fa-file-pdf text-2xl text-orange-500 mb-2"></i>
+                                <p class="text-sm font-medium text-orange-600">Klik untuk upload akad jual beli</p>
+                                <p class="text-xs text-orange-500 mt-1">File PDF • Maks 10MB</p>
+                            </div>
+                        </div>
+                        <div id="akadJualBeliPreview" class="mt-2 space-y-1">
+                            <!-- File preview will appear here -->
+                        </div>
+                       
+                    </div>
+
                     <!-- Tax Type Display (Read-only) -->
                     <div class="mb-4 p-3 bg-gray-50 rounded-lg">
                         <label class="block text-gray-700 text-sm font-bold mb-2">
@@ -246,6 +265,58 @@
                         </div>
                     </div>
 
+                    <!-- Masjid Search -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-gray-700 text-sm font-bold" for="masjidDropdown">
+                                Masjid Tujuan
+                            </label>
+                            <button type="button" onclick="openAddMasjidModal()" 
+                                class="text-xs text-green-600 hover:text-green-700 font-medium flex items-center">
+                                <i class="fas fa-plus mr-1"></i>
+                                Tambah Masjid
+                            </button>
+                        </div>
+                        <div class="masjid-dropdown-container relative">
+                            <div class="flex items-center relative">
+                                <input
+                                    id="masjidSearchPayment"
+                                    type="text"
+                                    class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
+                                    placeholder="Cari masjid (nama/alamat)"
+                                    autocomplete="off"
+                                >
+                                <div class="absolute right-0 top-0 h-full flex items-center pr-3">
+                                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                                </div>
+                            </div>
+                            <div id="masjidDropdownListPayment" class="dropdown-list absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                                <div id="masjidResultsPayment" class="max-h-48 overflow-y-auto p-1">
+                                    <!-- Results will appear here -->
+                                </div>
+                                <!-- Add masjid button in dropdown -->
+                                <div class="border-t border-gray-200 p-2">
+                                    <button type="button" onclick="openAddMasjidModal()" 
+                                        class="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded flex items-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Tambah Masjid Baru
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="selectedMasjidPayment" class="mt-2 hidden">
+                                <div class="flex justify-between items-center bg-green-50 p-2 rounded">
+                                    <div class="flex flex-col">
+                                        <span id="masjidNamePayment" class="font-medium text-sm"></span>
+                                        <span id="masjidAddressPayment" class="text-xs text-gray-500"></span>
+                                    </div>
+                                    <button id="removeMasjidPayment" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="notes">
                             Catatan (Opsional)
@@ -263,3 +334,78 @@
         </div>
     </div>
 </div>
+
+<script>
+// Handle transaction category change to show/hide akad jual beli section
+document.addEventListener('DOMContentLoaded', function() {
+    const transactionCategoryRadios = document.querySelectorAll('input[name="transactionCategory"]');
+    const akadJualBeliSection = document.getElementById('akadJualBeliSection');
+    const akadJualBeliUpload = document.getElementById('akadJualBeliUpload');
+    const akadJualBeliPreview = document.getElementById('akadJualBeliPreview');
+
+    // Handle category change
+    transactionCategoryRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'dp') {
+                akadJualBeliSection.classList.remove('hidden');
+                akadJualBeliUpload.setAttribute('required', 'required');
+            } else {
+                akadJualBeliSection.classList.add('hidden');
+                akadJualBeliUpload.removeAttribute('required');
+                // Clear file input and preview
+                akadJualBeliUpload.value = '';
+                akadJualBeliPreview.innerHTML = '';
+            }
+        });
+    });
+
+    // Handle file upload preview
+    if (akadJualBeliUpload) {
+        akadJualBeliUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (file.type !== 'application/pdf') {
+                    alert('Hanya file PDF yang diperbolehkan');
+                    this.value = '';
+                    return;
+                }
+
+                // Validate file size (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 10MB');
+                    this.value = '';
+                    return;
+                }
+
+                // Show preview
+                akadJualBeliPreview.innerHTML = `
+                    <div class="flex items-center justify-between p-2 bg-white border border-orange-200 rounded">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-pdf text-orange-500 mr-2"></i>
+                            <span class="text-sm font-medium">${file.name}</span>
+                            <span class="text-xs text-gray-500 ml-2">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                        </div>
+                        <button type="button" onclick="clearAkadJualBeli()" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    }
+});
+
+// Function to clear akad jual beli file
+function clearAkadJualBeli() {
+    const akadJualBeliUpload = document.getElementById('akadJualBeliUpload');
+    const akadJualBeliPreview = document.getElementById('akadJualBeliPreview');
+    
+    if (akadJualBeliUpload) {
+        akadJualBeliUpload.value = '';
+    }
+    if (akadJualBeliPreview) {
+        akadJualBeliPreview.innerHTML = '';
+    }
+}
+</script>

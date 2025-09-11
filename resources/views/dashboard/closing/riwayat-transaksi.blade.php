@@ -185,6 +185,20 @@
                     <p class="text-gray-500">Member</p>
                     <p id="detailMember" class="font-medium"></p>
                 </div>
+                <div id="masjidInfoRow" class="hidden">
+                    <p class="text-gray-500">Masjid Tujuan</p>
+                    <p id="detailMasjid" class="font-medium"></p>
+                </div>
+                <div id="contractPdfInfoRow" class="hidden">
+                    <p class="text-gray-500">Akad Jual Beli</p>
+                    <div id="detailContractPdf" class="font-medium">
+                        <button onclick="downloadContractPdf(window.currentTransactionDetail.contract_pdf_url, window.currentTransactionDetail.order_number)" 
+                            class="inline-flex items-center px-3 py-1 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            Download Akad Jual Beli
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- Approval Information Section -->
@@ -925,6 +939,12 @@
                             Riwayat DP
                         </button>
                         ` : ''}
+                        ${transaction.transaction_category === 'dp' && transaction.contract_pdf_url ? `
+                        <button onclick="downloadContractPdf('${transaction.contract_pdf_url}', '${transaction.order_number}')" class="inline-flex items-center px-2 py-1 text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors" title="Download Akad Jual Beli">
+                            <i data-lucide="file-text" class="w-3 h-3 mr-1"></i>
+                            Akad PDF
+                        </button>
+                        ` : ''}
                         ${transaction.approval_status === 'pending' ? `
                         <button onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors" title="Setujui Transaksi">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
@@ -1065,6 +1085,26 @@
                 memberRow.classList.remove('hidden');
             } else {
                 memberRow.classList.add('hidden');
+            }
+
+            // Isi masjid info
+            const masjidRow = document.getElementById('masjidInfoRow');
+            const masjidElement = document.getElementById('detailMasjid');
+            if (transaction.mosque && transaction.mosque.name) {
+                masjidElement.textContent = `${transaction.mosque.name} - ${transaction.mosque.address}`;
+                masjidRow.classList.remove('hidden');
+            } else {
+                masjidRow.classList.add('hidden');
+            }
+
+            // Isi contract PDF info untuk transaksi DP
+            const contractPdfRow = document.getElementById('contractPdfInfoRow');
+            if (transaction.transaction_category === 'dp' && transaction.contract_pdf_url) {
+                // Store transaction detail globally for download function
+                window.currentTransactionDetail = transaction;
+                contractPdfRow.classList.remove('hidden');
+            } else {
+                contractPdfRow.classList.add('hidden');
             }
             
             elements.total.textContent = formatCurrency(transaction.total);
@@ -2311,6 +2351,27 @@
             submitButton.disabled = false;
         }
     });
+    
+    // Function to download contract PDF
+    function downloadContractPdf(pdfUrl, orderNumber) {
+        try {
+            // Create a temporary link to download the file
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = `Akad_Jual_Beli_${orderNumber}.pdf`;
+            link.target = '_blank';
+            
+            // Append to body, click, then remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showAlert('success', 'Download akad jual beli dimulai');
+        } catch (error) {
+            console.error('Error downloading contract PDF:', error);
+            showAlert('error', 'Gagal mendownload akad jual beli');
+        }
+    }
     
     // Setup polling for transaction history updates
     document.addEventListener('DOMContentLoaded', function() {

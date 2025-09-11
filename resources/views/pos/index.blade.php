@@ -828,6 +828,56 @@
                                 </select>
                             </div>
 
+                            <!-- Masjid Selection -->
+                            {{-- <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-xs font-medium text-gray-600">Masjid Tujuan</label>
+                                    <button type="button" onclick="openAddMasjidModal()" 
+                                        class="text-xs text-green-600 hover:text-green-700 font-medium flex items-center">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        Tambah Masjid
+                                    </button>
+                                </div>
+                                <div class="masjid-dropdown-container relative">
+                                    <div class="flex items-center relative">
+                                        <input
+                                            id="masjidSearch"
+                                            type="text"
+                                            class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
+                                            placeholder="Cari masjid (nama/alamat)"
+                                            autocomplete="off"
+                                        >
+                                        <div class="absolute right-0 top-0 h-full flex items-center pr-3">
+                                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                                        </div>
+                                    </div>
+                                    <div id="masjidDropdownList" class="dropdown-list absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
+                                        <div id="masjidResults" class="max-h-48 overflow-y-auto p-1">
+                                            <!-- Results will appear here -->
+                                        </div>
+                                        <!-- Add masjid button in dropdown -->
+                                        <div class="border-t border-gray-200 p-2">
+                                            <button type="button" onclick="openAddMasjidModal()" 
+                                                class="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded flex items-center">
+                                                <i class="fas fa-plus mr-2"></i>
+                                                Tambah Masjid Baru
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="selectedMasjid" class="mt-2 hidden">
+                                        <div class="flex justify-between items-center bg-green-50 p-2 rounded">
+                                            <div class="flex flex-col">
+                                                <span id="masjidName" class="font-medium text-sm"></span>
+                                                <span id="masjidAddress" class="text-xs text-gray-500"></span>
+                                            </div>
+                                            <button id="removeMasjid" class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> --}}
+
                             <!-- Installation Date - Always visible when expanded -->
                             <div id="installationDateContainer">
                                 <label class="block text-xs font-medium text-gray-600 mb-1">Estimasi Pemasangan</label>
@@ -915,6 +965,7 @@
     <!-- Include other modals -->
     @include('partials.pos.payment-modal')
     @include('partials.pos.add-member-modal')
+    @include('partials.pos.add-masjid-modal')
     @include('partials.pos.cashier-modal')
     @include('partials.pos.history-modal')
     @include('partials.pos.income-modal')

@@ -34,7 +34,7 @@
                 </div>
                 
                 <!-- Email -->
-                <div>
+                {{-- <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="newMemberEmail">
                         Email
                     </label>
@@ -42,17 +42,17 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500" 
                         placeholder="Masukkan email (opsional)">
                     <p id="errorNewMemberEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
-                </div>
+                </div> --}}
                 
                 <!-- Alamat -->
-                <div>
+                {{-- <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="newMemberAddress">
                         Alamat
                     </label>
                     <textarea id="newMemberAddress" rows="3" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500" 
                         placeholder="Masukkan alamat (opsional)"></textarea>
-                </div>
+                </div> --}}
                 
                 <!-- Gender -->
                 <div>
@@ -68,13 +68,6 @@
                 </div>
                 
                 
-                <!-- Info Member Code -->
-                <div class="bg-blue-50 p-3 rounded-md">
-                    <p class="text-sm text-blue-700">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Kode member akan dibuat otomatis setelah member berhasil ditambahkan
-                    </p>
-                </div>
             </form>
             
             <div class="flex justify-end pt-4 gap-3">

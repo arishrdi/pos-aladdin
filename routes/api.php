@@ -18,6 +18,7 @@ use App\Http\Controllers\CashRegisterTransactionController;
 use App\Http\Controllers\BonusController;
 use App\Http\Controllers\CashRequestController;
 use App\Http\Controllers\CashReportController;
+use App\Http\Controllers\MosqueController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -67,6 +68,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', 'store')->middleware('role:admin');
             Route::put('/{member}', 'update')->middleware('role:admin');
             Route::delete('/{member}', 'destroy')->middleware('role:admin');
+        });
+
+        Route::controller(MosqueController::class)->prefix('mosques')->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store')->middleware('role:admin');
+            Route::get('/{mosque}', 'show');
+            Route::put('/{mosque}', 'update')->middleware('role:admin');
+            Route::delete('/{mosque}', 'destroy')->middleware('role:admin');
         });
 
         Route::controller(ProductController::class)->group(function () {
@@ -192,6 +201,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
         Route::post('/members', [MemberController::class, 'store']); // Allow kasir to add members
+        Route::get('/mosques', [MosqueController::class, 'index']);
+        Route::post('/mosques', [MosqueController::class, 'store']); // Allow kasir to add mosques
         Route::post('/print-receipt', [PrintController::class, 'printReceipt']);
         Route::post('/test-printer', [PrintController::class, 'testPrinter']);
 

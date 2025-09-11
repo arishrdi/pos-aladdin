@@ -4,8 +4,9 @@
     <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('historyModal')"></div>
 
     <!-- Modal Box -->
-    <div class="bg-white w-[95%] md:w-11/12 md:max-w-6xl mx-auto rounded shadow-lg z-50 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
-        
+    <div
+        class="bg-white w-[95%] md:w-11/12 md:max-w-6xl mx-auto rounded shadow-lg z-50 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
+
         <!-- Header (Fixed inside modal) -->
         <div class="p-4 md:p-6 border-b sticky top-0 bg-white z-10">
             <div class="flex justify-between items-start md:items-center flex-col md:flex-row gap-2">
@@ -13,7 +14,8 @@
                     <h2 class="text-xl md:text-2xl font-bold">Riwayat Transaksi</h2>
                     <p class="text-sm md:text-base text-gray-600">Lihat riwayat transaksi berdasarkan tanggal</p>
                 </div>
-                <button onclick="tutupModal('historyModal')" class="text-gray-500 hover:text-red-500 text-xl md:text-2xl">✕</button>
+                <button onclick="tutupModal('historyModal')"
+                    class="text-gray-500 hover:text-red-500 text-xl md:text-2xl">✕</button>
             </div>
         </div>
 
@@ -22,34 +24,35 @@
             <!-- Date Range & Search -->
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                 <div class="relative w-full md:w-1/2">
-                    <input id="dateRange" type="text" class="border p-3 rounded w-full pl-12 text-base" placeholder="Pilih rentang tanggal" readonly />
+                    <input id="dateRange" type="text" class="border p-3 rounded w-full pl-12 text-base"
+                        placeholder="Pilih rentang tanggal" readonly />
                     <div class="absolute left-4 top-3.5 text-gray-400">
                         <!-- Calendar Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
                 </div>
 
                 <div class="relative w-full md:w-1/2">
-                    <input 
-                        id="searchInvoice" 
-                        type="text" 
-                        placeholder="Cari transaksi berdasarkan nomor invoice..." 
-                        class="border p-3 rounded w-full pl-12 text-base"
-                        oninput="filterTransaksi()"
-                    />
+                    <input id="searchInvoice" type="text" placeholder="Cari transaksi berdasarkan nomor invoice..."
+                        class="border p-3 rounded w-full pl-12 text-base" oninput="filterTransaksi()" />
                     <div class="absolute left-4 top-3.5 text-gray-400">
                         <!-- Search Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                 </div>
             </div>
 
             <!-- Summary -->
-            <div class="bg-green-50 p-4 rounded mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+            <div
+                class="bg-green-50 p-4 rounded mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
                 <div id="summaryText">
                     <span class="font-semibold text-lg">Total Transaksi</span><br>
                     <span class="text-gray-500 text-sm">Memuat data...</span>
@@ -86,46 +89,51 @@
         <!-- Footer (Fixed inside modal) -->
         <div class="border-t p-4 md:p-6 bg-white sticky bottom-0 z-10">
             <div class="flex justify-end">
-                <button onclick="tutupModal('historyModal')" class="px-5 py-3 text-base bg-green-500 text-white rounded hover:bg-green-600 transition">Tutup</button>
+                <button onclick="tutupModal('historyModal')"
+                    class="px-5 py-3 text-base bg-green-500 text-white rounded hover:bg-green-600 transition">Tutup</button>
             </div>
         </div>
 
         @include('partials.pos.modal.modal-history-transaksi')
-        
+
         <!-- Modal Refund Confirmation -->
         <div id="refundModal" class="fixed inset-0 z-50 hidden">
             <!-- Overlay -->
             <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('refundModal')"></div>
-            
+
             <!-- Modal Box -->
             <div class="bg-white w-[90%] md:w-1/2 max-w-md mx-auto rounded shadow-lg z-60 relative mt-20">
                 <!-- Header -->
                 <div class="p-4 border-b">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold text-red-600">Konfirmasi Refund</h3>
-                        <button onclick="tutupModal('refundModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+                        <button onclick="tutupModal('refundModal')"
+                            class="text-gray-500 hover:text-red-500 text-xl">✕</button>
                     </div>
                 </div>
-                
+
                 <!-- Body -->
                 <div class="p-6">
                     <div class="text-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mx-auto mb-4" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
                         <h4 id="refundModalTitle" class="text-lg font-semibold mb-2">Ajukan Permintaan Refund</h4>
                         <p class="text-gray-600 mb-4">
-                            Permintaan untuk transaksi <span id="refundInvoice" class="font-mono font-bold"></span> 
+                            Permintaan untuk transaksi <span id="refundInvoice" class="font-mono font-bold"></span>
                             dengan total <span id="refundTotal" class="font-bold text-red-600"></span>
                         </p>
                     </div>
-                    
+
                     <!-- Alasan Refund -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Alasan Refund <span class="text-red-500">*</span>
                         </label>
-                        <select id="refundReason" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select id="refundReason"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="">Pilih alasan...</option>
                             <option value="customer_request">Permintaan Pelanggan</option>
                             <option value="defective_product">Produk Rusak/Cacat</option>
@@ -134,26 +142,27 @@
                             <option value="other">Lainnya</option>
                         </select>
                     </div>
-                    
+
                     <!-- Catatan Tambahan -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Catatan Tambahan (Opsional)
                         </label>
-                        <textarea id="refundNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                  placeholder="Masukkan catatan tambahan jika diperlukan..."></textarea>
+                        <textarea id="refundNotes" rows="3"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Masukkan catatan tambahan jika diperlukan..."></textarea>
                     </div>
                 </div>
-                
+
                 <!-- Footer -->
                 <div class="border-t p-4 bg-gray-50 rounded-b">
                     <div class="flex justify-end gap-3">
-                        <button onclick="tutupModal('refundModal')" 
-                                class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        <button onclick="tutupModal('refundModal')"
+                            class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
                             Batal
                         </button>
-                        <button onclick="prosesRefund()" 
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        <button onclick="prosesRefund()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                             Ajukan Permintaan
                         </button>
                     </div>
@@ -165,17 +174,19 @@
         <div id="pelunasanModal" class="fixed inset-0 z-50 hidden">
             <!-- Overlay -->
             <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('pelunasanModal')"></div>
-            
+
             <!-- Modal Box -->
-            <div class="bg-white w-[90%] md:w-1/2 max-w-lg mx-auto rounded shadow-lg z-60 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
+            <div
+                class="bg-white w-[90%] md:w-1/2 max-w-lg mx-auto rounded shadow-lg z-60 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
                 <!-- Header -->
                 <div class="p-4 border-b flex-shrink-0">
                     <div class="flex justify-between items-center">
                         <h3 class="text-lg font-bold text-green-600">Pelunasan DP</h3>
-                        <button onclick="tutupModal('pelunasanModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+                        <button onclick="tutupModal('pelunasanModal')"
+                            class="text-gray-500 hover:text-red-500 text-xl">✕</button>
                     </div>
                 </div>
-                
+
                 <!-- Body Scrollable -->
                 <div class="p-6 overflow-y-auto flex-1">
                     <div class="mb-4">
@@ -200,7 +211,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Riwayat Pelunasan (jika ada) -->
                     <div id="riwayatPelunasanSection" class="mb-4 hidden">
                         <h4 class="text-sm font-medium text-gray-700 mb-3">Riwayat Pelunasan Sebelumnya</h4>
@@ -216,57 +227,59 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Jumlah Pelunasan <span class="text-red-500">*</span>
                         </label>
-                        <input type="number" id="jumlahPelunasan" 
-                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                               placeholder="Masukkan jumlah pelunasan..."
-                               min="1" step="1000">
-                        <p class="text-xs text-gray-500 mt-1">Masukkan jumlah yang akan dibayar (maksimal sisa bayar)</p>
+                        <input type="number" id="jumlahPelunasan"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Masukkan jumlah pelunasan..." min="1" step="1000">
+                        <p class="text-xs text-gray-500 mt-1">Masukkan jumlah yang akan dibayar (maksimal sisa bayar)
+                        </p>
                     </div>
-                    
+
                     <!-- Metode Pembayaran -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Metode Pembayaran <span class="text-red-500">*</span>
                         </label>
-                        <select id="metodePembayaranPelunasan" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select id="metodePembayaranPelunasan"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="">Pilih metode pembayaran...</option>
                             <option value="cash">Tunai</option>
                             <option value="transfer">Transfer Bank</option>
                             <option value="qris">QRIS</option>
                         </select>
                     </div>
-                    
+
                     <!-- Upload Bukti Pembayaran (required) -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Bukti Pembayaran <span class="text-red-500">*</span>
                         </label>
-                        <input type="file" id="buktiPembayaranPelunasan" 
-                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                               accept="image/*,.pdf" required>
-                        <p class="text-xs text-gray-500 mt-1">Upload foto atau scan bukti pembayaran (jpg, png, pdf) - maksimal 5MB</p>
+                        <input type="file" id="buktiPembayaranPelunasan"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            accept="image/*,.pdf" required>
+                        <p class="text-xs text-gray-500 mt-1">Upload foto atau scan bukti pembayaran (jpg, png, pdf) -
+                            maksimal 5MB</p>
                     </div>
-                    
+
                     <!-- Catatan -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Catatan (Opsional)
                         </label>
-                        <textarea id="catatanPelunasan" rows="3" 
-                                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" 
-                                  placeholder="Catatan tambahan untuk pelunasan..."></textarea>
+                        <textarea id="catatanPelunasan" rows="3"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Catatan tambahan untuk pelunasan..."></textarea>
                     </div>
                 </div>
-                
+
                 <!-- Footer -->
                 <div class="border-t p-4 bg-gray-50 rounded-b flex-shrink-0">
                     <div class="flex justify-end gap-3">
-                        <button onclick="tutupModal('pelunasanModal')" 
-                                class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                        <button onclick="tutupModal('pelunasanModal')"
+                            class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
                             Batal
                         </button>
-                        <button onclick="prosesPelunasan()" 
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        <button onclick="prosesPelunasan()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                             Proses Pelunasan
                         </button>
                     </div>
@@ -283,7 +296,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
-     // Variabel global untuk menyimpan data transaksi
+    // Variabel global untuk menyimpan data transaksi
     let semuaTransaksi = [];
     let sedangMemuat = false;
 
@@ -496,13 +509,11 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
-                            ${transaksi.status === 'Selesai' ? `
                             <button onclick="cetakStruk('${transaksi.invoice}')" class="text-green-500 hover:text-green-700" title="Cetak Struk">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                             </button>
-                            ` : ''}
                             ${transaksi.has_pending_cancellation ? `
                                 <div class="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700" title="Sedang diproses oleh admin">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -739,407 +750,453 @@
 
         // console.log("Semua data: ", safeTransaction)
 
-        return `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Struk Transaksi #${safeTransaction.invoice}</title>
-                <meta charset="UTF-8">
-                <style>
-                    /* Reset dan base styling */
-                    * {
-                        font-weight: 'bold';
-                        font-family: 'Courier New', monospace;
-                    }
-                    
-                    body {
-                        font-weight: 'bold';
-                        font-size: 18px;
-                        color: #000;
-                    }
-                    
-                    /* Header styling */
-                    .receipt-header {
-                        display: flex;
-                        align-items: center;
-                        gap: 10px;
-                        margin-bottom: 15px;
-                        padding-bottom: 10px;
-                        border-bottom: 1px dashed #ccc;
-                    }
-                    
-                    .logo-container {
-                        width: 70px;  /* Sedikit lebih besar untuk thermal printer */
-                        height: 70px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 3px;  /* Padding untuk mencegah clipping */
-                        background-color: white;  /* Pastikan background putih */
-                    }
-                    
-                    .logo {
-                        max-width: 100%;
-                        max-height: 100%;
-                        object-fit: contain;
-                        filter: grayscale(100%) contrast(200%);  /* Buat hitam putih dengan kontras tinggi */
-                        -webkit-filter: grayscale(100%) contrast(200%);
-                    }
-                    
-                    .header-text {
-                        flex: 1;
-                        font-weight: bold;
-                        font-size: 18px;
-                        text-align: right;
-                    }
-                    
-                    .company-name {
-                        font-weight: bold;
-                        font-size: 18px;
-                        margin-bottom: 3px;
-                    }
-                    
-                    .company-info {
-                        font-size: 18px;
-                        font-weight: bold;
-                        line-height: 1.3;
-                    }
-                    
-                    /* Divider */
-                    .divider {
-                        border-top: 1px dashed #000;
-                        margin: 8px 0;
-                    }
-                    
-                    /* Transaction info */
-                    .transaction-info {
-                        margin-bottom: 10px;
-                        font-weight: bold;
-                    }
-                    
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 3px;
-                    }
-                    
-                    .info-label {
-                        font-weight: bold;
-                    }
-                    
-                    /* Items list */
-                    .items-list {
-                        margin: 10px 0;
-                    }
-                    
-                    .item-row {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 5px;
-                    }
-                    
-                    .item-name {
-                        font-weight: bold;
-                        font-size: 18px;
-                        flex: 2;
-                    }
-                    
-                    .item-price {
-                        flex: 1;
-                        font-weight: bold;
-                        text-align: right;
-                    }
-                    
-                    /* Totals */
-                    .totals {
-                        font-weight: bold;
-                        margin-top: 10px;
-                    }
-                    
-                    .total-row {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 5px;
-                    }
-                    
-                    .grand-total {
-                        font-weight: bold;
-                        font-size: 20px;
-                        margin-top: 8px;
-                        padding-top: 5px;
-                        border-top: 1px dashed #000;
-                    }
-                    
-                    /* Payment info */
-                    .payment-info {
-                        font-weight: bold;
-                        margin-top: 10px;
-                    }
-                    
-                    /* Footer */
-                    .receipt-footer {
-                        font-weight: bold;
-                        margin-top: 15px;
-                        text-align: left;
-                        font-size: 12px;
-                        line-height: 1.4;
-                        white-space: pre-line;
-                    }
-                    
-                    /* Utilities */
-                    .text-center {
-                        text-align: center;
-                    }
-                    
-                    .text-right {
-                        text-align: right;
-                    }
-                    
-                    .text-bold {
-                        font-weight: bold;
-                    }
-                </style>
-            </head>
-            <body>
-                <!-- Header dengan logo -->
-                <div class="receipt-header">
-                    <div class="logo-container">
-                        <img src="${logoPath}" 
-                            alt="Logo Toko" 
-                            class="logo"
-                            onerror="this.style.display='none'"
-                            style="width: auto; height: auto; max-width: 65px; max-height: 65px;">
-                    </div>
-                    <div class="header-text">
-                        <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
-                        <div class="company-info">
-                            ${templateData.company_slogan || ''}
-                            ${outletData.address ? `<br>${outletData.address}` : ''}
-                            ${outletData.phone ? `<br>Telp: ${outletData.phone}` : ''}
-                            ${outletData.email ? `<br>Email: ${outletData.email}` : ''}
-                            <br>Website : 
-                            <br>www.aladdinkarpet.com
-                            <br>www.gudangkarpetmasjid.com
+         const template2 =  `
+        <!DOCTYPE html>
+<html>
+<head>
+    <title>Struk Thermal 58mm</title>
+    <meta charset="UTF-8">
+    <style>
+        /* Reset dan base styling untuk thermal printer 58mm */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+            font-weight: normal;
+            line-height: 1.2;
+        }
+        
+        body {
+            width: 58mm; /* Lebar maksimum untuk thermal 58mm */
+            max-width: 58mm;
+            font-size: 12px; /* Ukuran font lebih kecil */
+            padding: 2mm;
+            color: #000;
+        }
+        
+        /* Header styling */
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #000;
+        }
+        
+        .logo-container {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 3px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%) contrast(200%);
+            -webkit-filter: grayscale(100%) contrast(200%);
+        }
+        
+        .company-name {
+            font-size: 14px;
+            font-weight: normal;;
+            margin-bottom: 2px;
+        }
+        
+        .company-info {
+            font-size: 10px;
+            line-height: 1.1;
+        }
+        
+        /* Divider */
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+        }
+        
+        .divider-thin {
+            border-top: 1px solid #000;
+            margin: 3px 0;
+        }
+        
+        /* Transaction info */
+        .transaction-info {
+            margin-bottom: 5px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .info-label {
+            font-weight: normal;;
+        }
+        
+        /* Items list */
+        .items-list {
+            margin: 5px 0;
+        }
+        
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+        
+        .item-name {
+            flex: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-price {
+            flex: 1;
+            text-align: right;
+        }
+        
+        /* Totals */
+        .totals {
+            margin-top: 5px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .grand-total {
+            font-weight: normal;;
+            font-size: 13px;
+            margin-top: 5px;
+            padding-top: 3px;
+            border-top: 1px dashed #000;
+        }
+        
+        /* Payment info */
+        .payment-info {
+            margin-top: 5px;
+        }
+        
+        /* Footer */
+        .receipt-footer {
+            margin-top: 8px;
+            text-align: center;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+        
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-bold {
+            font-weight: normal;;
+        }
+        
+        .text-small {
+            font-size: 10px;
+        }
+        
+        /* Menghindari page break di tempat tidak tepat */
+        @media print {
+            .avoid-break {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header dengan logo -->
+    <div class="receipt-header avoid-break">
+        <div class="logo-container">
+            <!-- <img src="${logoPath}" 
+                alt="Logo Toko" 
+                class="logo"
+                onerror="this.style.display='none'"> -->
+            <img class="logo" src="images/logo-black.jpg" >
+        </div>
+        <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
+        <div class="company-info">
+            ${templateData.company_slogan || ''}<br>
+            ${outletData.address ? `${outletData.address}` : ''}<br>
+            ${outletData.phone ? `Telp: ${outletData.phone}` : ''}
+            ${outletData.email ? `Email: ${outletData.email}` : ''}<br>
+            www.aladdinkarpet.com<br>
+            www.gudangkarpetmasjid.com
+        </div>
+    </div>
+    
+    <span>
+    --------------------------
+    </span>
+    <div class="text-center">
+        <div class="info-row text-bold">STRUK PEMBAYARAN</div>
+    </div>
+    <!-- <div class="divider-thin"></div> -->
+     <span>
+    --------------------------
+    </span>
+    
+    <!-- Info transaksi -->
+    <div class="transaction-info avoid-break">
+        <div class="info-row">
+            <span class="info-label">Invoice:</span>
+            <span>${safeTransaction.invoice}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Order:</span>
+            <span>${safeTransaction.id}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tanggal:</span>
+            <span>${formatDate(safeTransaction.waktu)}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Kasir:</span>
+            <span>${safeTransaction.kasir}</span>
+        </div>
+    </div>
+    
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    
+    
+    <!-- Daftar item -->
+    <div class="items-list avoid-break">
+        ${safeTransaction.items.length > 0 
+            ? safeTransaction.items.map(item => {
+                const safeItem = {
+                    ...item,
+                    quantity: safeNumber(item.quantity),
+                    price: safeNumber(item.price),
+                    discount: safeNumber(item.discount),
+                    product: item.product || 'Produk'
+                };
+                
+                // Potong nama produk jika terlalu panjang
+                const productName = safeItem.product.length > 20 
+                    ? safeItem.product.substring(0, 17) + '...' 
+                    : safeItem.product;
+                
+                return `
+                    <div class="item-row">
+                        <div class="item-name">
+                            ${safeItem.quantity}x ${productName}
+                        </div>
+                        <div class="item-price">
+                            Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
                         </div>
                     </div>
-                </div>
-                
-                <div class="text-center">
-                    <div class="info-row">STRUK PEMBAYARAN</div>
-                </div>
-                <div class="divider"></div>
-                
-                <!-- Info transaksi -->
-                <div class="transaction-info">
-                    <div class="info-row">
-                        <span class="info-label">No. Invoice:</span>
-                        <span>${safeTransaction.invoice}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">No. Order:</span>
-                        <span>${safeTransaction.id}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Tanggal:</span>
-                        <span>${formatDate(safeTransaction.waktu)}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Kasir:</span>
-                        <span>${safeTransaction.kasir}</span>
-                    </div>
-                </div>
-                
-                <div class="divider"></div>
-                
-                <!-- Daftar item -->
-                <div class="items-list">
-                    ${safeTransaction.items.length > 0 
-                        ? safeTransaction.items.map(item => {
-                            const safeItem = {
-                                ...item,
-                                quantity: safeNumber(item.quantity),
-                                price: safeNumber(item.price),
-                                discount: safeNumber(item.discount),
-                                product: item.product || 'Produk'
-                            };
-                            
-                            return `
-                                <div class="item-row">
-                                    <div class="item-name">
-                                        ${safeItem.quantity}x ${safeItem.product}
-                                    </div>
-                                    <div class="item-price">
-                                        Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
-                                        ${safeItem.discount > 0 ? `<br><small>Diskon: -Rp ${formatCurrency(safeItem.discount)}</small>` : ''}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')
-                        : '<div class="text-center">Tidak ada item</div>'
-                    }
-                </div>
-                
-                <!-- Bonus items section -->
-                ${safeTransaction.bonus_items && safeTransaction.bonus_items.length > 0 ? `
-                <div class="divider"></div>
-                
-                <div class="items-list">
-                    <div class="text-center" style="font-weight: bold; margin-bottom: 8px;">BONUS ITEMS</div>
-                    ${safeTransaction.bonus_items.map(bonusItem => {
-                        const safeBonusItem = {
-                            ...bonusItem,
-                            quantity: safeNumber(bonusItem.quantity),
-                            product: bonusItem.product || bonusItem.product_name || 'Bonus Item'
-                        };
-                        
-                        return `
-                            <div class="item-row">
-                                <div class="item-name">
-                                    ${safeBonusItem.quantity}x ${safeBonusItem.product}
-                                </div>
-                                <div class="item-price">
-                                    GRATIS
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                ` : ''}
-                
-                <div class="divider"></div>
-                
-                <!-- Total pembelian -->
-                <div class="totals">
-                    <div class="total-row">
-                        <span>Subtotal:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.subtotal)}</span>
-                    </div>
-                    
-                    ${safeTransaction.discount > 0 ? `
-                    <div class="total-row">
-                        <span>Diskon:</span>
-                        <span>- Rp ${formatCurrency(safeTransaction.discount)}</span>
+                    ${safeItem.discount > 0 ? `
+                    <div class="item-row text-small">
+                        <div class="item-name">   Diskon</div>
+                        <div class="item-price">-Rp ${formatCurrency(safeItem.discount)}</div>
                     </div>
                     ` : ''}
-                    
-                    ${safeTransaction.tax > 0 ? `
-                    <div class="total-row">
-                        <span>Pajak:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.tax)}</span>
+                `;
+            }).join('')
+            : '<div class="text-center">Tidak ada item</div>'
+        }
+    </div>
+    
+    <!-- Bonus items section -->
+    ${safeTransaction.bonus_items && safeTransaction.bonus_items.length > 0 ? `
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    
+    <div class="items-list avoid-break">
+        <div class="text-center text-bold" style="margin-bottom: 3px;">BONUS ITEMS</div>
+        ${safeTransaction.bonus_items.map(bonusItem => {
+            const safeBonusItem = {
+                ...bonusItem,
+                quantity: safeNumber(bonusItem.quantity),
+                product: bonusItem.product || bonusItem.product_name || 'Bonus Item'
+            };
+            
+            // Potong nama produk jika terlalu panjang
+            const productName = safeBonusItem.product.length > 20 
+                ? safeBonusItem.product.substring(0, 17) + '...' 
+                : safeBonusItem.product;
+            
+            return `
+                <div class="item-row">
+                    <div class="item-name">
+                        ${safeBonusItem.quantity}x ${productName}
                     </div>
-                    ` : ''}
-                    
-                    <div class="total-row grand-total">
-                        <span>TOTAL:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.total)}</span>
+                    <div class="item-price">
+                        GRATIS
                     </div>
                 </div>
-                
-                <!-- Info pembayaran -->
-                <div class="payment-info">
-                    <div class="total-row">
-                        <span>Metode Bayar:</span>
-                        <span>${safeTransaction.pembayaran === "cash" ? "TUNAI" : 
-                            safeTransaction.pembayaran === "qris" ? "QRIS" : 
-                            (safeTransaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Transaksi:</span>
-                        <span>${safeTransaction.transaction_category.toUpperCase()}</span>
-                    </div>
-                    
-                    ${safeTransaction.transaction_category.toLowerCase() === 'dp' ? `
-                    <div class="total-row">
-                        <span>Uang Muka (DP):</span>
-                        <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Sisa Bayar:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.remaining_balance || (safeTransaction.total - safeTransaction.total_paid))}</span>
-                    </div>
-                    ` : `
-                    ${safeTransaction.pembayaran === 'cash' ? `
-                    <div class="total-row">
-                        <span>Dibayar:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
-                    </div>
-                    <div class="total-row">
-                        <span>Kembalian:</span>
-                        <span>Rp ${formatCurrency(safeTransaction.change)}</span>
-                    </div>
-                    ` : ''}
-                    `}
-                </div>
-                
-                ${safeTransaction.member ? `
-                <div class="divider"></div>
-                <div class="info-row">
-                    <span class="info-label">Tuan:</span>
-                    <span class="text-bold">${safeTransaction.member.name || ''}</span>
-                </div>
-                ${safeTransaction.member.address ? `
-                <div class="info-row">
-                    <span class="info-label">Alamat:</span>
-                    <span class="text-bold">${safeTransaction.member.address}</span>
-                </div>
-                ` : ''}
-                ${safeTransaction.member.phone ? `
-                <div class="info-row">
-                    <span class="info-label">No. HP:</span>
-                    <span class="text-bold">${safeTransaction.member.phone}</span>
-                </div>
-                ` : ''}
-                ` : ''}
+            `;
+        }).join('')}
+    </div>
+    ` : ''}
+    
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    
+    <!-- Total pembelian -->
+    <div class="totals avoid-break">
+        <div class="total-row">
+            <span>Subtotal:</span>
+            <span>Rp ${formatCurrency(safeTransaction.subtotal)}</span>
+        </div>
+        
+        ${safeTransaction.discount > 0 ? `
+        <div class="total-row">
+            <span>Diskon:</span>
+            <span>- Rp ${formatCurrency(safeTransaction.discount)}</span>
+        </div>
+        ` : ''}
+        
+        ${safeTransaction.tax > 0 ? `
+        <div class="total-row">
+            <span>Pajak:</span>
+            <span>Rp ${formatCurrency(safeTransaction.tax)}</span>
+        </div>
+        ` : ''}
+        
+        <div class="total-row grand-total">
+            <span>TOTAL:</span>
+            <span>Rp ${formatCurrency(safeTransaction.total)}</span>
+        </div>
+    </div>
+    
+    <!-- Info pembayaran -->
+    <div class="payment-info avoid-break">
+        <div class="total-row">
+            <span>Metode Bayar:</span>
+            <span>${safeTransaction.pembayaran === "cash" ? "TUNAI" : 
+                safeTransaction.pembayaran === "qris" ? "QRIS" : 
+                (safeTransaction.pembayaran || 'TIDAK DIKETAHUI').toUpperCase()}</span>
+        </div>
+        <div class="total-row">
+            <span>Transaksi:</span>
+            <span>${safeTransaction.transaction_category.toUpperCase()}</span>
+        </div>
+        
+        ${safeTransaction.transaction_category.toLowerCase() === 'dp' ? `
+        <div class="total-row">
+            <span>Uang Muka (DP):</span>
+            <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
+        </div>
+        <div class="total-row">
+            <span>Sisa Bayar:</span>
+            <span>Rp ${formatCurrency(safeTransaction.remaining_balance || (safeTransaction.total - safeTransaction.total_paid))}</span>
+        </div>
+        ` : `
+        ${safeTransaction.pembayaran === 'cash' ? `
+        <div class="total-row">
+            <span>Dibayar:</span>
+            <span>Rp ${formatCurrency(safeTransaction.total_paid)}</span>
+        </div>
+        <div class="total-row">
+            <span>Kembalian:</span>
+            <span>Rp ${formatCurrency(safeTransaction.change)}</span>
+        </div>
+        ` : ''}
+        `}
+    </div>
+    
+    ${safeTransaction.member ? `
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    <div class="avoid-break">
+        <div class="info-row">
+            <span class="info-label">Tuan:</span>
+            <span class="text-bold">${safeTransaction.member.name || ''}</span>
+        </div>
+        ${safeTransaction.member.address ? `
+        <div class="info-row">
+            <span class="info-label">Alamat:</span>
+            <span class="text-small">${safeTransaction.member.address.length > 30 ? safeTransaction.member.address.substring(0, 27) + '...' : safeTransaction.member.address}</span>
+        </div>
+        ` : ''}
+        ${safeTransaction.member.phone ? `
+        <div class="info-row">
+            <span class="info-label">No. HP:</span>
+            <span>${safeTransaction.member.phone}</span>
+        </div>
+        ` : ''}
+    </div>
+    ` : ''}
 
-                ${safeTransaction.service_type ? `
-                <div class="divider"></div>
-                <div class="text-center" style="font-weight: bold; margin-bottom: 8px;">LAYANAN KARPET MASJID</div>
-                <div class="info-row">
-                    <span class="info-label">Jenis Layanan:</span>
-                    <span>${safeTransaction.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat'}</span>
-                </div>
-                ${safeTransaction.installation_date ? `
-                <div class="info-row">
-                    <span class="info-label">Estimasi Pemasangan:</span>
-                    <span>${new Date(safeTransaction.installation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                </div>
-                ` : ''}
-                ${safeTransaction.installation_notes ? `
-                <div class="info-row" style="margin-top: 5px;">
-                    <span class="info-label">Rincian Pemasangan:</span>
-                </div>
-                <div style="margin-top: 3px; font-size: 14px; line-height: 1.3;">
-                    ${safeTransaction.installation_notes}
-                </div>
-                ` : ''}
-                ` : ''}
-                
-                <!-- Footer -->
-                <div class="divider"></div>
-                <div>
-                    <p class="info-label">
-                        Tanda Terima,
-                    </p>
-                    <p style="margin-top: 60px">
-                        ........
-                    </p>
-                </div>
-                <div>
-                    <p class="info-label">
-                        Hormat kami,
-                    </p>
-                    <p style="margin-top: 60px">
-                        ........
-                    </p>
-                </div>
-                <div class="receipt-footer">
-                    ${templateData.footer_message || 'Terima kasih telah berbelanja'}<br>
-                    Barang yang sudah dibeli tidak dapat ditukar<br>
-                    ${new Date().getFullYear()} © ${templateData.company_name || outletData.name || 'TOKO ANDA'}
-                </div>
-            </body>
-            </html>
-        `;       
+    ${safeTransaction.service_type ? `
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    <div class="avoid-break">
+        <div class="text-center text-bold" style="margin-bottom: 3px;">LAYANAN KARPET MASJID</div>
+        <div class="info-row">
+            <span class="info-label">Jenis Layanan:</span>
+            <span>${safeTransaction.service_type === 'potong_obras_kirim' ? 'Potong, Obras & Kirim' : 'Pasang di Tempat'}</span>
+        </div>
+        ${safeTransaction.installation_date ? `
+        <div class="info-row">
+            <span class="info-label">Estimasi Pasang:</span>
+            <span>${new Date(safeTransaction.installation_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+        </div>
+        ` : ''}
+        ${safeTransaction.installation_notes ? `
+        <div class="info-row" style="margin-top: 2px;">
+            <span class="info-label">Catatan:</span>
+        </div>
+        <div class="text-small" style="margin-top: 1px; line-height: 1.1;">
+            ${safeTransaction.installation_notes.length > 50 ? safeTransaction.installation_notes.substring(0, 47) + '...' : safeTransaction.installation_notes}
+        </div>
+        ` : ''}
+    </div>
+    ` : ''}
+    
+    <!-- Footer -->
+    <!-- <div class="divider"></div> -->
+    <span>
+    --------------------------
+    </span>
+    <div class="avoid-break">
+        <div class="info-row">
+            <span class="info-label">Tanda Terima,</span>
+            <span class="info-label">Hormat kami,</span>
+        </div>
+        <br>
+        <br>
+        <div class="info-row" style="margin-top: 20px;">
+            <span>(............)</span>
+            <span>(............)</span>
+        </div>
+    </div>
+    <div class="receipt-footer">
+        ${templateData.footer_message || 'Terima kasih telah berbelanja'}<br>
+        Barang yang sudah dibeli tidak dapat ditukar<br>
+        ${new Date().getFullYear()} © ${templateData.company_name || outletData.name || 'TOKO ANDA'}
+    </div>
+</body>
+</html>
+        `
+        
+        
+        return template2;
 
     }
 

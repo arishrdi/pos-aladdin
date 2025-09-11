@@ -11,6 +11,7 @@ class SimplePaymentManager {
             qris: []
         };
         this.selectedMember = null;
+        this.selectedMasjid = null;
         this.currentPaymentMethod = 'cash';
         this.transactionCategory = 'lunas';
     }
@@ -130,6 +131,9 @@ class SimplePaymentManager {
 
         // Member search
         this.attachMemberSearchListeners();
+
+        // Masjid search
+        this.attachMasjidSearchListeners();
 
         // Process payment button
         const processBtn = document.getElementById('btnProcessPayment');
@@ -452,6 +456,79 @@ class SimplePaymentManager {
         };
     }
 
+    // Attach masjid search listeners
+    attachMasjidSearchListeners() {
+        const masjidSearch = document.getElementById('masjidSearchPayment');
+        const masjidDropdown = document.getElementById('masjidDropdownListPayment');
+        const masjidResults = document.getElementById('masjidResultsPayment');
+
+        if (!masjidSearch) return;
+
+        const debouncedSearch = debounce(async (query) => {
+            if (query.length < 2) {
+                masjidDropdown.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/mosques?search=${query}`, {
+                    headers: {
+                        'Authorization': `Bearer ${POS_CONFIG.API_TOKEN}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    this.renderMasjidResults(data.data, masjidResults);
+                    masjidDropdown.classList.remove('hidden');
+                } else {
+                    masjidResults.innerHTML = '<div class="p-3 text-gray-500 text-sm">Tidak ada masjid ditemukan</div>';
+                    masjidDropdown.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error searching mosques:', error);
+            }
+        }, 300);
+
+        masjidSearch.addEventListener('input', (e) => {
+            debouncedSearch(e.target.value.trim());
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.masjid-dropdown-container')) {
+                masjidDropdown.classList.add('hidden');
+            }
+        });
+    }
+
+    // Render masjid results
+    renderMasjidResults(mosques, container) {
+        container.innerHTML = mosques.map(mosque => `
+            <div class="member-item" onclick="window.simplePaymentManager.selectMasjid(${JSON.stringify(mosque).replace(/"/g, '&quot;')})">
+                <div class="font-medium text-gray-800">${mosque.name}</div>
+                <div class="text-sm text-gray-500">${mosque.address}</div>
+            </div>
+        `).join('');
+    }
+
+    // Select masjid
+    selectMasjid(mosque) {
+        this.selectedMasjid = mosque;
+        document.getElementById('masjidNamePayment').textContent = mosque.name;
+        document.getElementById('masjidAddressPayment').textContent = mosque.address;
+        document.getElementById('selectedMasjidPayment').classList.remove('hidden');
+        document.getElementById('masjidSearchPayment').value = '';
+        document.getElementById('masjidDropdownListPayment').classList.add('hidden');
+
+        // Remove masjid button
+        document.getElementById('removeMasjidPayment').onclick = () => {
+            this.selectedMasjid = null;
+            document.getElementById('selectedMasjidPayment').classList.add('hidden');
+        };
+    }
+
     // Process payment
     async processPayment(totals) {
     const formData = new FormData();
@@ -508,6 +585,7 @@ class SimplePaymentManager {
         formData.append('tax_type', selectedTaxType);
         formData.append('discount', totals.totalDiscount);
         formData.append('member_id', this.selectedMember?.id || '');
+        formData.append('mosque_id', this.selectedMasjid?.id || '');
         formData.append('transaction_type', this.cartManager.transactionType);
         formData.append('order_number', generateOrderNumber());
         formData.append('invoice_number', generateInvoiceNumber(outletInfo.name.toUpperCase()));
@@ -556,6 +634,14 @@ class SimplePaymentManager {
             }
         }
 
+        // Handle contract PDF for DP transactions
+        if (this.transactionCategory === 'dp') {
+            const contractFile = document.getElementById('akadJualBeliUpload')?.files[0];
+            if (contractFile) {
+                formData.append('contract_pdf', contractFile);
+            }
+        }
+
         const response = await fetch('/api/orders', {
             method: 'POST',
             headers: {
@@ -593,6 +679,7 @@ class SimplePaymentManager {
             this.cartManager.clear();
             this.cartManager.setMember(null);
             this.selectedMember = null;
+            this.selectedMasjid = null;
             closeModal('paymentModal');
             
             // Reload products to get updated stock quantities

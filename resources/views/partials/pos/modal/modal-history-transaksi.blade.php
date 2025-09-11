@@ -79,7 +79,7 @@
       {{-- Layanan Karpet Masjid --}}
       <div id="modalCarpetServiceSection" class="hidden">
         <h4 class="font-medium text-green-600 mb-2">
-          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid
+          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid 19
         </h4>
         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
           <div class="space-y-2 text-sm">

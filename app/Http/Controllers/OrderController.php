@@ -80,6 +80,8 @@ class OrderController extends Controller
             'service_type' => 'nullable|string|in:potong_obras_kirim,pasang_ditempat',
             'installation_date' => 'nullable|date|after_or_equal:today',
             'installation_notes' => 'nullable|string|max:1000',
+            'mosque_id' => 'nullable|exists:mosques,id',
+            'contract_pdf' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB for contract PDF
         ]);
 
         try {
@@ -100,6 +102,23 @@ class OrderController extends Controller
                 // Pindahkan file ke direktori public
                 $file->move($uploadDir, $fileName);
                 $paymentProofPath = 'payment_proofs/' . $fileName;
+            }
+
+            // Handle contract PDF upload for DP transactions
+            $contractPdfPath = null;
+            if ($request->hasFile('contract_pdf')) {
+                $contractFile = $request->file('contract_pdf');
+                $contractFileName = 'contract_' . time() . '_' . Str::random(10) . '.pdf';
+
+                // Pastikan direktori ada
+                $contractUploadDir = public_path('uploads/contracts');
+                if (!file_exists($contractUploadDir)) {
+                    mkdir($contractUploadDir, 0755, true);
+                }
+
+                // Pindahkan file ke direktori public
+                $contractFile->move($contractUploadDir, $contractFileName);
+                $contractPdfPath = 'contracts/' . $contractFileName;
             }
 
             // 1. Hitung subtotal awal (tanpa diskon)
@@ -164,9 +183,11 @@ class OrderController extends Controller
                 'transaction_category' => $request->transaction_category,
                 'notes' => $request->notes,
                 'member_id' => $request->member_id,
+                'mosque_id' => $request->mosque_id,
                 'service_type' => $request->service_type,
                 'installation_date' => $request->installation_date,
-                'installation_notes' => $request->installation_notes
+                'installation_notes' => $request->installation_notes,
+                'contract_pdf' => $contractPdfPath
             ]);
 
             // Buat order items
@@ -739,6 +760,8 @@ class OrderController extends Controller
                 'outlet:id,name',
                 'shift:id',
                 'user:id,name',
+                'member:id,name,member_code',
+                'mosque:id,name,address',
                 'approver:id,name',
                 'cancellationRequester:id,name',
                 'cancellationProcessor:id,name',
@@ -788,6 +811,11 @@ class OrderController extends Controller
                         'name' => $order->member->name,
                         'member_code' => $order->member->member_code
                     ] : null,
+                    'mosque' => $order->mosque ? [
+                        'name' => $order->mosque->name,
+                        'address' => $order->mosque->address
+                    ] : null,
+                    'contract_pdf_url' => $order->contract_pdf_url,
                     'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
                         return $bonusTransaction->bonusItems->map(function ($bonusItem) {
                             return [

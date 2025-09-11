@@ -40,7 +40,9 @@ class Order extends Model
         'cancellation_admin_notes',
         'service_type',
         'installation_date',
-        'installation_notes'
+        'installation_notes',
+        'contract_pdf',
+        'mosque_id'
     ];
 
     protected $casts = [
@@ -50,7 +52,7 @@ class Order extends Model
         'installation_date' => 'date'
     ];
 
-    protected $appends = ['payment_proof_url'];
+    protected $appends = ['payment_proof_url', 'contract_pdf_url'];
 
     public function scopeMonthlyTotal($query, $month = null, $outletId = null)
     {
@@ -86,6 +88,11 @@ class Order extends Model
     public function member()
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function mosque()
+    {
+        return $this->belongsTo(Mosque::class);
     }
 
     public function user()
@@ -292,6 +299,12 @@ class Order extends Model
     public function getPaymentProofUrlAttribute(): ?string
     {
         return $this->payment_proof ? asset('uploads/' . $this->payment_proof) : null;
+    }
+
+    // Accessor for contract PDF URL
+    public function getContractPdfUrlAttribute(): ?string
+    {
+        return $this->contract_pdf ? asset('uploads/' . $this->contract_pdf) : null;
     }
 
     // DP/Settlement Methods
