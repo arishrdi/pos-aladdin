@@ -200,6 +200,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
+        Route::get('/members/search', [MemberController::class, 'search']); // Search members including leads
         Route::post('/members', [MemberController::class, 'store']); // Allow kasir to add members
         Route::get('/mosques', [MosqueController::class, 'index']);
         Route::post('/mosques', [MosqueController::class, 'store']); // Allow kasir to add mosques

@@ -9,6 +9,7 @@ use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
 use App\Services\CashBalanceService;
+use App\Services\LeadsService;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -76,6 +77,7 @@ class OrderController extends Controller
             'tax' => 'nullable|numeric|min:0',
             'discount' => 'required|numeric|min:0',
             'member_id' => 'nullable|exists:members,id',
+            'lead_data' => 'nullable|array', // For creating member from lead during transaction
             'payment_proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // Wajib upload bukti (max 5MB)
             'service_type' => 'nullable|string|in:potong_obras_kirim,pasang_ditempat',
             'installation_date' => 'nullable|date|after_or_equal:today',
@@ -119,6 +121,33 @@ class OrderController extends Controller
                 // Pindahkan file ke direktori public
                 $contractFile->move($contractUploadDir, $contractFileName);
                 $contractPdfPath = 'contracts/' . $contractFileName;
+            }
+
+            // Handle member creation from lead data
+            $finalMemberId = $request->member_id;
+            if (!$finalMemberId && $request->lead_data) {
+                $leadData = $request->lead_data;
+                $outletId = $request->outlet_id;
+                
+                // Check if lead already exists as member
+                $existingMember = \App\Models\Member::where('lead_id', $leadData['id'])->first();
+                if ($existingMember) {
+                    $finalMemberId = $existingMember->id;
+                } else {
+                    // Create new member from lead
+                    $leadsService = new LeadsService();
+                    $memberData = $leadsService->convertLeadToMember($leadData, $outletId);
+                    
+                    // Generate member code
+                    $lastMember = \App\Models\Member::lockForUpdate()->orderBy('id', 'desc')->first();
+                    $nextNumber = $lastMember ? $lastMember->id + 1 : 1;
+                    $memberData['member_code'] = str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
+                    
+                    $newMember = \App\Models\Member::create($memberData);
+                    $finalMemberId = $newMember->id;
+                    
+                    Log::info("Created member from lead during transaction: member_id={$finalMemberId}, lead_id={$leadData['id']}");
+                }
             }
 
             // 1. Hitung subtotal awal (tanpa diskon)
@@ -182,7 +211,7 @@ class OrderController extends Controller
                 'payment_proof' => $paymentProofPath,
                 'transaction_category' => $request->transaction_category,
                 'notes' => $request->notes,
-                'member_id' => $request->member_id,
+                'member_id' => $finalMemberId,
                 'mosque_id' => $request->mosque_id,
                 'service_type' => $request->service_type,
                 'installation_date' => $request->installation_date,
@@ -257,6 +286,18 @@ class OrderController extends Controller
 
             // Jangan tambahkan ke kas register dulu, tunggu approval
             // Transaksi akan ditambahkan ke kas saat diapprove
+
+            // Update lead status to CROSS_SELLING if member is from lead
+            if ($order->member && $order->member->isFromLead()) {
+                try {
+                    $leadsService = new LeadsService();
+                    $leadsService->updateLeadStatus($order->member->lead_id, 'CROSS_SELLING');
+                    Log::info("Updated lead status to CROSS_SELLING for lead_id: {$order->member->lead_id}");
+                } catch (\Exception $e) {
+                    Log::warning("Failed to update lead status: " . $e->getMessage());
+                    // Don't fail the transaction if leads API is down
+                }
+            }
 
             DB::commit();
 

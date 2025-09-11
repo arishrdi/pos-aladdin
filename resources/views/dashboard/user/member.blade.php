@@ -81,8 +81,8 @@
                     <th class="py-3 font-semibold">No.</th>
                     <th class="py-3 font-semibold">Nama</th>
                     <th class="py-3 font-semibold">Kode Member</th>
-                    <th class="py-3 font-semibold">Email</th>
-                    <th class="py-3 font-semibold">Alamat</th>
+                    {{-- <th class="py-3 font-semibold">Email</th>
+                    <th class="py-3 font-semibold">Alamat</th> --}}
                     <th class="py-3 font-semibold">Jenis Kelamin</th>
                     <th class="py-3 font-semibold">Total Transaksi</th>
                     <th class="py-3 font-semibold">Aksi</th>

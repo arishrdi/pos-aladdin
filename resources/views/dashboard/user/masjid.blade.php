@@ -159,7 +159,7 @@
 
     function handleEditSubmit(e) {
         e.preventDefault();
-        submitEditMasjid(e);
+        submitEditMasjid();
     }
 
     function handleSearchInput() {
@@ -363,6 +363,11 @@
         return localStorage.getItem('role') || 'default';
     }
 
+    //fungsi panggil outlet_id di localStorage
+    function getOutletId() {
+        return localStorage.getItem('outlet_id') || 1;
+    }
+
     function showConfirmDelete(id) {
         masjidIdToDelete = id;
         const modal = document.getElementById('modalHapusMasjid');
@@ -426,8 +431,7 @@
         openModalEdit();
     }
 
-    async function submitEditMasjid(e) {
-        e.preventDefault();
+    async function submitEditMasjid() {
         
         if (!validateEditForm()) {
             return;
@@ -453,7 +457,8 @@
                 },
                 body: JSON.stringify({
                     name: document.getElementById('editNamaMasjid')?.value,
-                    address: document.getElementById('editAlamatMasjid')?.value
+                    address: document.getElementById('editAlamatMasjid')?.value,
+                    outlet_id: getOutletId()
                 })
             });
             
@@ -509,7 +514,8 @@
                 },
                 body: JSON.stringify({
                     name: document.getElementById('namaMasjid')?.value,
-                    address: document.getElementById('alamatMasjid')?.value
+                    address: document.getElementById('alamatMasjid')?.value,
+                    outlet_id: getOutletId()
                 })
             });
 
@@ -573,6 +579,11 @@
     }
     
     function openModalEdit() {
+        // Close all dropdowns first
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+        
         const modal = document.getElementById('modalEditMasjid');
         if (modal) {
             modal.classList.remove('hidden');

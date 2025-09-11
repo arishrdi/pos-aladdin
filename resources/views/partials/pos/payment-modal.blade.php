@@ -231,7 +231,7 @@
                                     id="memberSearch"
                                     type="text"
                                     class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
-                                    placeholder="Cari member (nama/kode)"
+                                    placeholder="Cari member (nama/no hp)"
                                     autocomplete="off"
                                 >
                                 <div class="absolute right-0 top-0 h-full flex items-center pr-3">

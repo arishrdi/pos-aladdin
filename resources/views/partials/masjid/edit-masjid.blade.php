@@ -1,4 +1,4 @@
-<div id="modalEditMasjid" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModalEdit()">
+<div id="modalEditMasjid" class="fixed inset-0 bg-black bg-opacity-50 z-[9999] hidden items-center justify-center" onclick="closeModalEdit()">
   <div class="bg-white w-full max-w-md rounded-xl shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
     
     <!-- Header -->

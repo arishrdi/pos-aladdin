@@ -281,6 +281,10 @@
                     id="userDropdownArrow"></i>
             </div>
             <div id="userDropdown" class="hidden pl-12 mt-2 sidebar-dropdown">
+                <a href="/masjid" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="building" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Masjid</span>
+                </a>
                 <a href="/member" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="user" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Member</span>

@@ -33,17 +33,17 @@
         </div>
 
         <!-- Email -->
-        <div>
+        {{-- <div>
           <label class="block font-medium mb-1">Email</label>
           <input type="email" id="editEmailMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Email member">
           <p id="errorEditEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
-        </div>
+        </div> --}}
 
         <!-- Alamat -->
-        <div>
+        {{-- <div>
           <label class="block font-medium mb-1">Alamat</label>
           <textarea id="editAlamatMember" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Alamat member"></textarea>
-        </div>
+        </div> --}}
 
         <!-- Jenis Kelamin -->
         <div>

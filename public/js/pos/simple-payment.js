@@ -405,7 +405,7 @@ class SimplePaymentManager {
             }
 
             try {
-                const response = await fetch(`/api/members?search=${query}`, {
+                const response = await fetch(`/api/members/search?q=${encodeURIComponent(query)}`, {
                     headers: {
                         'Authorization': `Bearer ${POS_CONFIG.API_TOKEN}`,
                         'Accept': 'application/json'
@@ -417,11 +417,13 @@ class SimplePaymentManager {
                     this.renderMemberResults(data.data, memberResults);
                     memberDropdown.classList.remove('hidden');
                 } else {
-                    memberResults.innerHTML = '<div class="p-3 text-gray-500 text-sm">Tidak ada member ditemukan</div>';
+                    memberResults.innerHTML = '<div class="p-3 text-gray-500 text-sm">Tidak ada member atau leads ditemukan</div>';
                     memberDropdown.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('Error searching members:', error);
+                memberResults.innerHTML = '<div class="p-3 text-red-500 text-sm">Error pencarian</div>';
+                memberDropdown.classList.remove('hidden');
             }
         }, 300);
 
@@ -432,19 +434,28 @@ class SimplePaymentManager {
 
     // Render member results
     renderMemberResults(members, container) {
-        container.innerHTML = members.map(member => `
-            <div class="member-item" onclick="window.simplePaymentManager.selectMember(${JSON.stringify(member).replace(/"/g, '&quot;')})">
-                <div class="font-medium text-gray-800">${member.name}</div>
-                <div class="text-sm text-gray-500">${member.member_code || 'No Code'}</div>
-            </div>
-        `).join('');
+        container.innerHTML = members.map(member => {
+            const isLead = member.type === 'lead';
+            const badge = isLead ? '<span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded ml-2">Lead</span>' : '';
+            
+            return `
+                <div class="member-item" onclick="window.simplePaymentManager.selectMember(${JSON.stringify(member).replace(/"/g, '&quot;')})">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-medium text-gray-800">${member.name}${badge}</div>
+                            <div class="text-sm text-gray-500">${member.phone}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     // Select member
     selectMember(member) {
         this.selectedMember = member;
         document.getElementById('memberName').textContent = member.name;
-        document.getElementById('memberCode').textContent = member.member_code || 'No Code';
+        document.getElementById('memberCode').textContent = member.phone || member.identifier || member.member_code || 'No Code';
         document.getElementById('selectedMember').classList.remove('hidden');
         document.getElementById('memberSearch').value = '';
         document.getElementById('memberDropdownList').classList.add('hidden');
@@ -584,7 +595,19 @@ class SimplePaymentManager {
         formData.append('tax', totals.tax);
         formData.append('tax_type', selectedTaxType);
         formData.append('discount', totals.totalDiscount);
-        formData.append('member_id', this.selectedMember?.id || '');
+        // Handle member or lead
+        if (this.selectedMember) {
+            if (this.selectedMember.type === 'lead') {
+                // Send lead data for member creation during transaction
+                // FormData akan otomatis serialize object menjadi format yang benar
+                Object.keys(this.selectedMember.lead_data).forEach(key => {
+                    formData.append(`lead_data[${key}]`, this.selectedMember.lead_data[key]);
+                });
+            } else {
+                // Regular member
+                formData.append('member_id', this.selectedMember.id);
+            }
+        }
         formData.append('mosque_id', this.selectedMasjid?.id || '');
         formData.append('transaction_type', this.cartManager.transactionType);
         formData.append('order_number', generateOrderNumber());

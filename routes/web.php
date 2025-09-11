@@ -42,6 +42,10 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.user.member');
         })->name('dashboard.user.member');
 
+        Route::get('/masjid', function () {
+            return view('dashboard.user.masjid');
+        })->name('dashboard.user.masjid');
+
         Route::get('/kategori', function () {
             return view('dashboard.produk.kategori-produk');
         })->name('kategori');
