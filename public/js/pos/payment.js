@@ -302,9 +302,13 @@ class PaymentManager {
         const amountReceivedInput = document.getElementById('amountReceived');
         if (amountReceivedInput) {
             amountReceivedInput.addEventListener('input', (e) => {
-                const received = parseCurrencyInput(e.target.value);
-                const change = Math.max(0, received - totals.grandTotal);
-                document.getElementById('changeAmount').value = formatCurrency(change);
+                // Get raw value from hidden input that's updated by the modal's formatCurrency function
+                setTimeout(() => {
+                    const amountReceivedRaw = document.getElementById('amountReceivedRaw')?.value;
+                    const received = amountReceivedRaw ? parseInt(amountReceivedRaw) : parseCurrencyInput(e.target.value);
+                    const change = Math.max(0, received - totals.grandTotal);
+                    document.getElementById('changeAmount').value = formatCurrency(change);
+                }, 10); // Small delay to ensure hidden input is updated
             });
         }
 
@@ -545,7 +549,9 @@ class PaymentManager {
     // Process payment
     async processPayment(totals) {
         const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-        const amountReceived = parseCurrencyInput(document.getElementById('amountReceived')?.value || '0');
+        // Get raw value from hidden input, fallback to parsing display value
+        const amountReceivedRaw = document.getElementById('amountReceivedRaw')?.value;
+        const amountReceived = amountReceivedRaw ? parseInt(amountReceivedRaw) : parseCurrencyInput(document.getElementById('amountReceived')?.value || '0');
         const notes = document.getElementById('paymentNotes')?.value || '';
 
         // Validation
@@ -749,7 +755,9 @@ class PaymentManager {
 
         const paymentDetails = document.getElementById('paymentDetails');
         if (paymentMethod === 'cash') {
-            const amountReceived = parseCurrencyInput(document.getElementById('amountReceived').value);
+            // Get raw value from hidden input, fallback to parsing display value
+            const amountReceivedRaw = document.getElementById('amountReceivedRaw')?.value;
+            const amountReceived = amountReceivedRaw ? parseInt(amountReceivedRaw) : parseCurrencyInput(document.getElementById('amountReceived').value);
             const change = amountReceived - totals.grandTotal;
             paymentDetails.innerHTML = `
                 <div class="text-sm space-y-1">

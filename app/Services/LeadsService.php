@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Log;
 
 class LeadsService
 {
-    private $baseUrl = 'https://leadsaladdin.demowebjalan.com/api/external';
+    private $baseUrl = 'https://leadsaladdin.demowebjalan.com/api/v1';
+
+    private $token = '1|KNIQhAg8F5D1ckkVpmRKuzQb9yE8jOMQxfJ3h5Exdd558ab6';
     
     /**
      * Cari leads berdasarkan query (nama atau nomor telepon)
@@ -18,15 +20,29 @@ class LeadsService
             // Jika query adalah nomor telepon, format dulu
             if (preg_match('/^[0-9+\-\s()]+$/', $query)) {
                 $formattedPhone = $this->formatPhoneForLeads($query);
-                $response = Http::timeout(10)->get("{$this->baseUrl}/leads/by-phone", [
-                    'phone' => $formattedPhone
-                ]);
+                $response = Http::timeout(10)
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ])
+                    ->get("{$this->baseUrl}/leads/search", [
+                        'phone' => $formattedPhone,
+                        'limit' => 10
+                    ]);
             } else {
-                // Jika query adalah nama, gunakan endpoint search umum (jika ada)
-                // Untuk sekarang kita tetap coba by-phone dengan query asli
-                $response = Http::timeout(10)->get("{$this->baseUrl}/leads/by-phone", [
-                    'phone' => $query
-                ]);
+                // Untuk pencarian nama, tetap gunakan parameter phone
+                // karena API hanya menyediakan search by phone
+                $response = Http::timeout(10)
+                    ->withHeaders([
+                        'Authorization' => 'Bearer ' . $this->token,
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ])
+                    ->get("{$this->baseUrl}/leads/search", [
+                        'phone' => $query,
+                        'limit' => 10
+                    ]);
             }
             
             if ($response->successful()) {
@@ -56,14 +72,20 @@ class LeadsService
     }
     
     /**
-     * Update status lead menjadi CROSS_SELLING
+     * Update status lead menjadi CUSTOMER atau status lainnya
      */
-    public function updateLeadStatus($leadId, $status = 'CROSS_SELLING')
+    public function updateLeadStatus($leadId, $status = 'CUSTOMER')
     {
         try {
-            $response = Http::timeout(10)->put("{$this->baseUrl}/leads/{$leadId}/status", [
-                'status' => $status
-            ]);
+            $response = Http::timeout(10)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->patch("{$this->baseUrl}/leads/{$leadId}/status", [
+                    'status' => $status
+                ]);
             
             if ($response->successful()) {
                 $data = $response->json();
@@ -83,15 +105,42 @@ class LeadsService
     public function convertLeadToMember($leadData, $outletId)
     {
         $memberData = [
-            'name' => $leadData['customer_name'],
-            'phone' => str_replace('+62', '0', $leadData['customer_phone']), // Convert +62 ke 0
-            'gender' => strtolower($leadData['sapaan']) === 'bapak' ? 'male' : 'female',
+            'name' => $leadData['nama_pelanggan'] ?? $leadData['customer_name'] ?? '',
+            'phone' => str_replace('+62', '0', $leadData['no_whatsapp'] ?? $leadData['customer_phone'] ?? ''), // Convert +62 ke 0
+            'gender' => 'male', // Default gender karena tidak ada info gender di API baru
             'outlet_id' => $outletId,
             'lead_id' => $leadData['id'],
-            'lead_number' => $leadData['lead_number']
+            'address' => $leadData['alamat'] ?? '',
+            'mosque_name' => $leadData['nama_masjid_instansi'] ?? ''
         ];
         
         return $memberData;
+    }
+    
+    /**
+     * Check API health status
+     */
+    public function checkApiHealth()
+    {
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->get("{$this->baseUrl}/health");
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['success'] ?? false;
+            }
+            
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Error checking leads API health: ' . $e->getMessage());
+            return false;
+        }
     }
     
     /**

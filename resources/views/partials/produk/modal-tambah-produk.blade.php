@@ -60,8 +60,10 @@
                                 <option value="meter">Meter</option>
                                 <option value="pcs">Pcs</option>
                                 <option value="unit">Unit</option>
+                                <option value="pasang">Pasang</option>
+                                <option value="kirim">Kirim</option>
                             </select>
-                            <p class="text-xs text-gray-500 mt-1">Meter: angka desimal (10.3), Pcs/Unit: angka bulat (10)</p>
+                            <p class="text-xs text-gray-500 mt-1">Meter: angka desimal (10.3), Pcs/Unit: angka bulat (10), Pasang/Kirim: selalu 1</p>
                         </div>
                     </div>
                 </div>

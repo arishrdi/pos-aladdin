@@ -171,13 +171,16 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                'unit_type' => 'required|in:meter,pcs,unit',
+                'unit_type' => 'required|in:meter,pcs,unit,pasang,kirim',
                 'min_stock' => 'nullable|numeric',
             ];
 
             // Validasi quantity berdasarkan unit_type
             if ($request->unit_type === 'meter') {
                 $validationRules['quantity'] = 'nullable|numeric|regex:/^\d+(\.\d+)?$/';
+            } elseif (in_array($request->unit_type, ['pasang', 'kirim'])) {
+                // Untuk unit_type 'pasang' dan 'kirim', quantity selalu 1
+                $validationRules['quantity'] = 'nullable|integer|min:1|max:1';
             } else {
                 $validationRules['quantity'] = 'nullable|integer|min:0';
             }
@@ -301,7 +304,7 @@ class ProductController extends Controller
                 'is_active' => 'required|boolean',
                 'outlet_ids' => 'required|array',
                 'outlet_ids.*' => 'exists:outlets,id',
-                'unit_type' => 'required|in:meter,pcs,unit',
+                'unit_type' => 'required|in:meter,pcs,unit,pasang,kirim',
                 'min_stock' => 'nullable|numeric',
             ];
 

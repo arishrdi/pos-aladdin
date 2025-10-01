@@ -15,9 +15,14 @@ class MemberController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+            // Jika ada parameter search, redirect ke search method
+            if ($request->has('search') && !empty($request->search)) {
+                return $this->search($request);
+            }
+            
             $members = Member::withCount('orders')->get();
             return $this->successResponse($members, 'Successfully retrieved members');
         } catch (\Throwable $th) {
@@ -136,7 +141,7 @@ class MemberController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = $request->get('q', '');
+            $query = $request->get('search', $request->get('q', ''));
             $outletId = auth()->user()->outlet_id ?? 1;
             
             $results = [];
@@ -184,16 +189,16 @@ class MemberController extends Controller
                     if (!$existingMember) {
                         $results[] = [
                             'id' => 'lead_' . $leadData['id'],
-                            'name' => $leadData['customer_name'],
-                            'phone' => str_replace('+', '', $leadData['customer_phone']),
-                            // 'phone' => str_replace('+62', '0', $leadData['customer_phone']),
-                            'identifier' => $leadData['lead_number'],
+                            'name' => $leadData['nama_pelanggan'] ?? $leadData['customer_name'] ?? 'Unknown',
+                            'phone' => str_replace('+', '', $leadData['no_whatsapp'] ?? $leadData['customer_phone'] ?? ''),
+                            'identifier' => $leadData['id'] ?? 'lead_' . $leadData['id'],
                             'type' => 'lead',
                             'source' => 'leads_api',
                             'lead_data' => $leadData,
                             'status' => $leadData['status'] ?? 'UNKNOWN',
-                            'priority' => $leadData['priority'] ?? 'Normal',
-                            'sapaan' => $leadData['sapaan'] ?? 'Bapak'
+                            'priority' => $leadData['prioritas'] ?? 'normal',
+                            'alamat' => $leadData['alamat'] ?? '',
+                            'nama_masjid' => $leadData['nama_masjid_instansi'] ?? ''
                         ];
                     }
                 }

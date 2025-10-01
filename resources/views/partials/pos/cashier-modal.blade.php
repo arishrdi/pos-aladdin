@@ -42,7 +42,8 @@
             <form onsubmit="submitTambahKas(event)">
                 <div class="mb-4 text-left">
                     <label class="block text-sm mb-1 font-medium">Jumlah</label>
-                    <input type="number" id="inputJumlah" class="w-full border border-green-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-green-500" placeholder="Masukkan jumlah" required>
+                    <input type="text" id="inputJumlah" class="w-full border border-green-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-green-500" placeholder="Masukkan jumlah" required>
+                    <input type="hidden" id="inputJumlahRaw" name="amount">
                 </div>
                 <div class="mb-4 text-left">
                     <label class="block text-sm mb-1 font-medium">Catatan</label>
@@ -90,7 +91,8 @@
             <form id="withdrawForm" onsubmit="submitWithdrawKas(event)">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="withdrawAmount">Jumlah</label>
-                    <input id="withdrawAmount" name="withdrawAmount" type="number" placeholder="Masukkan jumlah" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-500" required>
+                    <input id="withdrawAmount" name="withdrawAmount" type="text" placeholder="Masukkan jumlah" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-500" required>
+                    <input type="hidden" id="withdrawAmountRaw" name="amount">
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="withdrawNote">Catatan</label>
@@ -235,7 +237,8 @@
             return;
         }
 
-        const amount = parseFloat(document.getElementById('inputJumlah').value);
+        const amountRaw = document.getElementById('inputJumlahRaw').value;
+        const amount = amountRaw ? parseFloat(amountRaw) : parseFloat(document.getElementById('inputJumlah').value.replace(/[^\d]/g, ''));
         const reason = document.getElementById('inputCatatan').value;
         const outletId = getCurrentOutletId();
         
@@ -327,7 +330,8 @@
             return;
         }
 
-        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        const amountRaw = document.getElementById('withdrawAmountRaw').value;
+        const amount = amountRaw ? parseFloat(amountRaw) : parseFloat(document.getElementById('withdrawAmount').value.replace(/[^\d]/g, ''));
         const reason = document.getElementById('withdrawNote').value;
         const outletId = getCurrentOutletId();
         
@@ -601,6 +605,137 @@
         }
     }
 
+    // Setup currency formatting for input fields
+    function setupCurrencyFormatting() {
+        // Add Cash amount formatting
+        const inputJumlah = document.getElementById('inputJumlah');
+        if (inputJumlah) {
+            // Format on input
+            inputJumlah.addEventListener('input', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                // Update hidden field with raw value
+                const hiddenInput = document.getElementById('inputJumlahRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                // Format display value
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+            
+            // Format on paste
+            inputJumlah.addEventListener('paste', function() {
+                setTimeout(() => {
+                    const rawValue = this.value.replace(/[^\d]/g, '');
+                    
+                    const hiddenInput = document.getElementById('inputJumlahRaw');
+                    if (hiddenInput) {
+                        hiddenInput.value = rawValue;
+                    }
+                    
+                    if (rawValue) {
+                        const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        this.value = formatted;
+                    } else {
+                        this.value = '';
+                    }
+                }, 10);
+            });
+            
+            // Keep formatting on focus but select all for easy replacement
+            inputJumlah.addEventListener('focus', function() {
+                this.select();
+            });
+            
+            // Re-format on blur
+            inputJumlah.addEventListener('blur', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                const hiddenInput = document.getElementById('inputJumlahRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+        
+        // Withdraw amount formatting
+        const withdrawAmount = document.getElementById('withdrawAmount');
+        if (withdrawAmount) {
+            // Format on input
+            withdrawAmount.addEventListener('input', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                // Update hidden field with raw value
+                const hiddenInput = document.getElementById('withdrawAmountRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                // Format display value
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+            
+            // Format on paste
+            withdrawAmount.addEventListener('paste', function() {
+                setTimeout(() => {
+                    const rawValue = this.value.replace(/[^\d]/g, '');
+                    
+                    const hiddenInput = document.getElementById('withdrawAmountRaw');
+                    if (hiddenInput) {
+                        hiddenInput.value = rawValue;
+                    }
+                    
+                    if (rawValue) {
+                        const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        this.value = formatted;
+                    } else {
+                        this.value = '';
+                    }
+                }, 10);
+            });
+            
+            // Keep formatting on focus but select all for easy replacement
+            withdrawAmount.addEventListener('focus', function() {
+                this.select();
+            });
+            
+            // Re-format on blur
+            withdrawAmount.addEventListener('blur', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                const hiddenInput = document.getElementById('withdrawAmountRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+    }
+
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
         // Fetch initial cash balance
@@ -608,6 +743,9 @@
         
         // Setup file upload handlers
         setupFileUpload();
+        
+        // Setup currency formatting
+        setupCurrencyFormatting();
         
         // Set up form submit handlers
         document.getElementById('tambahKasForm')?.addEventListener('submit', submitTambahKas);

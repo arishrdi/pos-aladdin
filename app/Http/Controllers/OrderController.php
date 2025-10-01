@@ -287,12 +287,12 @@ class OrderController extends Controller
             // Jangan tambahkan ke kas register dulu, tunggu approval
             // Transaksi akan ditambahkan ke kas saat diapprove
 
-            // Update lead status to CROSS_SELLING if member is from lead
+            // Update lead status to CUSTOMER if member is from lead
             if ($order->member && $order->member->isFromLead()) {
                 try {
                     $leadsService = new LeadsService();
-                    $leadsService->updateLeadStatus($order->member->lead_id, 'CROSS_SELLING');
-                    Log::info("Updated lead status to CROSS_SELLING for lead_id: {$order->member->lead_id}");
+                    $leadsService->updateLeadStatus($order->member->lead_id, 'CUSTOMER');
+                    Log::info("Updated lead status to CUSTOMER for lead_id: {$order->member->lead_id}");
                 } catch (\Exception $e) {
                     Log::warning("Failed to update lead status: " . $e->getMessage());
                     // Don't fail the transaction if leads API is down

@@ -203,6 +203,7 @@
                             <span id="amountReceivedLabel">Jumlah Uang Diterima</span>
                         </label>
                         <input type="text" id="amountReceived" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+                        <input type="hidden" id="amountReceivedRaw" name="total_paid">
                     </div>
                     
                     <!-- Change Section - Only show for cash payments when Lunas -->
@@ -408,4 +409,106 @@ function clearAkadJualBeli() {
         akadJualBeliPreview.innerHTML = '';
     }
 }
+
+// Format currency input functions
+function formatCurrency(input) {
+    // Remove all non-digit characters
+    let value = input.value.replace(/[^\d]/g, '');
+    
+    // Convert to number and format with dots as thousand separators
+    if (value) {
+        // Add dots for thousands separator
+        let formatted = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        input.value = formatted;
+        
+        // Store raw value (without formatting) in hidden input
+        const hiddenInput = document.getElementById('amountReceivedRaw');
+        if (hiddenInput) {
+            hiddenInput.value = value;
+        }
+    } else {
+        input.value = '';
+        const hiddenInput = document.getElementById('amountReceivedRaw');
+        if (hiddenInput) {
+            hiddenInput.value = '';
+        }
+    }
+}
+
+function unformatCurrency(value) {
+    // Remove all non-digit characters to get raw number
+    return value.replace(/[^\d]/g, '');
+}
+
+// Initialize currency formatting for amount received input
+document.addEventListener('DOMContentLoaded', function() {
+    const amountReceivedInput = document.getElementById('amountReceived');
+    
+    if (amountReceivedInput) {
+        // Format on input - immediately format and update display
+        amountReceivedInput.addEventListener('input', function() {
+            const rawValue = this.value.replace(/[^\d]/g, '');
+            
+            // Update hidden field with raw value
+            const hiddenInput = document.getElementById('amountReceivedRaw');
+            if (hiddenInput) {
+                hiddenInput.value = rawValue;
+            }
+            
+            // Format display value like kembalian does
+            if (rawValue) {
+                const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = formatted;
+            } else {
+                this.value = '';
+            }
+        });
+        
+        // Format on paste
+        amountReceivedInput.addEventListener('paste', function() {
+            setTimeout(() => {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                // Update hidden field with raw value
+                const hiddenInput = document.getElementById('amountReceivedRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                // Format display value
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            }, 10);
+        });
+        
+        // Keep formatting on focus but select all for easy replacement
+        amountReceivedInput.addEventListener('focus', function() {
+            // Select all text for easier replacement while keeping format
+            this.select();
+        });
+        
+        // Re-format on blur to ensure consistency
+        amountReceivedInput.addEventListener('blur', function() {
+            const rawValue = this.value.replace(/[^\d]/g, '');
+            
+            // Update hidden field with raw value
+            const hiddenInput = document.getElementById('amountReceivedRaw');
+            if (hiddenInput) {
+                hiddenInput.value = rawValue;
+            }
+            
+            // Format display value
+            if (rawValue) {
+                const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = formatted;
+            } else {
+                this.value = '';
+            }
+        });
+    }
+});
 </script>

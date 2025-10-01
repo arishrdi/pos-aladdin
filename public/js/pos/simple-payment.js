@@ -47,6 +47,7 @@ class SimplePaymentManager {
 
         // Reset form
         document.getElementById('amountReceived').value = '';
+        document.getElementById('amountReceivedRaw').value = '';
         document.getElementById('changeAmount').value = '';
         
         // Reset transaction category radio
@@ -120,9 +121,13 @@ class SimplePaymentManager {
         const amountReceivedInput = document.getElementById('amountReceived');
         if (amountReceivedInput) {
             amountReceivedInput.addEventListener('input', (e) => {
-                const received = parseCurrencyInput(e.target.value);
-                const change = Math.max(0, received - totals.grandTotal);
-                document.getElementById('changeAmount').value = formatCurrency(change);
+                // Get raw value from hidden input that's updated by the modal's formatCurrency function
+                setTimeout(() => {
+                    const amountReceivedRaw = document.getElementById('amountReceivedRaw')?.value;
+                    const received = amountReceivedRaw ? parseInt(amountReceivedRaw) : parseCurrencyInput(e.target.value);
+                    const change = Math.max(0, received - totals.grandTotal);
+                    document.getElementById('changeAmount').value = formatCurrency(change);
+                }, 10); // Small delay to ensure hidden input is updated
             });
         }
 
@@ -545,7 +550,9 @@ class SimplePaymentManager {
     const formData = new FormData();
 
     const paymentMethod = this.currentPaymentMethod;
-    const amountReceived = parseCurrencyInput(document.getElementById('amountReceived')?.value || '0');
+    // Get raw value from hidden input, fallback to parsing display value
+    const amountReceivedRaw = document.getElementById('amountReceivedRaw')?.value;
+    const amountReceived = amountReceivedRaw ? parseInt(amountReceivedRaw) : parseCurrencyInput(document.getElementById('amountReceived')?.value || '0');
 
     // Validation
     if (this.transactionCategory === 'lunas') {

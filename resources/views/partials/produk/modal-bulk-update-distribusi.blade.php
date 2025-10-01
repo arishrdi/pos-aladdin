@@ -23,7 +23,12 @@
 
             <!-- Card: Distribusi Outlet -->
             <div class="p-4 border rounded shadow">
-                <h3 class="font-semibold mb-2">Pengaturan Distribusi Outlet</h3>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold">Pengaturan Distribusi Outlet</h3>
+                    <button id="btnSelectAllOutlets" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Pilih Semua
+                    </button>
+                </div>
                 <p class="text-sm text-gray-600 mb-4">Pilih outlet yang akan mendistribusikan produk-produk terpilih</p>
                 <div id="bulkOutletList" class="space-y-2 text-sm">
                     <!-- Daftar outlet akan diisi via JavaScript -->

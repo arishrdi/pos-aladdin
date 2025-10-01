@@ -992,10 +992,14 @@
                     ? safeItem.product.substring(0, 17) + '...' 
                     : safeItem.product;
                 
+                // Check if unit_type is 'pasang' or 'kirim' to hide quantity
+                const hideQuantity = ['pasang', 'kirim'].includes(item.unit_type);
+                const quantityDisplay = hideQuantity ? '' : `${safeItem.quantity}x `;
+                
                 return `
                     <div class="item-row">
                         <div class="item-name">
-                            ${safeItem.quantity}x ${productName}
+                            ${quantityDisplay}${productName}
                         </div>
                         <div class="item-price">
                             Rp ${formatCurrency(safeItem.price * safeItem.quantity)}
@@ -1273,14 +1277,20 @@
         // Items
         const itemsEl = document.getElementById('modalItems');
         if (t.items && t.items.length > 0) {
-            itemsEl.innerHTML = t.items.map(i => `
-                <tr>
-                    <td class="px-3 py-2">${i.product || '-'}</td>
-                    <td class="px-3 py-2">${i.quantity || 0}x</td>
-                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
-                    <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
-                </tr>
-            `).join('');
+            itemsEl.innerHTML = t.items.map(i => {
+                // Check if unit_type is 'pasang' or 'kirim' to hide quantity
+                const hideQuantity = ['pasang', 'kirim'].includes(i.unit_type);
+                const quantityDisplay = hideQuantity ? '' : `${i.quantity || 0}x`;
+                
+                return `
+                    <tr>
+                        <td class="px-3 py-2">${i.product || '-'}</td>
+                        <td class="px-3 py-2">${quantityDisplay}</td>
+                        <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price))}</td>
+                        <td class="px-3 py-2">Rp ${formatUang(safeNumber(i.price) * safeNumber(i.quantity))}</td>
+                    </tr>
+                `;
+            }).join('');
         } else {
             itemsEl.innerHTML = '<tr><td colspan="4" class="px-3 py-2 text-center text-gray-500">Tidak ada item</td></tr>';
         }

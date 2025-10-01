@@ -1832,9 +1832,31 @@ const BulkManager = (() => {
                     <span>${outlet.name}</span>
                 </label>`
             ).join('');
+
+            // Setup select all outlets button
+            const btnSelectAllOutlets = document.getElementById('btnSelectAllOutlets');
+            if (btnSelectAllOutlets) {
+                btnSelectAllOutlets.addEventListener('click', handleSelectAllOutlets);
+            }
         } catch (error) {
             console.error('Error loading outlets:', error);
             ProductManager.showAlert('error', 'Gagal memuat data outlet');
+        }
+    };
+
+    // Handle select all outlets
+    const handleSelectAllOutlets = () => {
+        const outletCheckboxes = document.querySelectorAll('.bulk-outlet-checkbox');
+        const allChecked = Array.from(outletCheckboxes).every(cb => cb.checked);
+        
+        outletCheckboxes.forEach(checkbox => {
+            checkbox.checked = !allChecked;
+        });
+        
+        // Update button text
+        const btnSelectAllOutlets = document.getElementById('btnSelectAllOutlets');
+        if (btnSelectAllOutlets) {
+            btnSelectAllOutlets.textContent = allChecked ? 'Pilih Semua' : 'Batal Pilih';
         }
     };
 
