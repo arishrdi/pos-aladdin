@@ -80,7 +80,7 @@
                             Upload Akad Jual Beli <span class="text-red-500">*</span>
                         </label>
                         <div class="border-2 border-dashed border-orange-300 rounded-lg p-4 text-center bg-orange-50">
-                            <input type="file" id="akadJualBeliUpload" accept=".pdf" class="hidden" required>
+                            <input type="file" id="akadJualBeliUpload" accept=".pdf" class="hidden">
                             <div class="cursor-pointer" onclick="document.getElementById('akadJualBeliUpload').click()">
                                 <i class="fas fa-file-pdf text-2xl text-orange-500 mb-2"></i>
                                 <p class="text-sm font-medium text-orange-600">Klik untuk upload akad jual beli</p>
