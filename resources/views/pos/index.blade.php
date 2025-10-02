@@ -179,6 +179,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            overflow-y: auto;
         }
 
         .payment-section {
@@ -404,6 +405,12 @@
             
             /* Better scrolling on mobile */
             .cart-items-container, .products-list-container {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Ensure cart content can scroll when service section is expanded */
+            .cart-section .flex-1 {
+                min-height: 0;
                 -webkit-overflow-scrolling: touch;
             }
             
@@ -782,7 +789,7 @@
             </div>
 
             <!-- Cart Section -->
-            <div class="cart-section w-1/2 bg-white flex flex-col overflow-hidden border-l-2 border-green-200">
+            <div class="cart-section w-1/2 bg-white flex flex-col border-l-2 border-green-200">
                 <div class="cart-header p-4 border-b-2 border-green-200">
                     <h4 class="text-lg m-0 flex items-center font-semibold">
                         <i class="fas fa-shopping-cart text-green-500 mr-3"></i> Keranjang
@@ -798,17 +805,18 @@
                     </div>
                 </div>
 
-                <div id="cartItems" class="cart-items-container w-full">
-                    <!-- Empty cart state -->
-                    <div id="emptyCart" class="empty-cart p-8 text-center">
-                        <i class="fas fa-shopping-cart text-gray-300"></i>
-                        <p class="text-gray-500 text-lg font-medium">Keranjang kosong</p>
-                        <p class="text-gray-400 text-sm mt-1">Tambahkan produk ke keranjang</p>
+                <div class="flex-1">
+                    <div id="cartItems" class="cart-items-container w-full">
+                        <!-- Empty cart state -->
+                        <div id="emptyCart" class="empty-cart p-8 text-center">
+                            <i class="fas fa-shopping-cart text-gray-300"></i>
+                            <p class="text-gray-500 text-lg font-medium">Keranjang kosong</p>
+                            <p class="text-gray-400 text-sm mt-1">Tambahkan produk ke keranjang</p>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Carpet Service Section -->
-                <div class="carpet-service-section border-t border-green-200 bg-gray-50">
+                    <!-- Carpet Service Section -->
+                    <div class="carpet-service-section border-t border-green-200 bg-gray-50">
                     <!-- Collapsible Header -->
                     <div class="service-toggle p-3 flex items-center justify-between" onclick="toggleServiceSection()">
                         <h5 class="text-sm font-semibold text-gray-700 flex items-center">
@@ -893,6 +901,7 @@
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <!-- Payment Section - Now sticks to bottom -->
