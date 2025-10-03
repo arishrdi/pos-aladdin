@@ -1086,7 +1086,7 @@
                 <td class="px-4 py-3">${transaction.order_number}</td>
                 <td class="px-4 py-3 whitespace-nowrap">${formatDateTime(transaction.created_at)}</td>
                 <td class="px-4 py-3">${transaction.user || 'Kasir'}</td>
-                ${outletFilterValue === 'all' ? `<td class="px-4 py-3">${transaction.outlet_name || 'Unknown'}</td>` : ''}
+                ${outletFilterValue === 'all' ? `<td class="px-4 py-3">${transaction.outlet || 'Unknown'}</td>` : ''}
                 <td class="px-4 py-3">
                     <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getCategoryText(transaction.transaction_category)}
