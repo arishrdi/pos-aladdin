@@ -986,8 +986,10 @@
                 params.append('date_to', currentDate);
             }
             
-            // Add outlet parameter only if not "all outlets"
-            if (outletFilterValue !== 'all') {
+            // Add outlet parameter - send 'all' for all outlets, specific ID for single outlet
+            if (outletFilterValue === 'all') {
+                params.append('outlet_id', 'all');
+            } else {
                 const outletId = getSelectedOutletId();
                 params.append('outlet_id', outletId);
             }

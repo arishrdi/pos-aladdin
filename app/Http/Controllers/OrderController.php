@@ -750,7 +750,7 @@ class OrderController extends Controller
         // knnnnninini
         try {
             $validator = Validator::make($request->query(), [
-                'outlet_id' => 'nullable|exists:outlets,id',
+                'outlet_id' => 'nullable|string', // Allow 'all' or valid outlet ID
                 'member_id' => 'nullable|exists:members,id',
                 'date_from' => 'nullable|date',
                 'date_to' => 'nullable|date|after_or_equal:date_from',
@@ -760,9 +760,17 @@ class OrderController extends Controller
                 return $this->errorResponse($validator->errors(), 422);
             }
 
+            // Additional validation for outlet_id
+            if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
+                $outletExists = \App\Models\Outlet::where('id', $request->outlet_id)->exists();
+                if (!$outletExists) {
+                    return $this->errorResponse('Outlet tidak ditemukan', 422);
+                }
+            }
+
             $query = Order::query();
 
-            if ($request->filled('outlet_id')) {
+            if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
                 $query->where('outlet_id', $request->outlet_id);
             }
 
