@@ -796,7 +796,7 @@ class OrderController extends Controller
 
             $orders = $query->with([
                 'items.product' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'sku', 'unit');
+                    $q->withTrashed()->select('id', 'name', 'sku', 'unit', 'image');
                 },
                 'outlet:id,name',
                 'shift:id',
@@ -804,10 +804,12 @@ class OrderController extends Controller
                 'member:id,name,member_code',
                 'mosque:id,name,address',
                 'approver:id,name',
+                'financeApprover:id,name',
+                'operationalApprover:id,name',
                 'cancellationRequester:id,name',
                 'cancellationProcessor:id,name',
                 'bonusTransactions.bonusItems.product' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'sku');
+                    $q->withTrashed()->select('id', 'name', 'sku', 'image');
                 }
             ])->has('outlet')->has('user')->latest()->get();
 
@@ -839,6 +841,7 @@ class OrderController extends Controller
                     'installation_notes' => $order->installation_notes,
                     'items' => $order->items->map(function ($item) {
                         return [
+                            'product_image' => $item->product->image_url,
                             'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',
                             'sku' => $item->product ? $item->product->sku : '',
                             'unit' => $item->product ? ($item->product->unit ?? 'pcs') : 'pcs',
@@ -862,6 +865,7 @@ class OrderController extends Controller
                             return [
                                 'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
                                 'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'product_image' => $bonusItem->product ? $bonusItem->product->image_url : null,
                                 'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
                                 'quantity' => $bonusItem->quantity,
                                 'bonus_value' => $bonusItem->bonus_value ?? 0,
@@ -877,6 +881,16 @@ class OrderController extends Controller
                     'rejection_reason' => $order->rejection_reason,
                     'approval_notes' => $order->approval_notes,
                     'transaction_category' => $order->transaction_category,
+                    // Dual approval system
+                    'dual_approval_status' => $order->getDualApprovalStatus(),
+                    'finance_approved_by' => $order->financeApprover ? $order->financeApprover->name : null,
+                    'finance_approved_at' => $order->finance_approved_at ? $order->finance_approved_at->format('d/m/Y H:i') : null,
+                    'operational_approved_by' => $order->operationalApprover ? $order->operationalApprover->name : null,
+                    'operational_approved_at' => $order->operational_approved_at ? $order->operational_approved_at->format('d/m/Y H:i') : null,
+                    'is_finance_approved' => $order->isFinanceApproved(),
+                    'is_operational_approved' => $order->isOperationalApproved(),
+                    'is_fully_approved' => $order->isFullyApproved(),
+                    'is_partially_approved' => $order->isPartiallyApproved(),
                     // DP Helper flags
                     'needs_settlement' => $order->needsSettlement(),
                     'can_settle' => $order->canSettle(),
@@ -1388,6 +1402,96 @@ class OrderController extends Controller
             ];
 
             return $this->successResponse($summary, 'DP summary berhasil diambil');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Approve transaction from Keuangan perspective (Admin only)
+     */
+    public function approveFinance($id)
+    {
+        try {
+            // Validate ID parameter
+            if (!$id || $id === 'null' || $id === 'undefined') {
+                return $this->errorResponse('Order ID tidak valid', 400);
+            }
+            
+            $user = auth()->user();
+            
+            // Only admin can approve
+            if ($user->role !== 'admin') {
+                return $this->errorResponse('Hanya admin yang dapat melakukan approval', 403);
+            }
+
+            $order = Order::findOrFail($id);
+
+            if (!$order->canBeFinanceApproved()) {
+                return $this->errorResponse('Transaksi sudah di-approve oleh Keuangan atau tidak dapat di-approve');
+            }
+
+            $order->approveFinance($user);
+            
+            // Refresh the order to get updated status
+            $updatedOrder = $order->fresh()->load(['financeApprover', 'operationalApprover']);
+            
+            // Check if transaction is now completed
+            $message = 'Transaksi berhasil di-approve oleh Keuangan';
+            if ($updatedOrder->status === 'completed') {
+                $message .= ' dan transaksi telah selesai (kedua approval lengkap)';
+            }
+
+            return $this->successResponse([
+                'order' => $updatedOrder,
+                'message' => $message
+            ], 'Keuangan approval berhasil');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Approve transaction from Operational perspective (Admin only)
+     */
+    public function approveOperational($id)
+    {
+        try {
+            // Validate ID parameter
+            if (!$id || $id === 'null' || $id === 'undefined') {
+                return $this->errorResponse('Order ID tidak valid', 400);
+            }
+            
+            $user = auth()->user();
+            
+            // Only admin can approve
+            if ($user->role !== 'admin') {
+                return $this->errorResponse('Hanya admin yang dapat melakukan approval', 403);
+            }
+
+            $order = Order::findOrFail($id);
+
+            if (!$order->canBeOperationalApproved()) {
+                return $this->errorResponse('Transaksi sudah di-approve oleh Operational atau tidak dapat di-approve');
+            }
+
+            $order->approveOperational($user);
+            
+            // Refresh the order to get updated status
+            $updatedOrder = $order->fresh()->load(['financeApprover', 'operationalApprover']);
+            
+            // Check if transaction is now completed
+            $message = 'Transaksi berhasil di-approve oleh Operasional';
+            if ($updatedOrder->status === 'completed') {
+                $message .= ' dan transaksi telah selesai (kedua approval lengkap)';
+            }
+
+            return $this->successResponse([
+                'order' => $updatedOrder,
+                'message' => $message
+            ], 'Operational approval berhasil');
 
         } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());

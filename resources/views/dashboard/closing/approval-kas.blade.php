@@ -106,6 +106,14 @@
         </h3>
         <div class="flex items-center gap-2 mt-2 sm:mt-0">
             <span id="pendingCount" class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">0</span>
+            <button onclick="openAdminCashModal('add')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                Tambah Kas
+            </button>
+            <button onclick="openAdminCashModal('subtract')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                <i data-lucide="minus" class="w-4 h-4 mr-1"></i>
+                Kurang Kas
+            </button>
             <button onclick="refreshPendingRequests()" class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">
                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
             </button>
@@ -363,6 +371,63 @@
                     <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
                         <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
                         Tolak
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Admin Direct Cash Operations -->
+<div id="adminCashModal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+    <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-lg shadow-lg z-50 overflow-y-auto relative top-1/2 transform -translate-y-1/2">
+        <div class="modal-content py-6 px-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="adminCashModalTitle" class="text-lg font-semibold">
+                    <i id="adminCashModalIcon" data-lucide="plus" class="w-5 h-5 inline mr-2"></i>
+                    Tambah Kas (Admin)
+                </h2>
+                <button onclick="closeAdminCashModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+                    <span class="text-sm font-medium text-blue-800">Mode Admin</span>
+                </div>
+                <p class="text-xs text-blue-600 mt-1">Transaksi akan diproses langsung tanpa perlu approval</p>
+            </div>
+            
+            <form onsubmit="submitAdminCash(event)">
+                <input type="hidden" id="adminCashType">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah *</label>
+                    <input type="text" id="adminCashAmount" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           placeholder="Masukkan jumlah" required>
+                    <input type="hidden" id="adminCashAmountRaw">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan</label>
+                    <textarea id="adminCashReason" rows="3" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                              placeholder="Jelaskan alasan transaksi kas..."></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeAdminCashModal()" 
+                            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Batal
+                    </button>
+                    <button type="submit" id="adminCashSubmitBtn" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                        Proses Langsung
                     </button>
                 </div>
             </form>
@@ -1111,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         let params = {
-            source: 'cash',
             outlet_id: outletId
         };
 
@@ -1245,6 +1309,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const breakdown = comprehensiveData.transactions_breakdown;
             allTransactions = [
                 ...(breakdown.manual_cash || []),
+                ...(breakdown.admin_direct || []),
                 ...(breakdown.pos_sales || []),
                 ...(breakdown.refunds || []),
                 ...(breakdown.other || [])
@@ -1279,8 +1344,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (transaction.source === 'refund') {
                         // Refunds subtract from cash
                         balanceChange = -amount;
-                    } else if (transaction.source === 'cash') {
-                        // Manual cash operations
+                    } else if (transaction.source === 'cash' || transaction.source === 'admin_direct') {
+                        // Manual cash operations (including admin direct transactions)
                         balanceChange = transaction.type === 'add' ? amount : -amount;
                     } else {
                         // Other transactions
@@ -1290,7 +1355,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     runningBalance += balanceChange;
                     
                     // Only store balance untuk manual cash transactions yang akan ditampilkan
-                    if (transaction.source === 'cash') {
+                    if (transaction.source === 'cash' || transaction.source === 'admin_direct') {
                         balanceHistory.push({
                             id: transaction.id,
                             beforeBalance: previousBalance,
@@ -1505,7 +1570,175 @@ document.addEventListener('DOMContentLoaded', function() {
             window.pollingManager.stop('cashData');
         }
     });
+
 });
+
+// Admin Cash Functions (Global scope for onclick handlers)
+function openAdminCashModal(type) {
+        const modal = document.getElementById('adminCashModal');
+        const title = document.getElementById('adminCashModalTitle');
+        const icon = document.getElementById('adminCashModalIcon');
+        const submitBtn = document.getElementById('adminCashSubmitBtn');
+        
+        // Set modal type
+        document.getElementById('adminCashType').value = type;
+        
+        // Update UI based on type
+        if (type === 'add') {
+            title.innerHTML = '<i data-lucide="plus" class="w-5 h-5 inline mr-2"></i>Tambah Kas (Admin)';
+            submitBtn.className = 'px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600';
+            submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>Tambah Langsung';
+        } else {
+            title.innerHTML = '<i data-lucide="minus" class="w-5 h-5 inline mr-2"></i>Kurang Kas (Admin)';
+            submitBtn.className = 'px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600';
+            submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>Kurang Langsung';
+        }
+        
+        // Reset form
+        document.getElementById('adminCashAmount').value = '';
+        document.getElementById('adminCashAmountRaw').value = '';
+        document.getElementById('adminCashReason').value = '';
+        
+        // Show modal
+        modal.classList.remove('hidden');
+        
+        // Update icons
+        if (window.lucide) window.lucide.createIcons();
+        
+        // Setup currency formatting for admin cash amount
+        setupAdminCashCurrencyFormatting();
+    }
+    
+    function closeAdminCashModal() {
+        document.getElementById('adminCashModal').classList.add('hidden');
+    }
+    
+    function setupAdminCashCurrencyFormatting() {
+        const adminCashAmount = document.getElementById('adminCashAmount');
+        const adminCashAmountRaw = document.getElementById('adminCashAmountRaw');
+        
+        if (!adminCashAmount || !adminCashAmountRaw) return;
+        
+        // Simple input handler for currency formatting
+        adminCashAmount.addEventListener('input', function(e) {
+            const rawValue = this.value.replace(/[^0-9]/g, '');
+            adminCashAmountRaw.value = rawValue;
+            
+            if (rawValue) {
+                const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = formatted;
+            } else {
+                this.value = '';
+            }
+        });
+        
+        adminCashAmount.addEventListener('paste', function(e) {
+            setTimeout(() => {
+                const rawValue = this.value.replace(/[^0-9]/g, '');
+                adminCashAmountRaw.value = rawValue;
+                
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            }, 10);
+        });
+        
+        adminCashAmount.addEventListener('focus', function(e) {
+            this.select();
+        });
+        
+        adminCashAmount.addEventListener('blur', function(e) {
+            const rawValue = this.value.replace(/[^0-9]/g, '');
+            adminCashAmountRaw.value = rawValue;
+            
+            if (rawValue) {
+                const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                this.value = formatted;
+            } else {
+                this.value = '';
+            }
+        });
+    }
+    
+    function submitAdminCash(event) {
+        event.preventDefault();
+        
+        const type = document.getElementById('adminCashType').value;
+        const amountRaw = document.getElementById('adminCashAmountRaw').value;
+        const amount = amountRaw ? parseFloat(amountRaw) : parseFloat(document.getElementById('adminCashAmount').value.replace(/[^\\d]/g, ''));
+        const reason = document.getElementById('adminCashReason').value || 'Transaksi admin langsung';
+        const outletId = getSelectedOutletId();
+        
+        if (isNaN(amount) || amount <= 0) {
+            showAlert('error', 'Jumlah tidak valid');
+            return;
+        }
+        
+        const submitBtn = document.getElementById('adminCashSubmitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 inline mr-1 animate-spin"></i>Memproses...';
+        submitBtn.disabled = true;
+        
+        // First fetch cash register ID for the outlet
+        axios.get(`/api/cash-registers/${outletId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.data.success || !response.data.data) {
+                throw new Error('Cash register tidak ditemukan untuk outlet ini');
+            }
+            
+            const cashRegisterId = response.data.data.id;
+            
+            // Now create the cash register transaction (shift_id is optional for admin transactions)
+            return axios.post('/api/cash-register-transactions', {
+                cash_register_id: cashRegisterId,
+                type: type === 'add' ? 'add' : 'remove',
+                amount: amount,
+                reason: reason,
+                source: 'admin_direct' // Flag to indicate this is an admin direct transaction
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+        })
+        .then(response => {
+            if (response.data.success) {
+                const actionText = type === 'add' ? 'menambah' : 'mengurangi';
+                const formattedAmount = new Intl.NumberFormat('id-ID').format(amount);
+                showAlert('success', `Berhasil ${actionText} kas sebesar Rp ${formattedAmount}`);
+                
+                closeAdminCashModal();
+                
+                // Refresh all related data
+                const currentOutletId = getSelectedOutletId();
+                fetchBalanceInfo(currentOutletId);
+                if (window.fetchCashHistory) {
+                    window.fetchCashHistory(currentOutletId, selectedDate);
+                }
+            } else {
+                throw new Error(response.data.message || 'Gagal memproses transaksi');
+            }
+        })
+        .catch(error => {
+            console.error('Error processing admin cash transaction:', error);
+            showAlert('error', error.response?.data?.message || error.message || 'Terjadi kesalahan saat memproses transaksi');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            if (window.lucide) window.lucide.createIcons();
+        });
+}
 </script>
 
 @endsection

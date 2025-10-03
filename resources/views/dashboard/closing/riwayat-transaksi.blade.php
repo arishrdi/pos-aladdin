@@ -19,7 +19,8 @@
     <div class="mb-3 md:mb-0 flex items-start gap-2">
         <i data-lucide="store" class="w-5 h-5 text-gray-600"></i>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Menampilkan riwayat transaksi: <span class="outlet-name">Loading...</span></h2>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">Menampilkan riwayat transaksi: <span
+                    class="outlet-name">Loading...</span></h2>
             <p class="text-sm text-gray-600">Data riwayat transaksi untuk <span class=" outlet-name"></span></p>
         </div>
     </div>
@@ -27,120 +28,175 @@
 
 <!-- Table Riwayat Transaksi -->
 <div class="bg-white rounded-lg shadow p-4">
-    <!-- Header & Filter Row -->
-    <div class="flex flex-col mb-4">
-        <!-- Title and Date Filter Row -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-            <h3 class="text-2xl font-bold text-gray-800">Riwayat Transaksi</h3>
-            
-            <div class="relative mt-2 sm:mt-0">
-                <input id="transDateInput" type="text"
-                    class="w-full sm:w-56 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Pilih Tanggal" />
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
-                </span>
+    <!-- Header & Filter Section -->
+    <div class="mb-6">
+        <!-- Page Title -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-1">Riwayat Transaksi</h3>
+                <p class="text-sm text-gray-600">Kelola dan pantau semua transaksi yang telah dilakukan</p>
             </div>
         </div>
-        
-        <!-- Filter and Search Row -->
-        <div class="flex flex-col sm:flex-row gap-3">
-            <!-- Search Bar -->
-            <div class="flex-1 relative">
-                <input type="text" id="searchInvoice"
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Cari Invoice..." />
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                    <i data-lucide="search" class="w-4 h-4"></i>
-                </span>
+
+        <!-- Filters Section -->
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+            <!-- Search and Date Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <!-- Search Invoice -->
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="search" class="w-4 h-4 inline mr-1"></i>
+                        Cari Invoice
+                    </label>
+                    <input type="text" id="searchInvoice"
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                        placeholder="Masukkan nomor invoice..." />
+                    <span class="absolute bottom-3 left-3 text-gray-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                </div>
+
+                <!-- Date Range -->
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                        Rentang Tanggal
+                    </label>
+                    <input id="transDateInput" type="text"
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                        placeholder="Pilih rentang tanggal..." />
+                    <span class="absolute bottom-3 left-3 text-gray-400">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                    </span>
+                </div>
             </div>
-            
-            <!-- Status Filter -->
-            <div class="relative">
-                <select id="statusFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Status</option>
-                    <option value="pending">Menunggu</option>
-                    <option value="completed">Selesai</option>
-                    <option value="cancelled">Dibatalkan</option>
-                </select>
-            </div>
-            
-            <!-- Approval Filter -->
-            <div class="relative">
-                <select id="approvalFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Approval</option>
-                    <option value="pending">Menunggu Approval</option>
-                    <option value="approved">Disetujui</option>
-                    <option value="rejected">Ditolak</option>
-                </select>
-            </div>
-            
-            <!-- Category Filter -->
-            <div class="relative">
-                <select id="categoryFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Kategori</option>
-                    <option value="lunas">Lunas</option>
-                    <option value="dp">DP</option>
-                </select>
-            </div>
-            
-            <!-- DP Status Filter -->
-            <div class="relative">
-                <select id="dpStatusFilter" class="w-full sm:w-48 pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white">
-                    <option value="">Semua Status DP</option>
-                    <option value="pending">DP Belum Lunas</option>
-                    <option value="completed">DP Sudah Lunas</option>
-                </select>
+
+            <!-- Filter Controls Section -->
+            <div class="border-t border-gray-200 pt-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-medium text-gray-700 flex items-center">
+                        <i data-lucide="filter" class="w-4 h-4 mr-1"></i>
+                        Filter Transaksi
+                    </h4>
+                    <button onclick="clearAllFilters()" class="text-xs text-green-600 hover:text-green-700 font-medium flex items-center">
+                        <i data-lucide="rotate-ccw" class="w-3 h-3 mr-1"></i>
+                        Reset Filter
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+                    <!-- Status Filter -->
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Status Transaksi</label>
+                        <select id="statusFilter"
+                            class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Menunggu</option>
+                            <option value="completed">Selesai</option>
+                            <option value="cancelled">Dibatalkan</option>
+                        </select>
+                    </div>
+
+                    <!-- Approval Filter -->
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Status Approval</label>
+                        <select id="approvalFilter"
+                            class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                            <option value="">Semua Approval</option>
+                            <option value="pending">Menunggu Approval</option>
+                            <option value="approved">Disetujui</option>
+                            <option value="rejected">Ditolak</option>
+                        </select>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Kategori Pembayaran</label>
+                        <select id="categoryFilter"
+                            class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                            <option value="">Semua Kategori</option>
+                            <option value="lunas">Lunas</option>
+                            <option value="dp">DP (Uang Muka)</option>
+                        </select>
+                    </div>
+
+                    <!-- DP Status Filter -->
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Status DP</label>
+                        <select id="dpStatusFilter"
+                            class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                            <option value="">Semua Status DP</option>
+                            <option value="pending">DP Belum Lunas</option>
+                            <option value="completed">DP Sudah Lunas</option>
+                        </select>
+                    </div>
+
+                    <!-- Outlet Filter -->
+                    <div class="relative">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Outlet</label>
+                        <select id="outletFilter"
+                            class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
+                            <option value="">Outlet Saat Ini</option>
+                            <option value="all">Semua Outlet</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Table Content -->
     <div class="relative">
         <!-- Scroll indicator shadows -->
-        <div class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white via-white to-transparent pointer-events-none z-10 rounded-r-lg" id="scrollIndicatorRight">
+        <div class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white via-white to-transparent pointer-events-none z-10 rounded-r-lg"
+            id="scrollIndicatorRight">
             <!-- Scroll hint icon -->
             <div class="absolute top-1/2 right-2 transform -translate-y-1/2">
-                <div class="flex items-center justify-center w-4 h-4 text-gray-400" title="Scroll horizontal untuk melihat lebih banyak kolom">
+                <div class="flex items-center justify-center w-4 h-4 text-gray-400"
+                    title="Scroll horizontal untuk melihat lebih banyak kolom">
                     <i data-lucide="chevrons-right" class="w-3 h-3"></i>
                 </div>
             </div>
         </div>
-        
+
         <div class="overflow-x-auto border border-gray-200 rounded-lg" id="tableContainer">
             <table class="min-w-full text-sm">
-            <thead class="text-left text-gray-700 border-b-2 bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 font-bold min-w-[120px]">Invoice</th>
-                    <th class="px-4 py-3 font-bold min-w-[140px]">Waktu</th>
-                    <th class="px-4 py-3 font-bold min-w-[100px]">Kasir</th>
-                    <th class="px-4 py-3 font-bold min-w-[80px]">Kategori</th>
-                    <th class="px-4 py-3 font-bold min-w-[120px]">Layanan</th>
-                    <th class="px-4 py-3 font-bold min-w-[80px]">Pajak</th>
-                    <th class="px-4 py-3 font-bold min-w-[100px]">Pembayaran</th>
-                    <th class="px-4 py-3 font-bold min-w-[80px]">Status</th>
-                    <th class="px-4 py-3 font-bold min-w-[120px]">Approval</th>
-                    <th class="px-4 py-3 font-bold min-w-[100px]">Total</th>
-                    <th class="px-4 py-3 font-bold min-w-[100px]">Sisa Bayar</th>
-                    <th class="px-4 py-3 font-bold min-w-[400px] text-left">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700 divide-y">
-                <!-- Data akan diisi secara dinamis -->
-                <tr>
-                    <td colspan="12" class="py-8 text-center">
-                        <div class="flex flex-col items-center justify-center gap-2 mx-auto">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-                                 class="animate-spin text-green-500">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                            </svg>
-                            <span class="text-gray-500">Memuat data transaksi...</span>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                <thead class="text-left text-gray-700 border-b-2 bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 font-bold min-w-[120px]">Invoice</th>
+                        <th class="px-4 py-3 font-bold min-w-[140px]">Waktu</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Kasir</th>
+                        <th id="outletColumn" class="px-4 py-3 font-bold min-w-[120px]" style="display: none;">Outlet
+                        </th>
+                        <th class="px-4 py-3 font-bold min-w-[80px]">Kategori</th>
+                        <th class="px-4 py-3 font-bold min-w-[120px]">Layanan</th>
+                        <th class="px-4 py-3 font-bold min-w-[80px]">Pajak</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Pembayaran</th>
+                        <th class="px-4 py-3 font-bold min-w-[80px]">Status</th>
+                        <th class="px-4 py-3 font-bold min-w-[120px]">Approval</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Keuangan</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Operasional</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Total</th>
+                        <th class="px-4 py-3 font-bold min-w-[100px]">Sisa Bayar</th>
+                        <th class="px-4 py-3 font-bold min-w-[400px] text-left">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 divide-y">
+                    <!-- Data akan diisi secara dinamis -->
+                    <tr>
+                        <td colspan="14" class="py-8 text-center">
+                            <div class="flex flex-col items-center justify-center gap-2 mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="animate-spin text-green-500">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                </svg>
+                                <span class="text-gray-500">Memuat data transaksi...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -155,11 +211,15 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <p class="text-gray-500">No. Invoice</p>
                     <p id="detailInvoice" class="font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-gray-500">No Order</p>
+                    <p id="detailOrderId" class="font-medium"></p>
                 </div>
                 <div>
                     <p class="text-gray-500">Tanggal/Waktu</p>
@@ -181,6 +241,20 @@
                     <p class="text-gray-500">Kategori Transaksi</p>
                     <p id="detailTransactionCategory" class="font-medium"></p>
                 </div>
+                <div id="financeApprovalRow" class="hidden">
+                    <p class="text-gray-500">Approval Keuangan</p>
+                    <div id="detailFinanceApproval" class="font-medium">
+                        <div id="financeApproverName" class="text-sm"></div>
+                        <div id="financeApprovalDate" class="text-xs text-gray-600"></div>
+                    </div>
+                </div>
+                <div id="operationalApprovalRow" class="hidden">
+                    <p class="text-gray-500">Approval Operasional</p>
+                    <div id="detailOperationalApproval" class="font-medium">
+                        <div id="operationalApproverName" class="text-sm"></div>
+                        <div id="operationalApprovalDate" class="text-xs text-gray-600"></div>
+                    </div>
+                </div>
                 <div id="memberInfoRow" class="hidden">
                     <p class="text-gray-500">Member</p>
                     <p id="detailMember" class="font-medium"></p>
@@ -192,7 +266,8 @@
                 <div id="contractPdfInfoRow" class="hidden">
                     <p class="text-gray-500">Akad Jual Beli</p>
                     <div id="detailContractPdf" class="font-medium">
-                        <button onclick="downloadContractPdf(window.currentTransactionDetail.contract_pdf_url, window.currentTransactionDetail.order_number)" 
+                        <button
+                            onclick="downloadContractPdf(window.currentTransactionDetail.contract_pdf_url, window.currentTransactionDetail.order_number)"
                             class="inline-flex items-center px-3 py-1 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors">
                             <i class="fas fa-file-pdf mr-2"></i>
                             Download Akad Jual Beli
@@ -200,7 +275,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Approval Information Section -->
             <div id="approvalInfoSection" class="hidden mb-4 p-3 bg-gray-50 rounded-lg">
                 <h4 class="font-medium mb-2 text-gray-700">Informasi Approval</h4>
@@ -223,11 +298,12 @@
                     </div>
                     <div id="paymentProofInfo" class="hidden">
                         <span class="text-gray-500">Bukti Pembayaran:</span>
-                        <a id="detailPaymentProofLink" href="#" class="font-medium ml-1 text-green-600 hover:text-green-800">Lihat Bukti</a>
+                        <a id="detailPaymentProofLink" href="#"
+                            class="font-medium ml-1 text-green-600 hover:text-green-800">Lihat Bukti</a>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Carpet Service Information Section -->
             <div id="carpetServiceSection" class="hidden mb-4 p-3 bg-gray-50 rounded-lg">
                 <h4 class="font-medium mb-2 text-green-700">
@@ -244,22 +320,23 @@
                     </div>
                     <div id="installationNotesInfo" class="hidden">
                         <span class="text-gray-500">Rincian Pemasangan:</span>
-                        <div id="detailInstallationNotes" class="font-medium mt-1 p-2 bg-white rounded border text-gray-700"></div>
+                        <div id="detailInstallationNotes"
+                            class="font-medium mt-1 p-2 bg-white rounded border text-gray-700"></div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="mb-4">
                 <h4 class="font-medium mb-2">Item Pembelian</h4>
                 <div id="detailItems"></div>
             </div>
-            
+
             <!-- Bonus Items Section -->
             <div id="bonusItemsSection" class="mb-4 hidden">
                 <h4 class="font-medium mb-2 text-green-600">Item Bonus</h4>
                 <div id="detailBonusItems" class="bg-green-50 p-3 rounded-lg"></div>
             </div>
-            
+
             <div class="border-t pt-4 space-y-2">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
@@ -306,7 +383,7 @@
                 <div class="mt-2">
                     <p class="text-sm text-gray-600">Anda yakin ingin melakukan refund untuk transaksi ini?</p>
                     <p id="refundInvoiceText" class="text-sm font-medium mt-1"></p>
-                    
+
                     <!-- Transaction Summary -->
                     <div id="refundTransactionSummary" class="mt-3 p-3 bg-gray-50 rounded-md">
                         <h4 class="text-sm font-medium text-gray-900 mb-2">Detail Transaksi:</h4>
@@ -325,11 +402,12 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Refund Reason -->
                     <div class="mt-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Refund *</label>
-                        <select id="refundReason" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <select id="refundReason"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                             <option value="">Pilih alasan refund</option>
                             <option value="produk_rusak">Produk Rusak/Cacat</option>
                             <option value="salah_produk">Salah Produk</option>
@@ -339,22 +417,27 @@
                             <option value="lainnya">Lainnya</option>
                         </select>
                     </div>
-                    
+
                     <!-- Custom Reason -->
                     <div id="customReasonSection" class="hidden mt-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan Tambahan</label>
-                        <textarea id="customReason" rows="2" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Jelaskan alasan refund secara detail..."></textarea>
+                        <textarea id="customReason" rows="2"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                            placeholder="Jelaskan alasan refund secara detail..."></textarea>
                     </div>
-                    
+
                     <div class="mt-3 p-3 bg-yellow-50 rounded-md">
-                        <p class="text-xs text-yellow-700"><strong>Perhatian:</strong> Refund tidak dapat dibatalkan. Pastikan produk telah dikembalikan dan semua persyaratan refund terpenuhi.</p>
+                        <p class="text-xs text-yellow-700"><strong>Perhatian:</strong> Refund tidak dapat dibatalkan.
+                            Pastikan produk telah dikembalikan dan semua persyaratan refund terpenuhi.</p>
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
-                    <button onclick="closeRefundModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    <button onclick="closeRefundModal()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                         Batal
                     </button>
-                    <button onclick="processRefund()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                    <button onclick="processRefund()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
                         Proses Refund
                     </button>
                 </div>
@@ -377,14 +460,18 @@
                     <p id="approveInvoiceText" class="text-sm font-medium mt-1"></p>
                     <div class="mt-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
-                        <textarea id="approvalNotes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tambahkan catatan approval..."></textarea>
+                        <textarea id="approvalNotes" rows="3"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Tambahkan catatan approval..."></textarea>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end gap-3">
-                    <button onclick="closeApproveModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    <button onclick="closeApproveModal()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                         Batal
                     </button>
-                    <button onclick="processApprove()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none">
+                    <button onclick="processApprove()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none">
                         Setujui Transaksi
                     </button>
                 </div>
@@ -407,14 +494,18 @@
                     <p id="rejectInvoiceText" class="text-sm font-medium mt-1"></p>
                     <div class="mt-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Penolakan *</label>
-                        <textarea id="rejectionReason" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Jelaskan alasan penolakan..." required></textarea>
+                        <textarea id="rejectionReason" rows="3"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                            placeholder="Jelaskan alasan penolakan..." required></textarea>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-end gap-3">
-                    <button onclick="closeRejectModal()" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    <button onclick="closeRejectModal()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                         Batal
                     </button>
-                    <button onclick="processReject()" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                    <button onclick="processReject()" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
                         Tolak Transaksi
                     </button>
                 </div>
@@ -424,7 +515,8 @@
 </div>
 
 <!-- Modal Payment Proof -->
-<div id="modalPaymentProof" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+<div id="modalPaymentProof"
+    class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Bukti Pembayaran</h3>
@@ -433,7 +525,8 @@
             </button>
         </div>
         <div class="text-center">
-            <img id="paymentProofImage" src="" alt="Bukti Pembayaran" class="max-w-full max-h-96 mx-auto rounded-lg shadow-md">
+            <img id="paymentProofImage" src="" alt="Bukti Pembayaran"
+                class="max-w-full max-h-96 mx-auto rounded-lg shadow-md">
         </div>
     </div>
 </div>
@@ -447,7 +540,7 @@
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        
+
         <!-- Order Details -->
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
             <h4 class="font-semibold text-gray-800 mb-3">Detail Order</h4>
@@ -479,16 +572,23 @@
         <form id="settlementForm" enctype="multipart/form-data">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pelunasan *</label>
-                <input type="number" id="settlementAmount" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Masukkan jumlah pelunasan" required>
+                <input type="number" id="settlementAmount" step="0.01" min="0"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Masukkan jumlah pelunasan" required>
                 <div class="mt-2 flex gap-2">
-                    <button type="button" onclick="setSettlementAmount('full')" class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Lunas Penuh</button>
-                    <button type="button" onclick="setSettlementAmount('half')" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">Setengah</button>
+                    <button type="button" onclick="setSettlementAmount('full')"
+                        class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Lunas
+                        Penuh</button>
+                    <button type="button" onclick="setSettlementAmount('half')"
+                        class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200">Setengah</button>
                 </div>
             </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran *</label>
-                <select id="settlementPaymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                <select id="settlementPaymentMethod"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required>
                     <option value="">Pilih metode pembayaran</option>
                     <option value="cash">Tunai</option>
                     <option value="transfer">Transfer Bank</option>
@@ -498,17 +598,21 @@
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran</label>
-                <input type="file" id="settlementPaymentProof" accept="image/*,application/pdf" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                <input type="file" id="settlementPaymentProof" accept="image/*,application/pdf"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                 <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG, PDF. Maksimal 5MB.</p>
             </div>
 
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Catatan (Opsional)</label>
-                <textarea id="settlementNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                <textarea id="settlementNotes" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Tambahkan catatan jika diperlukan"></textarea>
             </div>
 
             <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeSettlementModal()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                <button type="button" onclick="closeSettlementModal()"
+                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                     Batal
                 </button>
                 <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
@@ -528,7 +632,7 @@
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        
+
         <!-- Order Info -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
@@ -550,26 +654,40 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Content -->
         <div class="px-6 py-4 max-h-96 overflow-y-auto">
             <div id="dpHistoryLoading" class="text-center py-8">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
                 <p class="mt-2 text-gray-600">Memuat riwayat pelunasan...</p>
             </div>
-            
+
             <div id="dpHistoryContent" class="hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Petugas</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bukti</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tanggal</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Jumlah</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Metode</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Petugas</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Bukti</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Catatan</th>
                             </tr>
                         </thead>
                         <tbody id="dpHistoryTableBody" class="bg-white divide-y divide-gray-200">
@@ -578,13 +696,13 @@
                     </table>
                 </div>
             </div>
-            
+
             <div id="dpHistoryEmpty" class="hidden text-center py-8">
                 <i data-lucide="file-text" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
                 <p class="text-gray-600">Belum ada riwayat pelunasan untuk transaksi DP ini.</p>
             </div>
         </div>
-        
+
         <!-- Summary Footer -->
         <div id="dpHistorySummary" class="hidden px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -602,12 +720,63 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Footer -->
         <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-            <button onclick="closeDpHistoryModal()" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button onclick="closeDpHistoryModal()"
+                class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                 Tutup
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Finance Approval Confirmation Modal -->
+<div id="financeApprovalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
+                <i data-lucide="banknote" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Konfirmasi Approval Keuangan</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Apakah Anda yakin ingin menyetujui transaksi ini dari sisi Keuangan?
+            </p>
+            <div class="flex gap-3">
+                <button onclick="closeFinanceApprovalModal()" 
+                    class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmFinanceApproval()" 
+                    class="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                    Ya, Setujui
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Operational Approval Confirmation Modal -->
+<div id="operationalApprovalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full">
+                <i data-lucide="settings" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Konfirmasi Approval Operasional</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Apakah Anda yakin ingin menyetujui transaksi ini dari sisi Operasional?
+            </p>
+            <div class="flex gap-3">
+                <button onclick="closeOperationalApprovalModal()" 
+                    class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmOperationalApproval()" 
+                    class="flex-1 px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    Ya, Setujui
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -624,16 +793,18 @@
             return;
         }
 
-        // Inisialisasi flatpickr untuk filter tanggal
+        // Inisialisasi flatpickr untuk filter tanggal range
         flatpickr("#transDateInput", {
+            mode: "range",
             dateFormat: "d/m/Y",
             maxDate: "today",
             locale: "id",
             onChange: function(selectedDates, dateStr) {
-                if (selectedDates.length > 0) {
-                    // Pastikan tanggal dikirim dalam format YYYY-MM-DD dengan timezone yang benar
-                    const date = formatDateForAPI(selectedDates[0]);
-                    fetchTransactionHistory(date);
+                if (selectedDates.length >= 1) {
+                    // For range mode, pass start and end dates
+                    const startDate = formatDateForAPI(selectedDates[0]);
+                    const endDate = selectedDates.length === 2 ? formatDateForAPI(selectedDates[1]) : startDate;
+                    fetchTransactionHistory(startDate, endDate);
                 } else {
                     // Jika tidak ada tanggal terpilih, tampilkan semua transaksi
                     fetchTransactionHistory(null);
@@ -650,6 +821,20 @@
         document.getElementById('approvalFilter').addEventListener('change', applyFilters);
         document.getElementById('categoryFilter').addEventListener('change', applyFilters);
         document.getElementById('dpStatusFilter').addEventListener('change', applyFilters);
+        document.getElementById('outletFilter').addEventListener('change', function() {
+            // When outlet filter changes, refresh data
+            const datePicker = document.getElementById('transDateInput');
+            let startDate = null, endDate = null;
+            
+            if (datePicker && datePicker._flatpickr && datePicker._flatpickr.selectedDates.length > 0) {
+                startDate = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
+                if (datePicker._flatpickr.selectedDates.length === 2) {
+                    endDate = formatDateForAPI(datePicker._flatpickr.selectedDates[1]);
+                }
+            }
+            
+            fetchTransactionHistory(startDate, endDate);
+        });
 
         // Connect outlet selection to transaction history updates
         connectOutletSelectionToHistory();
@@ -692,7 +877,11 @@
                 }
                 
                 // Reload history with new outlet
-                fetchTransactionHistory(date);
+                if (date) {
+                    fetchTransactionHistory(date, date);
+                } else {
+                    fetchTransactionHistory();
+                }
             }
         });
         
@@ -716,7 +905,11 @@
                             date = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
                         }
                         
-                        fetchTransactionHistory(date);
+                        if (date) {
+                            fetchTransactionHistory(date, date);
+                        } else {
+                            fetchTransactionHistory();
+                        }
                     }, 100);
                 }
             });
@@ -771,7 +964,7 @@
     }
 
     // Fungsi untuk fetch data transaksi - dimodifikasi untuk menyertakan outlet_id
-    async function fetchTransactionHistory(date = null) {
+    async function fetchTransactionHistory(startDate = null, endDate = null) {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -779,24 +972,25 @@
                 return;
             }
 
-            // Get the current outlet ID
-            const outletId = getSelectedOutletId();
+            // Check outlet filter selection
+            const outletFilterValue = document.getElementById('outletFilter').value;
             
-            // Format parameter tanggal seperti di versi lama
+            // Format parameter tanggal untuk date range
             const params = new URLSearchParams();
-            if (date) {
-                // Gunakan tanggal yang sama untuk date_from dan date_to
-                // untuk menampilkan transaksi pada hari yang dipilih saja
-                params.append('date_from', date);
-                params.append('date_to', date);
+            if (startDate) {
+                params.append('date_from', startDate);
+                params.append('date_to', endDate || startDate);
             } else {
                 const currentDate = new Date().toISOString().split('T')[0];
-                params.append('date_from', currentDate.toLocaleString());
-                params.append('date_to', currentDate.toLocaleString());
+                params.append('date_from', currentDate);
+                params.append('date_to', currentDate);
             }
             
-            // Tambahkan outlet_id ke parameters
-            params.append('outlet_id', outletId);
+            // Add outlet parameter only if not "all outlets"
+            if (outletFilterValue !== 'all') {
+                const outletId = getSelectedOutletId();
+                params.append('outlet_id', outletId);
+            }
             
             // Fetch data dari endpoint dengan token authorization
             const response = await fetch(`/api/orders/history?${params.toString()}`, {
@@ -857,10 +1051,25 @@
         
         console.log("Data transaksi untuk dirender:", transactions); // Untuk debugging
         
+        // Update outlet info display and column visibility
+        const outletFilterValue = document.getElementById('outletFilter').value;
+        const outletElements = document.querySelectorAll('.outlet-name');
+        const outletColumn = document.getElementById('outletColumn');
+        
+        if (outletFilterValue === 'all') {
+            outletElements.forEach(el => {
+                el.textContent = 'Semua Outlet';
+            });
+            outletColumn.style.display = 'table-cell';
+        } else {
+            // Keep the current outlet name (will be updated by loadOutletInfo)
+            outletColumn.style.display = 'none';
+        }
+        
         if (!transactions || transactions.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="12" class="py-4 text-center text-gray-500">
+                    <td colspan="14" class="py-4 text-center text-gray-500">
                         Tidak ada transaksi pada tanggal ini.
                     </td>
                 </tr>
@@ -869,6 +1078,7 @@
         }
         
         transactions.forEach(transaction => {
+            console.log('Processing transaction:', {id: transaction.id, order_number: transaction.order_number, is_finance_approved: transaction.is_finance_approved}); // Debug log
             const row = document.createElement('tr');
             row.className = 'border-b hover:bg-gray-50';
             row.dataset.transactionId = transaction.id; // Add transaction ID for filtering
@@ -876,6 +1086,7 @@
                 <td class="px-4 py-3">${transaction.order_number}</td>
                 <td class="px-4 py-3 whitespace-nowrap">${formatDateTime(transaction.created_at)}</td>
                 <td class="px-4 py-3">${transaction.user || 'Kasir'}</td>
+                ${outletFilterValue === 'all' ? `<td class="px-4 py-3">${transaction.outlet_name || 'Unknown'}</td>` : ''}
                 <td class="px-4 py-3">
                     <span class="px-2 py-1 ${getCategoryBadgeClass(transaction.transaction_category)} rounded-full text-xs font-medium whitespace-nowrap">
                         ${getCategoryText(transaction.transaction_category)}
@@ -904,9 +1115,37 @@
                     </span>
                 </td>
                 <td class="px-4 py-3">
-                    <span class="px-2 py-1 ${getApprovalBadgeClass(transaction.approval_status)} rounded-full text-xs font-medium whitespace-nowrap">
-                        ${getApprovalStatusText(transaction.approval_status)}
+                    <span class="px-2 py-1 ${getDualApprovalBadgeClass(transaction.dual_approval_status)} rounded-full text-xs font-medium whitespace-nowrap">
+                        ${getDualApprovalStatusText(transaction.dual_approval_status)}
                     </span>
+                </td>
+                <td class="px-4 py-3">
+                    <div class="flex flex-col gap-1">
+                        ${transaction.is_finance_approved ? `
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                ✓ ${transaction.finance_approved_by}
+                            </span>
+                            <span class="text-xs text-gray-500">${transaction.finance_approved_at}</span>
+                        ` : `
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                Menunggu
+                            </span>
+                        `}
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <div class="flex flex-col gap-1">
+                        ${transaction.is_operational_approved ? `
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                ✓ ${transaction.operational_approved_by}
+                            </span>
+                            <span class="text-xs text-gray-500">${transaction.operational_approved_at}</span>
+                        ` : `
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                Menunggu
+                            </span>
+                        `}
+                    </div>
                 </td>
                 <td class="px-4 py-3 font-semibold whitespace-nowrap">${formatCurrency(transaction.total)}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
@@ -945,14 +1184,16 @@
                             Akad PDF
                         </button>
                         ` : ''}
-                        ${transaction.approval_status === 'pending' ? `
-                        <button onclick="openApproveModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors" title="Setujui Transaksi">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
-                            Setujui
+                        ${!transaction.is_finance_approved && transaction.id && transaction.id !== 'undefined' ? `
+                        <button onclick="openFinanceApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Approve Keuangan">
+                            <i data-lucide="banknote" class="w-3 h-3 mr-1"></i>
+                            Keuangan
                         </button>
-                        <button onclick="openRejectModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak Transaksi">
-                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
-                            Tolak
+                        ` : ''}
+                        ${!transaction.is_operational_approved && transaction.id && transaction.id !== 'undefined' ? `
+                        <button onclick="openOperationalApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Approve Operational">
+                            <i data-lucide="settings" class="w-3 h-3 mr-1"></i>
+                            Operasional
                         </button>
                         ` : ''}
                         ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
@@ -1043,6 +1284,7 @@
             // Daftar element yang diperlukan
             const elements = {
                 invoice: document.getElementById('detailInvoice'),
+                orderId: document.getElementById('detailOrderId'),
                 dateTime: document.getElementById('detailDateTime'),
                 paymentMethod: document.getElementById('detailPaymentMethod'),
                 status: document.getElementById('detailStatus'),
@@ -1069,14 +1311,35 @@
 
             // Isi data
             elements.invoice.textContent = transaction.order_number;
+            elements.orderId.textContent = transaction.id;
             elements.dateTime.textContent = formatDateTime(transaction.created_at);
             elements.paymentMethod.textContent = getPaymentMethodText(transaction.payment_method);
             elements.status.textContent = getStatusText(transaction.status);
-            elements.approvalStatus.textContent = getApprovalStatusText(transaction.approval_status);
+            elements.approvalStatus.textContent = getDualApprovalStatusText(transaction.dual_approval_status);
             
             // Isi kategori transaksi
             const categoryText = transaction.transaction_category === 'dp' ? 'DP (Uang Muka)' : 'Lunas';
             elements.transactionCategory.textContent = categoryText;
+            
+            // Isi approval info
+            const financeApprovalRow = document.getElementById('financeApprovalRow');
+            const operationalApprovalRow = document.getElementById('operationalApprovalRow');
+            
+            if (transaction.is_finance_approved && transaction.finance_approved_by && transaction.finance_approved_at) {
+                document.getElementById('financeApproverName').textContent = `Disetujui oleh: ${transaction.finance_approved_by}`;
+                document.getElementById('financeApprovalDate').textContent = `Pada: ${transaction.finance_approved_at}`;
+                financeApprovalRow.classList.remove('hidden');
+            } else {
+                financeApprovalRow.classList.add('hidden');
+            }
+            
+            if (transaction.is_operational_approved && transaction.operational_approved_by && transaction.operational_approved_at) {
+                document.getElementById('operationalApproverName').textContent = `Disetujui oleh: ${transaction.operational_approved_by}`;
+                document.getElementById('operationalApprovalDate').textContent = `Pada: ${transaction.operational_approved_at}`;
+                operationalApprovalRow.classList.remove('hidden');
+            } else {
+                operationalApprovalRow.classList.add('hidden');
+            }
             
             // Isi member info
             const memberRow = document.getElementById('memberInfoRow');
@@ -1195,15 +1458,25 @@
                     const itemElement = document.createElement('div');
                     itemElement.className = 'border-b py-2';
                     itemElement.innerHTML = `
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="font-medium">${item.product}</p>
-                                <p class="text-sm text-gray-500">${item.quantity} × ${formatCurrency(item.price)}</p>
-                                ${item.bonus_qty > 0 ? `<p class="text-sm text-green-600">+ ${item.bonus_qty} bonus</p>` : ''}
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0">
+                                ${item.product_image ? 
+                                    `<img src="${item.product_image}" alt="${item.product}" class="w-16 h-16 object-cover rounded-lg border border-gray-200">` :
+                                    `<div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                    </div>`
+                                }
                             </div>
-                            <div class="text-right">
-                                <p class="font-medium">${formatCurrency(item.total)}</p>
-                                ${item.discount > 0 ? `<p class="text-sm text-red-500">Diskon: ${formatCurrency(item.discount)}</p>` : ''}
+                            <div class="flex-1 flex justify-between">
+                                <div>
+                                    <p class="font-medium">${item.product}</p>
+                                    <p class="text-sm text-gray-500">${item.quantity} × ${formatCurrency(item.price)}</p>
+                                    ${item.bonus_qty > 0 ? `<p class="text-sm text-green-600">+ ${item.bonus_qty} bonus</p>` : ''}
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium">${formatCurrency(item.total)}</p>
+                                    ${item.discount > 0 ? `<p class="text-sm text-red-500">Diskon: ${formatCurrency(item.discount)}</p>` : ''}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1221,16 +1494,26 @@
                     const bonusElement = document.createElement('div');
                     bonusElement.className = 'border-b border-green-200 py-2 last:border-b-0';
                     bonusElement.innerHTML = `
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-green-700">
-                                    <i class="fas fa-gift mr-1"></i>
-                                    ${bonusItem.product || bonusItem.product_name || '-'}
-                                </p>
-                                <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0">
+                                ${bonusItem.product_image ? 
+                                    `<img src="${bonusItem.product_image}" alt="${bonusItem.product || bonusItem.product_name}" class="w-12 h-12 object-cover rounded-lg border border-green-200">` :
+                                    `<div class="w-12 h-12 bg-green-100 rounded-lg border border-green-200 flex items-center justify-center">
+                                        <i data-lucide="gift" class="w-5 h-5 text-green-500"></i>
+                                    </div>`
+                                }
                             </div>
-                            <div class="text-sm text-green-600 font-medium">
-                                GRATIS
+                            <div class="flex-1 flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium text-green-700">
+                                        <i class="fas fa-gift mr-1"></i>
+                                        ${bonusItem.product || bonusItem.product_name || '-'}
+                                    </p>
+                                    <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
+                                </div>
+                                <div class="text-sm text-green-600 font-medium">
+                                    GRATIS
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1661,6 +1944,33 @@
         if (window.lucide) window.lucide.createIcons();
     }
 
+    // Function to clear all filters
+    function clearAllFilters() {
+        // Clear search input
+        document.getElementById('searchInvoice').value = '';
+        
+        // Clear date input
+        const datePicker = document.getElementById('transDateInput');
+        if (datePicker && datePicker._flatpickr) {
+            datePicker._flatpickr.clear();
+        } else {
+            datePicker.value = '';
+        }
+        
+        // Reset all select filters
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('approvalFilter').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('dpStatusFilter').value = '';
+        document.getElementById('outletFilter').value = '';
+        
+        // Refresh transaction history with no filters
+        fetchTransactionHistory();
+        
+        // Show success message
+        showAlert('success', 'Semua filter berhasil direset');
+    }
+
     // Function untuk apply filters
     function applyFilters() {
         const searchTerm = document.getElementById('searchInvoice').value.toLowerCase();
@@ -1819,6 +2129,25 @@
             'rejected': 'bg-red-100 text-red-800 border-red-200'
         };
         return classMap[approvalStatus] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Dual Approval Helper Functions
+    function getDualApprovalStatusText(dualApprovalStatus) {
+        const statusMap = {
+            'pending': 'Menunggu Approval',
+            'partially_approved': 'Sebagian Disetujui',
+            'fully_approved': 'Disetujui Penuh'
+        };
+        return statusMap[dualApprovalStatus] || 'Tidak diketahui';
+    }
+
+    function getDualApprovalBadgeClass(dualApprovalStatus) {
+        const classMap = {
+            'pending': 'bg-orange-100 text-orange-800 border-orange-200',
+            'partially_approved': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'fully_approved': 'bg-green-100 text-green-800 border-green-200'
+        };
+        return classMap[dualApprovalStatus] || 'bg-gray-100 text-gray-800';
     }
 
     // Modal functions untuk approval
@@ -2390,6 +2719,133 @@
             window.pollingManager.stop('transactionHistory');
         }
     });
+
+    // Modal Management Variables
+    let currentApprovalOrderId = null;
+
+    // Dual Approval Modal Functions
+    function openFinanceApprovalModal(orderId) {
+        console.log('openFinanceApprovalModal called with orderId:', orderId);
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk approval Keuangan: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('financeApprovalModal').classList.remove('hidden');
+    }
+
+    function closeFinanceApprovalModal() {
+        currentApprovalOrderId = null;
+        document.getElementById('financeApprovalModal').classList.add('hidden');
+    }
+
+    function openOperationalApprovalModal(orderId) {
+        console.log('openOperationalApprovalModal called with orderId:', orderId);
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk approval Operasional: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('operationalApprovalModal').classList.remove('hidden');
+    }
+
+    function closeOperationalApprovalModal() {
+        currentApprovalOrderId = null;
+        document.getElementById('operationalApprovalModal').classList.add('hidden');
+    }
+
+    // Approval Functions
+    async function confirmFinanceApproval() {
+        console.log('confirmFinanceApproval called with currentApprovalOrderId:', currentApprovalOrderId);
+        if (!currentApprovalOrderId) return;
+        
+        const orderId = currentApprovalOrderId; // Store the ID before closing modal
+        closeFinanceApprovalModal();
+        await approveFinance(orderId);
+    }
+
+    async function confirmOperationalApproval() {
+        console.log('confirmOperationalApproval called with currentApprovalOrderId:', currentApprovalOrderId);
+        if (!currentApprovalOrderId) return;
+        
+        const orderId = currentApprovalOrderId; // Store the ID before closing modal
+        closeOperationalApprovalModal();
+        await approveOperational(orderId);
+    }
+
+    async function approveFinance(orderId) {
+        try {
+            console.log('approveFinance called with orderId:', orderId);
+            if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+                showAlert('error', 'Order ID tidak valid untuk approval Keuangan');
+                return;
+            }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('error', 'Token tidak ditemukan. Silakan login ulang.');
+                return;
+            }
+
+            const response = await fetch(`/api/orders/approve-finance/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showAlert('success', 'Transaksi berhasil di-approve oleh Keuangan');
+                // Refresh the table
+                await fetchTransactionHistory();
+            } else {
+                showAlert('error', result.message || 'Gagal melakukan approval Keuangan');
+            }
+        } catch (error) {
+            console.error('Error approving finance:', error);
+            showAlert('error', 'Terjadi kesalahan saat melakukan approval Keuangan');
+        }
+    }
+
+    async function approveOperational(orderId) {
+        try {
+            console.log('approveOperational called with orderId:', orderId);
+            if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+                showAlert('error', 'Order ID tidak valid untuk approval Operasional');
+                return;
+            }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('error', 'Token tidak ditemukan. Silakan login ulang.');
+                return;
+            }
+
+            const response = await fetch(`/api/orders/approve-operational/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showAlert('success', 'Transaksi berhasil di-approve oleh Operasional');
+                // Refresh the table
+                await fetchTransactionHistory();
+            } else {
+                showAlert('error', result.message || 'Gagal melakukan approval Operasional');
+            }
+        } catch (error) {
+            console.error('Error approving operational:', error);
+            showAlert('error', 'Terjadi kesalahan saat melakukan approval Operasional');
+        }
+    }
 </script>
 
 <style>
@@ -2399,74 +2855,76 @@
             opacity: 0;
             transform: translateY(10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-    
+
     @keyframes fadeOut {
         from {
             opacity: 1;
             transform: translateY(0);
         }
+
         to {
             opacity: 0;
             transform: translateY(10px);
         }
     }
-    
+
     .animate-fade-in-up {
         animation: fadeInUp 0.3s ease-out forwards;
     }
-    
+
     .animate-fade-out {
         animation: fadeOut 0.3s ease-out forwards;
     }
-    
+
     /* Styling untuk scrollable table */
     .overflow-x-auto {
         scrollbar-width: thin;
         scrollbar-color: #CBD5E1 #F1F5F9;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar {
         height: 8px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-track {
         background: #F1F5F9;
         border-radius: 4px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-thumb {
         background: #CBD5E1;
         border-radius: 4px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-thumb:hover {
         background: #94A3B8;
     }
-    
+
     /* Sticky first column for better UX (optional) */
     .table-sticky-first {
         position: sticky;
         left: 0;
         background: white;
         z-index: 10;
-        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
     }
-    
+
     /* Scroll indicator styling */
     #scrollIndicatorRight {
         transition: opacity 0.3s ease;
-        background: linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+        background: linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
     }
-    
+
     #scrollIndicatorRight.hidden {
         opacity: 0;
     }
-    
+
     /* Smooth scrolling for table */
     #tableContainer {
         scroll-behavior: smooth;

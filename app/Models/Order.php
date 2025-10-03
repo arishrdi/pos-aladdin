@@ -42,14 +42,20 @@ class Order extends Model
         'installation_date',
         'installation_notes',
         'contract_pdf',
-        'mosque_id'
+        'mosque_id',
+        'finance_approved_by',
+        'finance_approved_at',
+        'operational_approved_by',
+        'operational_approved_at'
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
         'cancellation_requested_at' => 'datetime',
         'cancellation_processed_at' => 'datetime',
-        'installation_date' => 'date'
+        'installation_date' => 'date',
+        'finance_approved_at' => 'datetime',
+        'operational_approved_at' => 'datetime'
     ];
 
     protected $appends = ['payment_proof_url', 'contract_pdf_url'];
@@ -120,6 +126,16 @@ class Order extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function financeApprover()
+    {
+        return $this->belongsTo(User::class, 'finance_approved_by');
+    }
+
+    public function operationalApprover()
+    {
+        return $this->belongsTo(User::class, 'operational_approved_by');
     }
 
     // Cancellation relationships
@@ -209,6 +225,91 @@ class Order extends Model
             'approved_at' => now(),
             'rejection_reason' => $reason
         ]);
+
+        return true;
+    }
+
+    // Dual approval helper methods
+    public function isFinanceApproved(): bool
+    {
+        return !is_null($this->finance_approved_by) && !is_null($this->finance_approved_at);
+    }
+
+    public function isOperationalApproved(): bool
+    {
+        return !is_null($this->operational_approved_by) && !is_null($this->operational_approved_at);
+    }
+
+    public function isFullyApproved(): bool
+    {
+        return $this->isFinanceApproved() && $this->isOperationalApproved();
+    }
+
+    public function isPartiallyApproved(): bool
+    {
+        return ($this->isFinanceApproved() && !$this->isOperationalApproved()) || 
+               (!$this->isFinanceApproved() && $this->isOperationalApproved());
+    }
+
+    public function getDualApprovalStatus(): string
+    {
+        if ($this->isFullyApproved()) {
+            return 'fully_approved';
+        } elseif ($this->isPartiallyApproved()) {
+            return 'partially_approved';
+        } else {
+            return 'pending';
+        }
+    }
+
+    public function canBeFinanceApproved(): bool
+    {
+        return !$this->isFinanceApproved();
+    }
+
+    public function canBeOperationalApproved(): bool
+    {
+        return !$this->isOperationalApproved();
+    }
+
+    public function approveFinance(User $approver): bool
+    {
+        if (!$this->canBeFinanceApproved()) {
+            return false;
+        }
+
+        $updateData = [
+            'finance_approved_by' => $approver->id,
+            'finance_approved_at' => now()
+        ];
+
+        // Check if operational is already approved, if so, mark as completed
+        if ($this->isOperationalApproved()) {
+            $updateData['status'] = 'completed';
+        }
+
+        $this->update($updateData);
+
+        return true;
+    }
+
+    public function approveOperational(User $approver): bool
+    {
+        if (!$this->canBeOperationalApproved()) {
+            return false;
+        }
+
+        $updateData = [
+            'operational_approved_by' => $approver->id,
+            'operational_approved_at' => now()
+        ];
+
+        // Check if finance is already approved, if so, mark as completed
+        if ($this->isFinanceApproved()) {
+            $updateData['status'] = 'completed';
+        }
+
+        $this->update($updateData);
 
         return true;
     }

@@ -165,6 +165,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/cancellation/reject/{id}', 'rejectCancellation'); // Reject cancellation/refund
         });
 
+        // Dual approval routes (Admin only)
+        Route::controller(OrderController::class)->prefix('orders')->middleware('role:admin')->group(function () {
+            Route::post('/approve-finance/{id}', 'approveFinance'); // Keuangan approval
+            Route::post('/approve-operational/{id}', 'approveOperational'); // Operational approval
+        });
+
         // Cash request approval routes (Admin/Supervisor only)
         Route::controller(CashRequestController::class)->prefix('cash-requests')->group(function () {
             Route::get('/pending', 'getPendingRequests'); // Get pending cash requests for approval

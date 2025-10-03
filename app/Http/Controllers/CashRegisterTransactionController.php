@@ -38,7 +38,9 @@ class CashRegisterTransactionController extends Controller
             $date = $request->date; // Format: YYYY-MM-DD
 
             $transactions = CashRegisterTransaction::with(['cashRegister', 'shift', 'user'])
-                ->where('source', $source)
+                ->when($source, function ($query) use ($source) {
+                    $query->where('source', $source);
+                })
                 ->orderBy('created_at', 'desc')
                 ->when($date, function ($query) use ($date) {
                     $query->whereDate('created_at', $date);
@@ -89,7 +91,7 @@ class CashRegisterTransactionController extends Controller
 
         $request->validate([
             'cash_register_id' => 'required|exists:cash_registers,id',
-            'shift_id' => 'required|exists:shifts,id',
+            'shift_id' => 'nullable|exists:shifts,id',
             'type' => 'required|in:add,remove',
             'amount' => 'required|numeric|min:0.01',
             'reason' => 'nullable|string'
@@ -101,32 +103,36 @@ class CashRegisterTransactionController extends Controller
                 return $this->errorResponse('Cannot create transaction for inactive cash register');
             }
 
-            $shift = Shift::findOrFail($request->shift_id);
-            if (!$shift->is_active) {
-                return $this->errorResponse('Cannot create transaction for inactive shift');
+            // Validate shift if provided
+            if ($request->shift_id) {
+                $shift = Shift::findOrFail($request->shift_id);
+                if (!$shift->is_active) {
+                    return $this->errorResponse('Cannot create transaction for inactive shift');
+                }
             }
 
             $transaction = new CashRegisterTransaction($request->all());
             $transaction->user_id = Auth::id();
             $transaction->save();
 
-            return $this->successResponse($transaction, 'Transaction created successfully');
+            // Update cash register balance
+            $currentBalance = $cashRegister->balance ?? 0;
+            if ($request->type === 'add') {
+                $newBalance = $currentBalance + $request->amount;
+            } else { // 'remove'
+                $newBalance = $currentBalance - $request->amount;
+            }
+            
+            $cashRegister->update(['balance' => $newBalance]);
+
+            return $this->successResponse([
+                'transaction' => $transaction,
+                'old_balance' => $currentBalance,
+                'new_balance' => $newBalance
+            ], 'Transaction created successfully and balance updated');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
         }
-
-        $cashRegister = CashRegister::findOrFail($request->cash_register_id);
-        if (!$cashRegister->is_active) {
-            return $this->errorResponse('Cannot create transaction for inactive cash register');
-        }
-
-        $shift = Shift::findOrFail($request->shift_id);
-
-        $transaction = new CashRegisterTransaction($request->all());
-        $transaction->user_id = Auth::id();
-        $transaction->save();
-
-        return $this->successResponse($transaction, 'Transaction created successfully');
     }
 
     /**
@@ -386,6 +392,7 @@ class CashRegisterTransactionController extends Controller
                 'opening_balance' => $this->cashBalanceService->getOpeningBalance($outletId, $date),
                 'transactions_breakdown' => [
                     'manual_cash' => $transactionsBySource->get('cash', collect())->toArray(),
+                    'admin_direct' => $transactionsBySource->get('admin_direct', collect())->toArray(),
                     'pos_sales' => $transactionsBySource->get('pos', collect())->toArray(),
                     'refunds' => $transactionsBySource->get('refund', collect())->toArray(),
                     'other' => $transactionsBySource->get('other', collect())->toArray()
@@ -393,6 +400,8 @@ class CashRegisterTransactionController extends Controller
                 'daily_totals' => [
                     'manual_additions' => $allTransactions->where('source', 'cash')->where('type', 'add')->sum('amount'),
                     'manual_subtractions' => $allTransactions->where('source', 'cash')->where('type', 'remove')->sum('amount'),
+                    'admin_additions' => $allTransactions->where('source', 'admin_direct')->where('type', 'add')->sum('amount'),
+                    'admin_subtractions' => $allTransactions->where('source', 'admin_direct')->where('type', 'remove')->sum('amount'),
                     'pos_sales' => $allTransactions->where('source', 'pos')->sum('amount'),
                     'refunds' => $allTransactions->where('source', 'refund')->sum('amount'),
                     'other_transactions' => $allTransactions->where('source', 'other')->sum('amount')
