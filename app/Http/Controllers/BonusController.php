@@ -260,6 +260,7 @@ class BonusController extends Controller
             $status = $request->query('status');
             $type = $request->query('type');
             $memberId = $request->query('member_id');
+            $search = $request->query('search');
             
             if (!$outletId) {
                 return response()->json([
@@ -289,6 +290,19 @@ class BonusController extends Controller
 
             if ($memberId) {
                 $query->where('member_id', $memberId);
+            }
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('member', function ($memberQuery) use ($search) {
+                        $memberQuery->where('name', 'like', '%' . $search . '%')
+                                   ->orWhere('member_code', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('cashier', function ($cashierQuery) use ($search) {
+                        $cashierQuery->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhere('reason', 'like', '%' . $search . '%');
+                });
             }
 
             $bonusTransactions = $query->orderBy('created_at', 'desc')->paginate(20);

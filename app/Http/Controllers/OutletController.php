@@ -38,6 +38,16 @@ class OutletController extends Controller
         }
     }
 
+    public function allOutlets()
+    {
+        try {
+            $outlets = Outlet::all();
+            return $this->successResponse($outlets, 'All outlets retrieved successfully');
+        } catch (\Throwable $th) {
+            return $this->errorResponse($th->getMessage());
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -61,6 +71,8 @@ class OutletController extends Controller
                 'non_pkp_atas_nama_bank' => 'required|string|max:255',
                 'non_pkp_nama_bank' => 'required|string|max:255',
                 'non_pkp_nomor_transaksi_bank' => 'required|string',
+                'target_tahunan' => 'nullable|numeric|min:0',
+                'target_bulanan' => 'nullable|numeric|min:0',
             ]);
     
             DB::beginTransaction();
@@ -81,6 +93,8 @@ class OutletController extends Controller
                 'non_pkp_atas_nama_bank' => $request->non_pkp_atas_nama_bank,
                 'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
                 'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
+                'target_tahunan' => $request->target_tahunan,
+                'target_bulanan' => $request->target_bulanan,
             ];
     
             // Hanya tambahkan qris jika ada file
@@ -161,6 +175,8 @@ class OutletController extends Controller
                 'non_pkp_atas_nama_bank' => 'required|string|max:255',
                 'non_pkp_nama_bank' => 'required|string|max:255',
                 'non_pkp_nomor_transaksi_bank' => 'required|string',
+                'target_tahunan' => 'nullable|numeric|min:0',
+                'target_bulanan' => 'nullable|numeric|min:0',
             ]);
     
             $updateData = [
@@ -180,6 +196,8 @@ class OutletController extends Controller
                 'non_pkp_atas_nama_bank' => $request->non_pkp_atas_nama_bank,
                 'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
                 'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
+                'target_tahunan' => $request->target_tahunan,
+                'target_bulanan' => $request->target_bulanan,
             ];
     
             // Hanya update qris jika ada file baru

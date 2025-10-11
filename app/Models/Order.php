@@ -43,6 +43,8 @@ class Order extends Model
         'installation_notes',
         'contract_pdf',
         'mosque_id',
+        'leads_cabang_outlet_id',
+        'deal_maker_outlet_id',
         'finance_approved_by',
         'finance_approved_at',
         'operational_approved_by',
@@ -101,6 +103,16 @@ class Order extends Model
         return $this->belongsTo(Mosque::class);
     }
 
+    public function leadsCabangOutlet()
+    {
+        return $this->belongsTo(Outlet::class, 'leads_cabang_outlet_id');
+    }
+
+    public function dealMakerOutlet()
+    {
+        return $this->belongsTo(Outlet::class, 'deal_maker_outlet_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -153,6 +165,24 @@ class Order extends Model
     public function dpSettlementHistory()
     {
         return $this->hasMany(DpSettlementHistory::class);
+    }
+
+    // Transaction Edits relationship
+    public function transactionEdits()
+    {
+        return $this->hasMany(TransactionEdit::class);
+    }
+
+    // Helper method to check if order can be edited
+    public function canBeEdited(): bool
+    {
+        return TransactionEdit::canEditOrder($this);
+    }
+
+    // Get pending edit for this order
+    public function getPendingEdit()
+    {
+        return $this->transactionEdits()->where('status', 'pending')->first();
     }
 
     // Scopes for approval status

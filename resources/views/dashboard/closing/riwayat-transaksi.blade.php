@@ -106,6 +106,7 @@
                             <option value="pending">Menunggu Approval</option>
                             <option value="approved">Disetujui</option>
                             <option value="rejected">Ditolak</option>
+                            <option value="edit_pending">Edit Pending</option>
                         </select>
                     </div>
 
@@ -176,6 +177,7 @@
                         <th class="px-4 py-3 font-bold min-w-[120px]">Approval</th>
                         <th class="px-4 py-3 font-bold min-w-[100px]">Keuangan</th>
                         <th class="px-4 py-3 font-bold min-w-[100px]">Operasional</th>
+                        <th class="px-4 py-3 font-bold min-w-[120px]">Status Edit</th>
                         <th class="px-4 py-3 font-bold min-w-[100px]">Total</th>
                         <th class="px-4 py-3 font-bold min-w-[100px]">Sisa Bayar</th>
                         <th class="px-4 py-3 font-bold min-w-[400px] text-left">Aksi</th>
@@ -255,6 +257,17 @@
                         <div id="operationalApprovalDate" class="text-xs text-gray-600"></div>
                     </div>
                 </div>
+                <div id="editRequestRow" class="hidden">
+                    <p class="text-gray-500">Permintaan Edit</p>
+                    <div id="detailEditRequest" class="font-medium">
+                        <div id="editRequestStatus" class="text-sm"></div>
+                        <div id="editRequestInfo" class="text-xs text-gray-600"></div>
+                        <button id="reviewEditBtn" onclick="openEditApprovalModal()" 
+                            class="mt-1 text-xs text-blue-600 hover:text-blue-800 underline hidden">
+                            Review Edit Request
+                        </button>
+                    </div>
+                </div>
                 <div id="memberInfoRow" class="hidden">
                     <p class="text-gray-500">Member</p>
                     <p id="detailMember" class="font-medium"></p>
@@ -322,6 +335,14 @@
                         <span class="text-gray-500">Rincian Pemasangan:</span>
                         <div id="detailInstallationNotes"
                             class="font-medium mt-1 p-2 bg-white rounded border text-gray-700"></div>
+                    </div>
+                    <div id="leadsCabangInfo" class="hidden">
+                        <span class="text-gray-500">Leads Cabang:</span>
+                        <span id="detailLeadsCabang" class="font-medium ml-1"></span>
+                    </div>
+                    <div id="dealMakerInfo" class="hidden">
+                        <span class="text-gray-500">Deal Maker:</span>
+                        <span id="detailDealMaker" class="font-medium ml-1"></span>
                     </div>
                 </div>
             </div>
@@ -572,9 +593,10 @@
         <form id="settlementForm" enctype="multipart/form-data">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Pelunasan *</label>
-                <input type="number" id="settlementAmount" step="0.01" min="0"
+                <input type="text" id="settlementAmount"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Masukkan jumlah pelunasan" required>
+                <input type="hidden" id="settlementAmountRaw" name="amount_received">
                 <div class="mt-2 flex gap-2">
                     <button type="button" onclick="setSettlementAmount('full')"
                         class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200">Lunas
@@ -731,6 +753,70 @@
     </div>
 </div>
 
+<!-- Modal Riwayat Edit Transaksi -->
+<div id="modalEditHistory" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4 max-h-[90vh] overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Riwayat Edit Transaksi</h3>
+                    <p class="text-sm text-gray-600">
+                        Order: <span id="editHistoryOrderNumber" class="font-mono font-bold"></span>
+                    </p>
+                </div>
+                <button onclick="closeEditHistoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="px-6 py-4 max-h-96 overflow-y-auto">
+            <div id="editHistoryLoading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                <p class="mt-2 text-gray-600">Memuat riwayat edit...</p>
+            </div>
+
+            <div id="editHistoryContent" class="hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Edit</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alasan</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diminta oleh</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selisih Total</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finance</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Operational</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diterapkan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="editHistoryTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="editHistoryEmpty" class="hidden text-center py-8">
+                <i data-lucide="edit-3" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+                <p class="text-gray-600">Belum ada riwayat edit untuk transaksi ini.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <button onclick="closeEditHistoryModal()"
+                class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Finance Approval Confirmation Modal -->
 <div id="financeApprovalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-md">
@@ -781,6 +867,157 @@
     </div>
 </div>
 
+<!-- Edit Transaction Approval Modal -->
+<div id="editApprovalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div class="p-6 border-b">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Review Edit Transaksi</h3>
+                <button onclick="closeEditApprovalModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <!-- Edit Request Info -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-medium mb-3 text-gray-800">Informasi Permintaan</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-gray-600">Invoice:</span> <span id="editInvoiceNumber" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Diminta oleh:</span> <span id="editRequester" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Tanggal Permintaan:</span> <span id="editRequestDate" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Tipe Edit:</span> <span id="editType" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Alasan:</span> <span id="editReason" class="font-medium"></span></div>
+                        <div id="editNotesDiv" class="hidden"><span class="text-gray-600">Catatan:</span> <span id="editNotes" class="font-medium"></span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-medium mb-3 text-gray-800">Perubahan Finansial</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-gray-600">Total Asli:</span> <span id="editOriginalTotal" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Total Baru:</span> <span id="editNewTotal" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Selisih:</span> <span id="editTotalDifference" class="font-medium"></span></div>
+                        <div><span class="text-gray-600">Status Approval:</span> <span id="editApprovalStatus" class="font-medium"></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Approval Information -->
+            <div id="editApprovalInfo" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 hidden">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-medium mb-3 text-blue-800">Approval Keuangan</h4>
+                    <div class="space-y-2 text-sm">
+                        <div id="editFinanceApprover" class="hidden"><span class="text-gray-600">Disetujui oleh:</span> <span id="editFinanceApproverName" class="font-medium"></span></div>
+                        <div id="editFinanceApprovalDate" class="hidden"><span class="text-gray-600">Tanggal:</span> <span id="editFinanceApprovalTime" class="font-medium"></span></div>
+                        <div id="editFinanceNotApproved" class="text-yellow-600 font-medium">Belum disetujui</div>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <h4 class="font-medium mb-3 text-purple-800">Approval Operasional</h4>
+                    <div class="space-y-2 text-sm">
+                        <div id="editOperationalApprover" class="hidden"><span class="text-gray-600">Disetujui oleh:</span> <span id="editOperationalApproverName" class="font-medium"></span></div>
+                        <div id="editOperationalApprovalDate" class="hidden"><span class="text-gray-600">Tanggal:</span> <span id="editOperationalApprovalTime" class="font-medium"></span></div>
+                        <div id="editOperationalNotApproved" class="text-yellow-600 font-medium">Belum disetujui</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Items Comparison -->
+            <div class="mb-6">
+                <h4 class="font-medium mb-3 text-gray-800">Perbandingan Item</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Original Items -->
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-700 mb-2">Item Asli</h5>
+                        <div class="border rounded-lg overflow-hidden">
+                            <table class="w-full text-xs">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-2 py-1 text-left">Produk</th>
+                                        <th class="px-2 py-1 text-center">Qty</th>
+                                        <th class="px-2 py-1 text-right">Harga</th>
+                                        <th class="px-2 py-1 text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="originalItemsList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- New Items -->
+                    <div>
+                        <h5 class="text-sm font-medium text-gray-700 mb-2">Item Baru</h5>
+                        <div class="border rounded-lg overflow-hidden">
+                            <table class="w-full text-xs">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-2 py-1 text-left">Produk</th>
+                                        <th class="px-2 py-1 text-center">Qty</th>
+                                        <th class="px-2 py-1 text-right">Harga</th>
+                                        <th class="px-2 py-1 text-right">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="newItemsList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Approval Actions -->
+            <div id="editApprovalActions" class="flex gap-3 justify-end pt-4 border-t">
+                <button onclick="closeEditApprovalModal()" 
+                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Tutup
+                </button>
+                <button id="rejectEditBtn" onclick="rejectEditRequest()" 
+                    class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    Tolak Edit
+                </button>
+                <button id="approveEditFinanceBtn" onclick="approveEditFinance()" 
+                    class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 hidden">
+                    Approve Keuangan
+                </button>
+                <button id="approveEditOperationalBtn" onclick="approveEditOperational()" 
+                    class="px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 hidden">
+                    Approve Operasional
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Edit Modal -->
+<div id="rejectEditModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold mb-4">Tolak Edit Transaksi</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
+                <textarea id="rejectEditReason" rows="3" 
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Jelaskan alasan penolakan edit..."></textarea>
+            </div>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeRejectEditModal()" 
+                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmRejectEdit()" 
+                    class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    Tolak Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
@@ -804,19 +1041,41 @@
                     // For range mode, pass start and end dates
                     const startDate = formatDateForAPI(selectedDates[0]);
                     const endDate = selectedDates.length === 2 ? formatDateForAPI(selectedDates[1]) : startDate;
-                    fetchTransactionHistory(startDate, endDate);
+                    const searchValue = document.getElementById('searchInvoice').value;
+                    fetchTransactionHistory(startDate, endDate, searchValue);
                 } else {
                     // Jika tidak ada tanggal terpilih, tampilkan semua transaksi
-                    fetchTransactionHistory(null);
+                    const searchValue = document.getElementById('searchInvoice').value;
+                    fetchTransactionHistory(null, null, searchValue);
                 }
             }
         });
 
-        // Load data awal
-        fetchTransactionHistory();
+        // Load data awal dan handle URL parameters
+        initializeFromUrlParams();
+        const initialSearch = document.getElementById('searchInvoice').value;
+        fetchTransactionHistory(null, null, initialSearch);
         
         // Pencarian dan Filter
-        document.getElementById('searchInvoice').addEventListener('input', applyFilters);
+        document.getElementById('searchInvoice').addEventListener('input', function() {
+            const searchValue = this.value;
+            const datePicker = document.getElementById('transDateInput');
+            let startDate = null, endDate = null;
+            
+            if (datePicker && datePicker._flatpickr && datePicker._flatpickr.selectedDates.length > 0) {
+                startDate = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
+                if (datePicker._flatpickr.selectedDates.length === 2) {
+                    endDate = formatDateForAPI(datePicker._flatpickr.selectedDates[1]);
+                } else {
+                    endDate = startDate;
+                }
+            }
+            
+            // Update URL parameters
+            updateUrlParams();
+            // Fetch data from backend with search parameter
+            fetchTransactionHistory(startDate, endDate, searchValue);
+        });
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('approvalFilter').addEventListener('change', applyFilters);
         document.getElementById('categoryFilter').addEventListener('change', applyFilters);
@@ -864,6 +1123,52 @@
         return 1;
     }
 
+    // Function to initialize form fields from URL parameters
+    function initializeFromUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search');
+        
+        if (searchParam) {
+            const searchInput = document.getElementById('searchInvoice');
+            if (searchInput) {
+                searchInput.value = searchParam;
+            }
+        }
+    }
+
+    // Function to update URL parameters when searching
+    function updateUrlParams() {
+        const searchValue = document.getElementById('searchInvoice').value;
+        const currentUrl = new URL(window.location);
+        
+        if (searchValue.trim()) {
+            currentUrl.searchParams.set('search', searchValue.trim());
+        } else {
+            currentUrl.searchParams.delete('search');
+        }
+        
+        // Update URL without page reload
+        window.history.replaceState({}, '', currentUrl);
+    }
+
+    // Helper function to refresh transaction history with current state
+    function refreshTransactionHistory() {
+        const searchValue = document.getElementById('searchInvoice').value;
+        const datePicker = document.getElementById('transDateInput');
+        let startDate = null, endDate = null;
+        
+        if (datePicker && datePicker._flatpickr && datePicker._flatpickr.selectedDates.length > 0) {
+            startDate = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
+            if (datePicker._flatpickr.selectedDates.length === 2) {
+                endDate = formatDateForAPI(datePicker._flatpickr.selectedDates[1]);
+            } else {
+                endDate = startDate;
+            }
+        }
+        
+        fetchTransactionHistory(startDate, endDate, searchValue);
+    }
+
     // Connect to outlet selection dropdown
     function connectOutletSelectionToHistory() {
         // Listen for outlet changes in localStorage
@@ -877,10 +1182,11 @@
                 }
                 
                 // Reload history with new outlet
+                const searchValue = document.getElementById('searchInvoice').value;
                 if (date) {
-                    fetchTransactionHistory(date, date);
+                    fetchTransactionHistory(date, date, searchValue);
                 } else {
-                    fetchTransactionHistory();
+                    fetchTransactionHistory(null, null, searchValue);
                 }
             }
         });
@@ -905,10 +1211,11 @@
                             date = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
                         }
                         
+                        const searchValue = document.getElementById('searchInvoice').value;
                         if (date) {
-                            fetchTransactionHistory(date, date);
+                            fetchTransactionHistory(date, date, searchValue);
                         } else {
-                            fetchTransactionHistory();
+                            fetchTransactionHistory(null, null, searchValue);
                         }
                     }, 100);
                 }
@@ -964,7 +1271,7 @@
     }
 
     // Fungsi untuk fetch data transaksi - dimodifikasi untuk menyertakan outlet_id
-    async function fetchTransactionHistory(startDate = null, endDate = null) {
+    async function fetchTransactionHistory(startDate = null, endDate = null, search = null) {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -992,6 +1299,11 @@
             } else {
                 const outletId = getSelectedOutletId();
                 params.append('outlet_id', outletId);
+            }
+            
+            // Add search parameter if provided
+            if (search && search.trim()) {
+                params.append('search', search.trim());
             }
             
             // Fetch data dari endpoint dengan token authorization
@@ -1149,6 +1461,21 @@
                         `}
                     </div>
                 </td>
+                <td class="px-4 py-3">
+                    ${transaction.pending_edit ? `
+                        <div class="flex flex-col gap-1">
+                            <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                Edit Pending
+                            </span>
+                            <button onclick="openEditApprovalModal(${transaction.pending_edit.id})" 
+                                class="text-xs text-blue-600 hover:text-blue-800 underline">
+                                Review Edit
+                            </button>
+                        </div>
+                    ` : `
+                        <span class="text-xs text-gray-400">-</span>
+                    `}
+                </td>
                 <td class="px-4 py-3 font-semibold whitespace-nowrap">${formatCurrency(transaction.total)}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
                     ${transaction.remaining_balance > 0 ? 
@@ -1178,6 +1505,12 @@
                         <button onclick="openDpHistoryModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Lihat Riwayat Pelunasan DP">
                             <i data-lucide="history" class="w-3 h-3 mr-1"></i>
                             Riwayat DP
+                        </button>
+                        ` : ''}
+                        ${transaction.has_edit_history ? `
+                        <button onclick="openEditHistoryModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded transition-colors" title="Lihat Riwayat Edit Transaksi">
+                            <i data-lucide="edit-3" class="w-3 h-3 mr-1"></i>
+                            Riwayat Edit
                         </button>
                         ` : ''}
                         ${transaction.transaction_category === 'dp' && transaction.contract_pdf_url ? `
@@ -1343,6 +1676,23 @@
                 operationalApprovalRow.classList.add('hidden');
             }
             
+            // Isi edit request info
+            const editRequestRow = document.getElementById('editRequestRow');
+            const reviewEditBtn = document.getElementById('reviewEditBtn');
+            
+            if (transaction.pending_edit) {
+                const editData = transaction.pending_edit;
+                document.getElementById('editRequestStatus').textContent = getEditStatusText(editData.status);
+                document.getElementById('editRequestInfo').textContent = `Diminta oleh ${editData.requester_name} - ${editData.edit_type}`;
+                
+                // Setup review button
+                reviewEditBtn.onclick = () => openEditApprovalModal(editData.id);
+                reviewEditBtn.classList.remove('hidden');
+                editRequestRow.classList.remove('hidden');
+            } else {
+                editRequestRow.classList.add('hidden');
+            }
+            
             // Isi member info
             const memberRow = document.getElementById('memberInfoRow');
             if (transaction.member && transaction.member.name) {
@@ -1459,29 +1809,48 @@
                 transaction.items.forEach(item => {
                     const itemElement = document.createElement('div');
                     itemElement.className = 'border-b py-2';
-                    itemElement.innerHTML = `
-                        <div class="flex gap-3">
-                            <div class="flex-shrink-0">
-                                ${item.product_image ? 
-                                    `<img src="${item.product_image}" alt="${item.product}" class="w-16 h-16 object-cover rounded-lg border border-gray-200">` :
-                                    `<div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
-                                    </div>`
-                                }
+                    
+                    const itemContent = document.createElement('div');
+                    itemContent.className = 'flex gap-3';
+                    
+                    // Image container
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'flex-shrink-0';
+                    
+                    if (item.product_image) {
+                        const img = document.createElement('img');
+                        img.src = item.product_image;
+                        img.alt = item.product;
+                        img.className = 'w-16 h-16 object-cover rounded-lg border border-gray-200 clickable-image';
+                        img.onclick = () => openImageModal(item.product_image, item.product, `Produk - Qty: ${formatQuantityWithUnit(item.quantity, item.unit_type)} × ${formatCurrency(item.price)}`);
+                        imageContainer.appendChild(img);
+                    } else {
+                        imageContainer.innerHTML = `
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
                             </div>
-                            <div class="flex-1 flex justify-between">
-                                <div>
-                                    <p class="font-medium">${item.product}</p>
-                                    <p class="text-sm text-gray-500">${item.quantity} × ${formatCurrency(item.price)}</p>
-                                    ${item.bonus_qty > 0 ? `<p class="text-sm text-green-600">+ ${item.bonus_qty} bonus</p>` : ''}
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-medium">${formatCurrency(item.total)}</p>
-                                    ${item.discount > 0 ? `<p class="text-sm text-red-500">Diskon: ${formatCurrency(item.discount)}</p>` : ''}
-                                </div>
-                            </div>
+                        `;
+                    }
+                    
+                    // Content container
+                    const contentContainer = document.createElement('div');
+                    contentContainer.className = 'flex-1 flex justify-between';
+                    const formattedQuantity = formatQuantityWithUnit(item.quantity, item.unit_type);
+                    contentContainer.innerHTML = `
+                        <div>
+                            <p class="font-medium">${item.product}</p>
+                            <p class="text-sm text-gray-500">${formattedQuantity} × ${formatCurrency(item.price)}</p>
+                            ${item.bonus_qty > 0 ? `<p class="text-sm text-green-600">+ ${formatQuantityWithUnit(item.bonus_qty, item.unit_type)} bonus</p>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <p class="font-medium">${formatCurrency(item.total)}</p>
+                            ${item.discount > 0 ? `<p class="text-sm text-red-500">Diskon: ${formatCurrency(item.discount)}</p>` : ''}
                         </div>
                     `;
+                    
+                    itemContent.appendChild(imageContainer);
+                    itemContent.appendChild(contentContainer);
+                    itemElement.appendChild(itemContent);
                     elements.items.appendChild(itemElement);
                 });
             } else {
@@ -1495,30 +1864,49 @@
                 transaction.bonus_items.forEach(bonusItem => {
                     const bonusElement = document.createElement('div');
                     bonusElement.className = 'border-b border-green-200 py-2 last:border-b-0';
-                    bonusElement.innerHTML = `
-                        <div class="flex gap-3">
-                            <div class="flex-shrink-0">
-                                ${bonusItem.product_image ? 
-                                    `<img src="${bonusItem.product_image}" alt="${bonusItem.product || bonusItem.product_name}" class="w-12 h-12 object-cover rounded-lg border border-green-200">` :
-                                    `<div class="w-12 h-12 bg-green-100 rounded-lg border border-green-200 flex items-center justify-center">
-                                        <i data-lucide="gift" class="w-5 h-5 text-green-500"></i>
-                                    </div>`
-                                }
+                    
+                    const bonusContent = document.createElement('div');
+                    bonusContent.className = 'flex gap-3';
+                    
+                    // Image container for bonus
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'flex-shrink-0';
+                    
+                    if (bonusItem.product_image) {
+                        const img = document.createElement('img');
+                        img.src = bonusItem.product_image;
+                        img.alt = bonusItem.product || bonusItem.product_name;
+                        img.className = 'w-12 h-12 object-cover rounded-lg border border-green-200 clickable-image';
+                        img.onclick = () => openImageModal(bonusItem.product_image, bonusItem.product || bonusItem.product_name, `Bonus Item - Qty: ${formatQuantityWithUnit(bonusItem.quantity || 0, bonusItem.unit_type)}`);
+                        imageContainer.appendChild(img);
+                    } else {
+                        imageContainer.innerHTML = `
+                            <div class="w-12 h-12 bg-green-100 rounded-lg border border-green-200 flex items-center justify-center">
+                                <i data-lucide="gift" class="w-5 h-5 text-green-500"></i>
                             </div>
-                            <div class="flex-1 flex justify-between items-center">
-                                <div>
-                                    <p class="font-medium text-green-700">
-                                        <i class="fas fa-gift mr-1"></i>
-                                        ${bonusItem.product || bonusItem.product_name || '-'}
-                                    </p>
-                                    <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
-                                </div>
-                                <div class="text-sm text-green-600 font-medium">
-                                    GRATIS
-                                </div>
-                            </div>
+                        `;
+                    }
+                    
+                    // Content container for bonus
+                    const contentContainer = document.createElement('div');
+                    contentContainer.className = 'flex-1 flex justify-between items-center';
+                    const bonusFormattedQuantity = formatQuantityWithUnit(bonusItem.quantity || 0, bonusItem.unit_type);
+                    contentContainer.innerHTML = `
+                        <div>
+                            <p class="font-medium text-green-700">
+                                <i class="fas fa-gift mr-1"></i>
+                                ${bonusItem.product || bonusItem.product_name || '-'}
+                            </p>
+                            <p class="text-sm text-green-600">${bonusFormattedQuantity} bonus</p>
+                        </div>
+                        <div class="text-sm text-green-600 font-medium">
+                            GRATIS
                         </div>
                     `;
+                    
+                    bonusContent.appendChild(imageContainer);
+                    bonusContent.appendChild(contentContainer);
+                    bonusElement.appendChild(bonusContent);
                     elements.bonusItems.appendChild(bonusElement);
                 });
                 bonusSection.classList.remove('hidden');
@@ -1566,6 +1954,28 @@
                 showCarpetServiceSection = true;
             } else {
                 installationNotesInfo.classList.add('hidden');
+            }
+
+            // Handle leads cabang and deal maker information
+            const leadsCabangInfo = document.getElementById('leadsCabangInfo');
+            const dealMakerInfo = document.getElementById('dealMakerInfo');
+
+            // Show leads cabang if available
+            if (transaction.leads_cabang_outlet && transaction.leads_cabang_outlet.name) {
+                document.getElementById('detailLeadsCabang').textContent = transaction.leads_cabang_outlet.name;
+                leadsCabangInfo.classList.remove('hidden');
+                showCarpetServiceSection = true;
+            } else {
+                leadsCabangInfo.classList.add('hidden');
+            }
+
+            // Show deal maker if available
+            if (transaction.deal_maker_outlet && transaction.deal_maker_outlet.name) {
+                document.getElementById('detailDealMaker').textContent = 'BC-' + transaction.deal_maker_outlet.name;
+                dealMakerInfo.classList.remove('hidden');
+                showCarpetServiceSection = true;
+            } else {
+                dealMakerInfo.classList.add('hidden');
             }
 
             // Show/hide carpet service section
@@ -1759,7 +2169,7 @@
             
             showAlert('success', successMessage);
             closeRefundModal();
-            fetchTransactionHistory(); // Refresh data
+            refreshTransactionHistory(); // Refresh data
             
         } catch (error) {
             console.error('Error:', error);
@@ -1860,7 +2270,7 @@
             const result = await response.json();
             showAlert('success', 'Permintaan pembatalan/refund berhasil disetujui');
             closeCancellationApprovalModal();
-            fetchTransactionHistory(); // Refresh data
+            refreshTransactionHistory(); // Refresh data
 
         } catch (error) {
             console.error('Error approving cancellation:', error);
@@ -1904,7 +2314,7 @@
             const result = await response.json();
             showAlert('success', 'Permintaan pembatalan/refund berhasil ditolak');
             closeCancellationApprovalModal();
-            fetchTransactionHistory(); // Refresh data
+            refreshTransactionHistory(); // Refresh data
 
         } catch (error) {
             console.error('Error rejecting cancellation:', error);
@@ -1966,7 +2376,7 @@
         document.getElementById('dpStatusFilter').value = '';
         document.getElementById('outletFilter').value = '';
         
-        // Refresh transaction history with no filters
+        // Refresh transaction history with no filters  
         fetchTransactionHistory();
         
         // Show success message
@@ -2010,7 +2420,19 @@
             // Apply filters
             const matchesSearch = invoice.includes(searchTerm);
             const matchesStatus = !statusFilter || actualStatus === statusFilter;
-            const matchesApproval = !approvalFilter || actualApprovalStatus === approvalFilter;
+            
+            // Enhanced approval filter to include edit_pending
+            let matchesApproval = true;
+            if (approvalFilter) {
+                if (approvalFilter === 'edit_pending') {
+                    // Filter for transactions with pending edit requests
+                    const transaction = transactionsCache.find(t => t.id == row.dataset.transactionId);
+                    matchesApproval = transaction && transaction.pending_edit && transaction.pending_edit.status === 'pending';
+                } else {
+                    matchesApproval = actualApprovalStatus === approvalFilter;
+                }
+            }
+            
             const matchesCategory = !categoryFilter || actualCategory === categoryFilter;
             
             // DP Status Filter Logic
@@ -2222,7 +2644,7 @@
             const result = await response.json();
             showAlert('success', 'Transaksi berhasil disetujui');
             closeApproveModal();
-            fetchTransactionHistory();
+            refreshTransactionHistory();
         } catch (error) {
             console.error('Error:', error);
             showAlert('error', error.message);
@@ -2307,7 +2729,7 @@
             const result = await response.json();
             showAlert('success', 'Transaksi berhasil ditolak');
             closeRejectModal();
-            fetchTransactionHistory();
+            refreshTransactionHistory();
         } catch (error) {
             console.error('Error:', error);
             showAlert('error', error.message);
@@ -2596,11 +3018,26 @@
         const modal = document.getElementById('modalSettlement');
         const remainingBalance = parseFloat(modal.dataset.remainingBalance || 0);
         const amountInput = document.getElementById('settlementAmount');
+        const rawInput = document.getElementById('settlementAmountRaw');
 
+        let amount;
         if (type === 'full') {
-            amountInput.value = remainingBalance;
+            amount = remainingBalance;
         } else if (type === 'half') {
-            amountInput.value = (remainingBalance / 2).toFixed(2);
+            amount = Math.floor(remainingBalance / 2);
+        }
+
+        // Set raw value
+        if (rawInput) {
+            rawInput.value = amount;
+        }
+
+        // Set formatted display value
+        if (amount) {
+            const formatted = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            amountInput.value = formatted;
+        } else {
+            amountInput.value = '';
         }
     }
 
@@ -2612,8 +3049,14 @@
         const orderId = modal.dataset.orderId;
         const remainingBalance = parseFloat(modal.dataset.remainingBalance || 0);
 
+        // Get amount from raw input or parse from formatted input
+        const rawAmountInput = document.getElementById('settlementAmountRaw');
+        const amount = rawAmountInput && rawAmountInput.value ? 
+                      parseFloat(rawAmountInput.value) : 
+                      parseFloat(document.getElementById('settlementAmount').value.replace(/[^\d]/g, ''));
+
         const formData = new FormData();
-        formData.append('amount_received', document.getElementById('settlementAmount').value);
+        formData.append('amount_received', amount);
         formData.append('payment_method', document.getElementById('settlementPaymentMethod').value);
         formData.append('notes', document.getElementById('settlementNotes').value);
 
@@ -2623,7 +3066,6 @@
         }
 
         // Validasi
-        const amount = parseFloat(document.getElementById('settlementAmount').value);
         if (amount <= 0) {
             showAlert('error', 'Jumlah pelunasan harus lebih dari 0');
             return;
@@ -2670,7 +3112,7 @@
             const result = await response.json();
             showAlert('success', result.message || 'Pelunasan berhasil diproses');
             closeSettlementModal();
-            fetchTransactionHistory(); // Refresh data
+            refreshTransactionHistory(); // Refresh data
 
         } catch (error) {
             console.error('Error processing settlement:', error);
@@ -2710,7 +3152,7 @@
         if (window.pollingManager) {
             window.pollingManager.start('transactionHistory', async () => {
                 console.log('Polling transaction history...');
-                await fetchTransactionHistory();
+                await refreshTransactionHistory();
             }, 30000); // 30 seconds interval
         }
     });
@@ -2802,7 +3244,7 @@
             if (response.ok && result.success) {
                 showAlert('success', 'Transaksi berhasil di-approve oleh Keuangan');
                 // Refresh the table
-                await fetchTransactionHistory();
+                await refreshTransactionHistory();
             } else {
                 showAlert('error', result.message || 'Gagal melakukan approval Keuangan');
             }
@@ -2839,7 +3281,7 @@
             if (response.ok && result.success) {
                 showAlert('success', 'Transaksi berhasil di-approve oleh Operasional');
                 // Refresh the table
-                await fetchTransactionHistory();
+                await refreshTransactionHistory();
             } else {
                 showAlert('error', result.message || 'Gagal melakukan approval Operasional');
             }
@@ -2848,6 +3290,427 @@
             showAlert('error', 'Terjadi kesalahan saat melakukan approval Operasional');
         }
     }
+
+    // Setup currency formatting for Settlement Amount field
+    document.addEventListener('DOMContentLoaded', function() {
+        const settlementAmountInput = document.getElementById('settlementAmount');
+        if (settlementAmountInput) {
+            // Format on input
+            settlementAmountInput.addEventListener('input', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                // Update hidden field with raw value
+                const hiddenInput = document.getElementById('settlementAmountRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                // Format display value
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+            
+            // Format on paste
+            settlementAmountInput.addEventListener('paste', function() {
+                setTimeout(() => {
+                    const rawValue = this.value.replace(/[^\d]/g, '');
+                    
+                    const hiddenInput = document.getElementById('settlementAmountRaw');
+                    if (hiddenInput) {
+                        hiddenInput.value = rawValue;
+                    }
+                    
+                    if (rawValue) {
+                        const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        this.value = formatted;
+                    } else {
+                        this.value = '';
+                    }
+                }, 10);
+            });
+            
+            // Keep formatting on focus but select all for easy replacement
+            settlementAmountInput.addEventListener('focus', function() {
+                this.select();
+            });
+            
+            // Re-format on blur
+            settlementAmountInput.addEventListener('blur', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                const hiddenInput = document.getElementById('settlementAmountRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+    });
+
+    // ============== EDIT TRANSACTION APPROVAL FUNCTIONS ==============
+    
+    let currentEditRequest = null;
+    let pendingEditsCache = [];
+
+    // Fetch pending edit requests
+    async function fetchPendingEdits() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('Token tidak ditemukan');
+                return [];
+            }
+
+            const response = await fetch('/api/transaction-edits/pending', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                pendingEditsCache = result.data;
+                return result.data;
+            } else {
+                console.error('Gagal mengambil data edit pending:', result.message);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error fetching pending edits:', error);
+            return [];
+        }
+    }
+
+    // Open edit approval modal
+    async function openEditApprovalModal(editId) {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('error', 'Token tidak ditemukan. Silakan login ulang.');
+                return;
+            }
+
+            // Get edit request details
+            const response = await fetch(`/api/transaction-edits/${editId}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (!response.ok || !result.success) {
+                showAlert('error', result.message || 'Gagal mengambil data edit request');
+                return;
+            }
+
+            currentEditRequest = result.data;
+            populateEditApprovalModal(currentEditRequest);
+            document.getElementById('editApprovalModal').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Error opening edit approval modal:', error);
+            showAlert('error', 'Terjadi kesalahan saat membuka modal approval');
+        }
+    }
+
+    // Populate edit approval modal with data
+    function populateEditApprovalModal(editData) {
+        // Basic info
+        document.getElementById('editInvoiceNumber').textContent = editData.order_number || '';
+        document.getElementById('editRequester').textContent = editData.requester_name || '';
+        document.getElementById('editRequestDate').textContent = editData.requested_at || '';
+        document.getElementById('editType').textContent = getEditTypeText(editData.edit_type);
+        document.getElementById('editReason').textContent = getEditReasonText(editData.reason) || '';
+        
+        // Notes (optional)
+        const notesDiv = document.getElementById('editNotesDiv');
+        const notesSpan = document.getElementById('editNotes');
+        if (editData.notes) {
+            notesSpan.textContent = editData.notes;
+            notesDiv.classList.remove('hidden');
+        } else {
+            notesDiv.classList.add('hidden');
+        }
+
+        // Financial changes
+        document.getElementById('editOriginalTotal').textContent = formatCurrency(editData.original_data.total);
+        document.getElementById('editNewTotal').textContent = formatCurrency(editData.new_data.total);
+        
+        const difference = editData.total_difference;
+        const diffElement = document.getElementById('editTotalDifference');
+        if (difference > 0) {
+            diffElement.textContent = `+${formatCurrency(difference)}`;
+            diffElement.className = 'font-medium text-green-600';
+        } else if (difference < 0) {
+            diffElement.textContent = `-${formatCurrency(Math.abs(difference))}`;
+            diffElement.className = 'font-medium text-red-600';
+        } else {
+            diffElement.textContent = formatCurrency(0);
+            diffElement.className = 'font-medium text-gray-600';
+        }
+
+        document.getElementById('editApprovalStatus').textContent = editData.approval_status || 'Pending';
+
+        // Show approval information if any approvals have been made
+        const approvalInfoSection = document.getElementById('editApprovalInfo');
+        let hasApprovals = false;
+
+        // Finance approval info
+        if (editData.finance_approved) {
+            document.getElementById('editFinanceApproverName').textContent = editData.finance_approved_by || 'Unknown';
+            document.getElementById('editFinanceApprovalTime').textContent = editData.finance_approved_at || '';
+            document.getElementById('editFinanceApprover').classList.remove('hidden');
+            document.getElementById('editFinanceApprovalDate').classList.remove('hidden');
+            document.getElementById('editFinanceNotApproved').classList.add('hidden');
+            hasApprovals = true;
+        } else {
+            document.getElementById('editFinanceApprover').classList.add('hidden');
+            document.getElementById('editFinanceApprovalDate').classList.add('hidden');
+            document.getElementById('editFinanceNotApproved').classList.remove('hidden');
+        }
+
+        // Operational approval info
+        if (editData.operational_approved) {
+            document.getElementById('editOperationalApproverName').textContent = editData.operational_approved_by || 'Unknown';
+            document.getElementById('editOperationalApprovalTime').textContent = editData.operational_approved_at || '';
+            document.getElementById('editOperationalApprover').classList.remove('hidden');
+            document.getElementById('editOperationalApprovalDate').classList.remove('hidden');
+            document.getElementById('editOperationalNotApproved').classList.add('hidden');
+            hasApprovals = true;
+        } else {
+            document.getElementById('editOperationalApprover').classList.add('hidden');
+            document.getElementById('editOperationalApprovalDate').classList.add('hidden');
+            document.getElementById('editOperationalNotApproved').classList.remove('hidden');
+        }
+
+        // Show approval info section if there are any approvals
+        if (hasApprovals) {
+            approvalInfoSection.classList.remove('hidden');
+        } else {
+            approvalInfoSection.classList.add('hidden');
+        }
+
+        // Populate items comparison
+        populateItemsComparison(editData.original_data.items, editData.new_data.items);
+
+        // Show/hide approval buttons based on current status
+        updateApprovalButtons(editData);
+    }
+
+    // Populate items comparison tables
+    function populateItemsComparison(originalItems, newItems) {
+        const originalTbody = document.getElementById('originalItemsList');
+        const newTbody = document.getElementById('newItemsList');
+
+        console.log('Populating items comparison:', { originalItems, newItems });
+        // Original items
+        originalTbody.innerHTML = originalItems.map(item => `
+            <tr>
+                <td class="px-2 py-1">${item.product || (item.product && item.product.name) || 'Unknown Product'}</td>
+                <td class="px-2 py-1 text-center">${formatQuantityWithUnit(item.quantity, item.unit_type || (item.product && item.product.unit_type))}</td>
+                <td class="px-2 py-1 text-right">${formatCurrency(item.price)}</td>
+                <td class="px-2 py-1 text-right">${formatCurrency((item.quantity * item.price) - (item.discount || 0))}</td>
+            </tr>
+        `).join('');
+
+        // New items
+        newTbody.innerHTML = newItems.map(item => `
+            <tr>
+                <td class="px-2 py-1">${item.product}</td>
+                <td class="px-2 py-1 text-center">${formatQuantityWithUnit(item.quantity, item.unit_type)}</td>
+                <td class="px-2 py-1 text-right">${formatCurrency(item.price)}</td>
+                <td class="px-2 py-1 text-right">${formatCurrency((item.quantity * item.price) - (item.discount || 0))}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Update approval buttons visibility
+    function updateApprovalButtons(editData) {
+        const financeBtn = document.getElementById('approveEditFinanceBtn');
+        const operationalBtn = document.getElementById('approveEditOperationalBtn');
+        const rejectBtn = document.getElementById('rejectEditBtn');
+
+        // Show reject button only if edit is still pending
+        rejectBtn.style.display = editData.status === 'pending' ? 'block' : 'none';
+
+        // Show finance button if not yet approved by finance
+        financeBtn.style.display = (!editData.finance_approved && editData.status === 'pending') ? 'block' : 'none';
+
+        // Show operational button if not yet approved by operational
+        operationalBtn.style.display = (!editData.operational_approved && editData.status === 'pending') ? 'block' : 'none';
+    }
+
+    // Close edit approval modal
+    function closeEditApprovalModal() {
+        currentEditRequest = null;
+        document.getElementById('editApprovalModal').classList.add('hidden');
+    }
+
+    // Approve edit - Finance
+    async function approveEditFinance() {
+        if (!currentEditRequest) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/transaction-edits/${currentEditRequest.id}/approve-finance`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                showAlert('success', result.message);
+                closeEditApprovalModal();
+                await refreshTransactionHistory(); // Refresh table
+            } else {
+                showAlert('error', result.message || 'Gagal approve finance');
+            }
+        } catch (error) {
+            console.error('Error approving edit finance:', error);
+            showAlert('error', 'Terjadi kesalahan saat approve finance');
+        }
+    }
+
+    // Approve edit - Operational
+    async function approveEditOperational() {
+        if (!currentEditRequest) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/transaction-edits/${currentEditRequest.id}/approve-operational`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                showAlert('success', result.message);
+                closeEditApprovalModal();
+                await refreshTransactionHistory(); // Refresh table
+            } else {
+                showAlert('error', result.message || 'Gagal approve operational');
+            }
+        } catch (error) {
+            console.error('Error approving edit operational:', error);
+            showAlert('error', 'Terjadi kesalahan saat approve operational');
+        }
+    }
+
+    // Show reject edit modal
+    function rejectEditRequest() {
+        document.getElementById('rejectEditModal').classList.remove('hidden');
+    }
+
+    // Close reject edit modal
+    function closeRejectEditModal() {
+        document.getElementById('rejectEditModal').classList.add('hidden');
+        document.getElementById('rejectEditReason').value = '';
+    }
+
+    // Confirm reject edit
+    async function confirmRejectEdit() {
+        if (!currentEditRequest) return;
+
+        const reason = document.getElementById('rejectEditReason').value.trim();
+        if (!reason) {
+            showAlert('error', 'Alasan penolakan harus diisi');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/transaction-edits/${currentEditRequest.id}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                showAlert('success', result.message);
+                closeRejectEditModal();
+                closeEditApprovalModal();
+                await refreshTransactionHistory(); // Refresh table
+            } else {
+                showAlert('error', result.message || 'Gagal menolak edit');
+            }
+        } catch (error) {
+            console.error('Error rejecting edit:', error);
+            showAlert('error', 'Terjadi kesalahan saat menolak edit');
+        }
+    }
+
+    // Helper function to get edit type text
+    function getEditTypeText(editType) {
+        const typeMap = {
+            'quantity_adjustment': 'Penyesuaian Kuantitas',
+            'item_addition': 'Penambahan Item',
+            'item_removal': 'Pengurangan Item',
+            'item_modification': 'Modifikasi Item'
+        };
+        return typeMap[editType] || editType;
+    }
+
+    // Helper function to get edit status text
+    function getEditStatusText(status) {
+        const statusMap = {
+            'pending': 'Menunggu Approval',
+            'approved': 'Disetujui',
+            'rejected': 'Ditolak',
+            'applied': 'Diterapkan'
+        };
+        return statusMap[status] || status;
+    }
+
+    // Helper function to format quantity with unit type
+    function formatQuantityWithUnit(quantity, unitType) {
+        const qty = parseFloat(quantity);
+        const unit = unitType || 'pcs';
+        
+        if (unit === 'meter') {
+            // For meter, show decimal if not whole number
+            return qty % 1 === 0 ? `${qty.toFixed(0)} ${unit}` : `${qty.toFixed(1)} ${unit}`;
+        } else {
+            // For other units, show as integer
+            return `${qty.toFixed(0)} ${unit}`;
+        }
+    }
+
+    // ============== END EDIT TRANSACTION APPROVAL FUNCTIONS ==============
 </script>
 
 <style>
@@ -2931,6 +3794,325 @@
     #tableContainer {
         scroll-behavior: smooth;
     }
+    
+    /* Image modal styles */
+    .image-modal {
+        backdrop-filter: blur(4px);
+    }
+    
+    .image-modal img {
+        max-width: 90vw;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    .clickable-image {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .clickable-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
 </style>
+
+<!-- Modal untuk menampilkan gambar produk/bonus -->
+<div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 image-modal">
+    <div class="relative max-w-full max-h-full">
+        <!-- Close button -->
+        <button onclick="closeImageModal()" class="absolute -top-4 -right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors z-10">
+            <i data-lucide="x" class="w-5 h-5 text-gray-700"></i>
+        </button>
+        
+        <!-- Image container -->
+        <div class="bg-white p-2 rounded-lg">
+            <img id="modalImage" src="" alt="" class="max-w-full max-h-full">
+        </div>
+        
+        <!-- Image info -->
+        <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-4 rounded-b-lg">
+            <p id="modalImageTitle" class="font-medium"></p>
+            <p id="modalImageDescription" class="text-sm text-gray-200"></p>
+        </div>
+    </div>
+    
+    <!-- Click outside to close -->
+    <div class="absolute inset-0" onclick="closeImageModal()"></div>
+</div>
+
+<script>
+    // Image modal functions
+    function openImageModal(imageSrc, title, description = '') {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalImageTitle');
+        const modalDescription = document.getElementById('modalImageDescription');
+        
+        modalImage.src = imageSrc;
+        modalImage.alt = title;
+        modalTitle.textContent = title;
+        modalDescription.textContent = description;
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+    });
+
+    // Helper functions for quantity formatting
+    function formatQuantityWithUnit(qty, unitType) {
+        // Convert to number first
+        const numQty = parseFloat(qty);
+        if (isNaN(numQty) || numQty === 0) return '0 pcs';
+        
+        const formattedQty = numQty % 1 === 0 ? numQty.toString() : numQty.toFixed(1);
+        const unit = unitType || 'pcs';
+        
+        return `${formattedQty} ${unit}`;
+    }
+
+    // Format quantity for display (with multiplier if needed)
+    function formatQuantityForDisplay(qty, unitType) {
+        // Convert to number first
+        const numQty = parseFloat(qty);
+        if (isNaN(numQty) || numQty === 0) return '';
+        
+        const hideQuantity = ['pasang', 'kirim'].includes(unitType);
+        if (hideQuantity) return '';
+        
+        const formattedQty = numQty % 1 === 0 ? numQty.toString() : numQty.toFixed(1);
+        return `${formattedQty}x `;
+    }
+
+    // ============== EDIT HISTORY FUNCTIONS ==============
+    
+    // Open edit history modal
+    async function openEditHistoryModal(orderNumber, orderId) {
+        try {
+            if (!orderId || orderId === 'undefined') {
+                showAlert('error', 'ID transaksi tidak valid');
+                return;
+            }
+
+            // Set order number in modal
+            document.getElementById('editHistoryOrderNumber').textContent = orderNumber;
+
+            // Show modal
+            const modal = document.getElementById('modalEditHistory');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Load edit history
+            await loadEditHistory(orderId);
+
+        } catch (error) {
+            console.error('Error in openEditHistoryModal:', error);
+            showAlert('error', 'Gagal membuka modal riwayat edit: ' + error.message);
+        }
+    }
+
+    // Close edit history modal
+    function closeEditHistoryModal() {
+        const modal = document.getElementById('modalEditHistory');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Load edit history data
+    async function loadEditHistory(orderId) {
+        try {
+            // Show loading state
+            document.getElementById('editHistoryLoading').classList.remove('hidden');
+            document.getElementById('editHistoryContent').classList.add('hidden');
+            document.getElementById('editHistoryEmpty').classList.add('hidden');
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Token tidak ditemukan');
+            }
+
+            const response = await fetch(`/api/orders/${orderId}/edit-history`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+
+            // Hide loading state
+            document.getElementById('editHistoryLoading').classList.add('hidden');
+
+            if (response.ok && result.success) {
+                renderEditHistoryTable(result.data);
+            } else {
+                throw new Error(result.message || 'Gagal memuat riwayat edit');
+            }
+
+        } catch (error) {
+            console.error('Error loading edit history:', error);
+            
+            // Hide loading, show empty state
+            document.getElementById('editHistoryLoading').classList.add('hidden');
+            document.getElementById('editHistoryContent').classList.add('hidden');
+            document.getElementById('editHistoryEmpty').classList.remove('hidden');
+            
+            showAlert('error', 'Gagal memuat riwayat edit: ' + error.message);
+        }
+    }
+
+    // Render edit history table
+    function renderEditHistoryTable(edits) {
+        const tableBody = document.getElementById('editHistoryTableBody');
+        const contentElement = document.getElementById('editHistoryContent');
+        const emptyElement = document.getElementById('editHistoryEmpty');
+
+        // Check if there's data
+        if (!edits || edits.length === 0) {
+            emptyElement.classList.remove('hidden');
+            return;
+        }
+
+        // Show content
+        contentElement.classList.remove('hidden');
+
+        // Render table rows
+        tableBody.innerHTML = edits.map(edit => `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 text-sm">${edit.requested_at}</td>
+                <td class="px-4 py-3 text-sm">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${getEditTypeClass(edit.edit_type)}">
+                        ${getEditTypeText(edit.edit_type)}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-sm max-w-xs truncate" title="${getEditReasonText(edit.reason)}">
+                    ${getEditReasonText(edit.reason)}
+                    ${edit.notes ? `<br><small class="text-gray-500">${edit.notes}</small>` : ''}
+                </td>
+                <td class="px-4 py-3 text-sm">${edit.requester}</td>
+                <td class="px-4 py-3 text-sm font-medium ${edit.total_difference >= 0 ? 'text-green-600' : 'text-red-600'}">
+                    ${edit.total_difference >= 0 ? '+' : ''}${formatCurrency(edit.total_difference)}
+                </td>
+                <td class="px-4 py-3 text-sm">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${getEditStatusClass(edit.status)}">
+                        ${getEditStatusText(edit.status)}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-sm">
+                    ${edit.finance_approver ? `
+                        <div class="text-green-600">
+                            <i data-lucide="check" class="w-3 h-3 inline mr-1"></i>
+                            ${edit.finance_approver}
+                        </div>
+                        <small class="text-gray-500">${edit.finance_approved_at}</small>
+                    ` : '<span class="text-gray-400">Belum</span>'}
+                </td>
+                <td class="px-4 py-3 text-sm">
+                    ${edit.operational_approver ? `
+                        <div class="text-green-600">
+                            <i data-lucide="check" class="w-3 h-3 inline mr-1"></i>
+                            ${edit.operational_approver}
+                        </div>
+                        <small class="text-gray-500">${edit.operational_approved_at}</small>
+                    ` : '<span class="text-gray-400">Belum</span>'}
+                </td>
+                <td class="px-4 py-3 text-sm">
+                    ${edit.applied_at ? `
+                        <span class="text-green-600 font-medium">
+                            <i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i>
+                            ${edit.applied_at}
+                        </span>
+                    ` : (edit.status === 'rejected' ? `
+                        <span class="text-red-600">
+                            <i data-lucide="x-circle" class="w-3 h-3 inline mr-1"></i>
+                            Ditolak
+                        </span>
+                        ${edit.rejector ? `<br><small class="text-gray-500">oleh ${edit.rejector}</small>` : ''}
+                        ${edit.rejected_at ? `<br><small class="text-gray-500">${edit.rejected_at}</small>` : ''}
+                    ` : '<span class="text-gray-400">Menunggu</span>')}
+                </td>
+            </tr>
+        `).join('');
+
+        // Refresh Lucide icons
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Helper function to get edit type class
+    function getEditTypeClass(editType) {
+        const typeClasses = {
+            'quantity_adjustment': 'bg-blue-100 text-blue-800',
+            'item_modification': 'bg-yellow-100 text-yellow-800',
+            'item_addition': 'bg-green-100 text-green-800',
+            'item_removal': 'bg-red-100 text-red-800'
+        };
+        return typeClasses[editType] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Helper function to get edit type text
+    function getEditTypeText(editType) {
+        const typeTexts = {
+            'quantity_adjustment': 'Penyesuaian Qty',
+            'item_modification': 'Modifikasi Item',
+            'item_addition': 'Tambah Item',
+            'item_removal': 'Hapus Item'
+        };
+        return typeTexts[editType] || editType;
+    }
+
+    // Helper function to get edit status class
+    function getEditStatusClass(status) {
+        const statusClasses = {
+            'pending': 'bg-yellow-100 text-yellow-800',
+            'approved': 'bg-green-100 text-green-800',
+            'rejected': 'bg-red-100 text-red-800'
+        };
+        return statusClasses[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    // Helper function to get edit reason text
+    function getEditReasonText(reason) {
+        const reasonTexts = {
+            'quantity_adjustment': 'Penyesuaian Jumlah di Lokasi',
+            'customer_request': 'Permintaan Tambahan Customer',
+            'measurement_correction': 'Koreksi Pengukuran',
+            'item_change': 'Perubahan Item',
+            'other': 'Lainnya'
+        };
+        return reasonTexts[reason] || reason;
+    }
+
+    // Helper function to get edit status text
+    function getEditStatusText(status) {
+        const statusTexts = {
+            'pending': 'Menunggu',
+            'approved': 'Disetujui',
+            'rejected': 'Ditolak'
+        };
+        return statusTexts[status] || status;
+    }
+</script>
 
 @endsection

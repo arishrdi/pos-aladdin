@@ -141,14 +141,47 @@
     </div>
 </div>
 
-<!-- Stats Cards - Row 1 -->
+<!-- Stats Cards - Main KPI Cards Layout -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-    <!-- Total Penjualan -->
+    <!-- Total Transaksi (Orange) -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-sm text-gray-500">Total Penjualan</p>
-                <p class="text-xl font-bold" id="totalSales">Loading...</p>
+                <p class="text-sm text-gray-500">TOTAL TRANSAKSI</p>
+                <p class="text-xl font-bold text-orange-600" id="totalOrders">Loading...</p>
+            </div>
+            <div class="bg-orange-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total QTY (Meter) Terjual (Teal) -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">TOTAL QTY (METER) TERJUAL</p>
+                <p class="text-xl font-bold text-teal-600" id="totalQtyMeter">Loading...</p>
+            </div>
+            <div class="bg-teal-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-500">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Omset (Green) -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">TOTAL OMSET</p>
+                <p class="text-xl font-bold text-green-600" id="totalSales">Loading...</p>
             </div>
             <div class="bg-green-100 p-2 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
@@ -160,84 +193,15 @@
         </div>
     </div>
     
-    <!-- Transaksi -->
+    <!-- Total Bonus Produk (Gray) -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-sm text-gray-500">Transaksi</p>
-                <p class="text-xl font-bold" id="totalOrders">Loading...</p>
+                <p class="text-sm text-gray-500">TOTAL BONUS PRODUK</p>
+                <p class="text-xl font-bold text-gray-600" id="totalBonus">Loading...</p>
             </div>
-            <div class="bg-green-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                </svg>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Total Item Terjual -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-sm text-gray-500">Total Item Terjual</p>
-                <p class="text-xl font-bold" id="totalItems">Loading...</p>
-            </div>
-            <div class="bg-green-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Average Order Value -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-sm text-gray-500">Rata-rata Nilai Order</p>
-                <p class="text-xl font-bold" id="averageOrder">Loading...</p>
-            </div>
-            <div class="bg-purple-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500">
-                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Stats Cards - Row 2: New Metrics -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-    <!-- Total Diskon -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-sm text-gray-500">Total Diskon</p>
-                <p class="text-xl font-bold text-orange-600" id="totalDiscount">Loading...</p>
-            </div>
-            <div class="bg-orange-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-500">
-                    <path d="M9 12l2 2 4-4"></path>
-                    <path d="M21 12c.552 0 1-.448 1-1V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6c0 .552.448 1 1 1h18z"></path>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Total Bonus -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-sm text-gray-500">Total Bonus Keluar</p>
-                <p class="text-xl font-bold text-yellow-600" id="totalBonus">Loading...</p>
-            </div>
-            <div class="bg-yellow-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500">
+            <div class="bg-gray-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
                     <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                     <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                     <path d="M4 22h16"></path>
@@ -247,65 +211,73 @@
             </div>
         </div>
     </div>
-    
-    <!-- Transaksi Belum Dilunasi -->
+</div>
+
+<!-- Second Row - Discount, Target, and Average -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <!-- Total Discount (Red) -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-sm text-gray-500">Belum Dilunasi</p>
-                <p class="text-xl font-bold text-blue-600" id="totalUnpaid">Loading...</p>
-            </div>
-            <div class="bg-blue-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 6v6l4 2"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Transaksi Cancel -->
-    <div class="bg-white rounded-lg p-4 card-shadow">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-sm text-gray-500">Transaksi Cancel</p>
-                <p class="text-xl font-bold text-red-600" id="totalCancelled">Loading...</p>
+                <p class="text-sm text-gray-500">TOTAL DISCOUNT/POTONGAN HARGA JUAL</p>
+                <p class="text-xl font-bold text-red-600" id="totalDiscount">Loading...</p>
             </div>
             <div class="bg-red-100 p-2 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500">
-                    <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"></path>
-                    <path d="M3 16.2V21m0 0h4.8M3 21l6-6"></path>
-                    <path d="M21 7.8V3m0 0h-4.8M21 3l-6 6"></path>
-                    <path d="M3 7.8V3m0 0h4.8M3 3l6 6"></path>
+                    <path d="M9 12l2 2 4-4"></path>
+                    <path d="M21 12c.552 0 1-.448 1-1V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v6c0 .552.448 1 1 1h18z"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7"></path>
                 </svg>
             </div>
         </div>
     </div>
     
-    <!-- Transaksi Refund -->
+    <!-- Target Omset (Pink) -->
     <div class="bg-white rounded-lg p-4 card-shadow">
         <div class="flex justify-between items-start">
             <div>
-                <p class="text-sm text-gray-500">Transaksi Refund</p>
-                <p class="text-xl font-bold text-indigo-600" id="totalRefunded">Loading...</p>
+                <p class="text-sm text-gray-500">TARGET OMSET</p>
+                <p class="text-xl font-bold text-pink-600" id="targetOmset">Loading...</p>
+                <p class="text-xs text-gray-400" id="targetProgress">Progress: 0%</p>
+                <p class="text-xs text-gray-400" id="targetBulanan" style="display: none;"></p>
+                <p class="text-xs text-gray-400" id="targetTahunan" style="display: none;"></p>
             </div>
-            <div class="bg-indigo-100 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500">
-                    <path d="M3 7v6h6"></path>
-                    <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            <div class="bg-pink-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-500">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rata-rata Penjualan (Pink) -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="text-sm text-gray-500">RATA RATA PENJUALAN</p>
+                <p class="text-xl font-bold text-pink-600" id="averageOrder">Loading...</p>
+            </div>
+            <div class="bg-pink-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-500">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
             </div>
         </div>
     </div>
 </div>
 
+
 <!-- DP Summary Widget -->
-{{-- <div class="mb-6">
+<div class="mb-6">
     <div class="bg-white rounded-lg p-6 card-shadow">
         <div class="flex justify-between items-start mb-4">
             <div>
                 <h3 class="text-lg font-semibold text-gray-800">DP Belum Lunas</h3>
-                <p class="text-sm text-gray-500">Transaksi DP yang memerlukan pelunasan</p>
+                <p class="text-sm text-gray-500" id="dpSubtitle">Transaksi DP yang memerlukan pelunasan</p>
             </div>
             <div class="flex items-center space-x-4">
                 <div class="text-right">
@@ -327,7 +299,7 @@
         </div>
         
         <div class="mt-4 pt-4 border-t border-gray-200">
-            <a href="/dashboard/closing/riwayat-transaksi" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
+            <a href="/riwayat-transaksi" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
                 <span>Lihat Semua Riwayat Transaksi</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
                     <path d="m9 18 6-6-6-6"/>
@@ -335,7 +307,7 @@
             </a>
         </div>
     </div>
-</div> --}}
+</div>
 
 <!-- Two Columns -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -366,6 +338,37 @@
     
     <!-- Right Column -->
     <div class="lg:col-span-1">
+        <!-- Tipe Karpet Section -->
+        <div class="bg-white rounded-lg p-4 card-shadow mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-800">Tipe Karpet</h3>
+                <div class="relative">
+                    <select id="karpetSortFilter" class="text-sm bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="quantity_desc">Qty Tertinggi</option>
+                        <option value="quantity_asc">Qty Terendah</option>
+                        <option value="omset_desc">Omset Tertinggi</option>
+                        <option value="omset_asc">Omset Terendah</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="space-y-3" id="topKarpetsList">
+                <!-- Top carpets will be inserted here -->
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div>
+                        <p class="font-medium text-gray-800">Loading...</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-teal-600">- meter</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-gray-200">
+                <p class="text-xs text-gray-500">Gunakan dropdown di atas untuk mengurutkan data karpet</p>
+            </div>
+        </div>
+
         <!-- Penjualan Terlaris -->
         <div class="bg-white rounded-lg p-4 card-shadow mb-6">
             <h3 class="font-semibold text-gray-800 mb-4">Penjualan Terlaris</h3>
@@ -424,16 +427,39 @@
             <table class="min-w-full divide-y divide-gray-200" id="comparisonTable">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Outlet</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Omset</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Diskon</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Bonus</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Transaksi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belum Dilunasi</th>
-                        {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Terjual</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rata-rata Order</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaksi Cancel</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaksi Refund</th> --}}
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cabang</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="omset">
+                            <div class="flex items-center justify-between">
+                                <span>Omset</span>
+                                <svg class="w-4 h-4 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="discount">
+                            <div class="flex items-center justify-between">
+                                <span>Discount</span>
+                                <svg class="w-4 h-4 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="bonus">
+                            <div class="flex items-center justify-between">
+                                <span>Total Bonus Keluar</span>
+                                <svg class="w-4 h-4 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="transactions">
+                            <div class="flex items-center justify-between">
+                                <span>Jumlah Total Transaksi</span>
+                                <svg class="w-4 h-4 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="comparisonTableBody" class="bg-white divide-y divide-gray-200">
@@ -653,25 +679,56 @@
             el.textContent = data.outlet;
         });
         
-        // Update summary stats
-        document.getElementById('totalSales').textContent = formatCurrency(data.summary.total_sales);
+        // Update summary stats - new layout
         document.getElementById('totalOrders').textContent = data.summary.total_orders;
-        document.getElementById('totalItems').textContent = data.summary.total_items + ' Item';
+        document.getElementById('totalQtyMeter').textContent = data.summary.total_unit_type_meter + ' Meter';
+        document.getElementById('totalSales').textContent = formatCurrency(data.summary.total_sales);
+        document.getElementById('totalBonus').textContent = formatCurrency(data.summary.total_bonus_value || 0);
+        document.getElementById('totalDiscount').textContent = formatCurrency(data.summary.total_discount || 0);
         document.getElementById('averageOrder').textContent = formatCurrency(data.summary.average_order_value);
         document.getElementById('totalSalesOverview').textContent = formatCurrency(data.sales.current_period);
         
-        // Update new metrics
-        document.getElementById('totalDiscount').textContent = formatCurrency(data.summary.total_discount || 0);
-        document.getElementById('totalBonus').textContent = formatCurrency(data.summary.total_bonus_value || 0);
-        document.getElementById('totalUnpaid').textContent = (data.summary.total_unpaid || 0) + ' Transaksi';
-        document.getElementById('totalCancelled').textContent = formatCurrency(data.summary.total_cancelled || 0);
-        document.getElementById('totalRefunded').textContent = formatCurrency(data.summary.total_refunded || 0);
+        // Update target omset and progress
+        document.getElementById('targetOmset').textContent = formatCurrency(data.target_bulanan || 0);
+        const targetProgress = data.sales.target_achievement_monthly || 0;
+        document.getElementById('targetProgress').textContent = `Progress: ${targetProgress}%`;
+        
+        // Show target bulanan info
+        const targetBulananElement = document.getElementById('targetBulanan');
+        if (data.target_bulanan && data.target_bulanan > 0) {
+            targetBulananElement.textContent = `Target Bulanan: ${formatCurrency(data.target_bulanan)}`;
+            targetBulananElement.style.display = 'block';
+        } else {
+            targetBulananElement.style.display = 'none';
+        }
+        
+        // Show target tahunan info
+        const targetTahunanElement = document.getElementById('targetTahunan');
+        if (data.target_tahunan && data.target_tahunan > 0) {
+            targetTahunanElement.textContent = `Target Tahunan: ${formatCurrency(data.target_tahunan)}`;
+            targetTahunanElement.style.display = 'block';
+        } else {
+            targetTahunanElement.style.display = 'none';
+        }
+        
+        // Update progress color based on achievement
+        const progressElement = document.getElementById('targetProgress');
+        if (targetProgress >= 100) {
+            progressElement.className = 'text-xs text-green-600';
+        } else if (targetProgress >= 80) {
+            progressElement.className = 'text-xs text-yellow-600';
+        } else {
+            progressElement.className = 'text-xs text-red-500';
+        }
         
         // Update top products
         updateTopProducts(data.top_products);
         
         // Update top bonus products
         updateTopBonusProducts(data.top_bonus_products || []);
+        
+        // Update top karpet products
+        updateTopKarpets(data.top_karpets || []);
         
         // Update chart
         updateSalesChart(data.daily_sales);
@@ -725,6 +782,14 @@
         document.getElementById('dpPendingCount').textContent = data.dp_count || 0;
         document.getElementById('dpPendingAmount').textContent = formatCurrency(data.total_remaining_balance || 0);
         
+        // Update subtitle based on whether it's comparison mode or single outlet
+        const dpSubtitle = document.getElementById('dpSubtitle');
+        if (data.outlet_count && data.outlet_count > 1) {
+            dpSubtitle.textContent = `DP dari ${data.outlet_count} outlet yang memerlukan pelunasan`;
+        } else {
+            dpSubtitle.textContent = 'Transaksi DP yang memerlukan pelunasan';
+        }
+        
         const dpList = document.getElementById('dpPendingList');
         
         if (!data.recent_dp_orders || data.recent_dp_orders.length === 0) {
@@ -747,7 +812,13 @@
                         <p class="font-medium text-gray-800">${order.order_number}</p>
                         <p class="text-sm text-gray-500">${order.created_at}</p>
                     </div>
-                    <p class="text-sm text-gray-600">${order.customer}</p>
+                    <div class="flex items-center space-x-2">
+                        <p class="text-sm text-gray-600">${order.customer}</p>
+                        ${data.outlet_count && data.outlet_count > 1 ? 
+                            `<span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">${order.outlet}</span>` : 
+                            ''
+                        }
+                    </div>
                     <div class="flex items-center space-x-4 mt-1">
                         <span class="text-xs text-gray-500">Total: ${formatCurrency(order.total)}</span>
                         <span class="text-xs text-gray-500">Dibayar: ${formatCurrency(order.paid)}</span>
@@ -755,7 +826,7 @@
                     </div>
                 </div>
                 <div class="ml-4">
-                    <a href="/dashboard/closing/riwayat-transaksi?search=${order.order_number}" 
+                    <a href="/riwayat-transaksi?search=${order.order_number}" 
                        class="inline-flex items-center px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors">
                         Lunasi
                     </a>
@@ -837,6 +908,44 @@
                     <div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-semibold">
                         BONUS
                     </div>
+                </div>
+            `;
+            container.appendChild(productElement);
+        });
+    }
+    
+    // Update top karpet products list
+    function updateTopKarpets(karpetProducts) {
+        // Store data for filtering
+        currentKarpetData = karpetProducts;
+        
+        const container = document.getElementById('topKarpetsList');
+        container.innerHTML = '';
+        
+        if (karpetProducts.length === 0) {
+            container.innerHTML = `
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div>
+                        <p class="font-medium text-gray-800">Tidak ada data karpet</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-teal-600">0 meter</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        karpetProducts.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+            productElement.innerHTML = `
+                <div>
+                    <p class="font-medium text-gray-800">${product.name}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-teal-600">${product.quantity} meter</p>
+                    <p class="text-xs text-gray-500">${formatCurrency(product.total || 0)}</p>
                 </div>
             `;
             container.appendChild(productElement);
@@ -1293,6 +1402,9 @@
         });
         updateSelectedOutlets();
         
+        // Reset KPI cards to single outlet data
+        fetchDashboardData();
+        
         if (comparisonSalesChart) {
             comparisonSalesChart.destroy();
             comparisonSalesChart = null;
@@ -1396,10 +1508,223 @@
         }
     }
 
+    // Calculate aggregated KPI data from all selected outlets
+    function calculateAggregatedKPIData(data) {
+        const aggregated = {
+            total_orders: 0,
+            total_sales: 0,
+            total_discount: 0,
+            total_bonus_value: 0,
+            total_items: 0,
+            total_unit_type_meter: 0,
+            target_bulanan: 0,
+            target_tahunan: 0,
+            average_order_value: 0,
+            dp_count: 0,
+            total_remaining_balance: 0,
+            outlet_count: data.length,
+            outlet_names: data.map(d => d.outlet_name).join(', '),
+            top_products: [],
+            top_bonus_products: [],
+            top_karpets: [],
+            recent_dp_orders: []
+        };
+
+        // Sum up all the metrics
+        data.forEach(outlet => {
+            aggregated.total_orders += outlet.total_orders || 0;
+            aggregated.total_sales += outlet.total_sales || 0;
+            aggregated.total_discount += outlet.total_discount || 0;
+            aggregated.total_bonus_value += outlet.total_bonus_value || 0;
+            aggregated.total_items += outlet.total_items || 0;
+            aggregated.total_unit_type_meter += parseFloat(outlet.total_unit_type_meter) || 0;
+            aggregated.target_bulanan += parseFloat(outlet.target_bulanan) || 0;
+            aggregated.target_tahunan += parseFloat(outlet.target_tahunan) || 0;
+        });
+
+        // Calculate average order value across all outlets
+        aggregated.average_order_value = aggregated.total_orders > 0 
+            ? aggregated.total_sales / aggregated.total_orders 
+            : 0;
+
+        // Aggregate top karpets from all outlets
+        const allKarpets = {};
+        data.forEach(outlet => {
+            if (outlet.top_karpets && Array.isArray(outlet.top_karpets)) {
+                outlet.top_karpets.forEach(karpet => {
+                    if (allKarpets[karpet.name]) {
+                        allKarpets[karpet.name].quantity += parseFloat(karpet.quantity) || 0;
+                        allKarpets[karpet.name].total += parseFloat(karpet.total) || 0;
+                    } else {
+                        allKarpets[karpet.name] = {
+                            name: karpet.name,
+                            quantity: parseFloat(karpet.quantity) || 0,
+                            total: parseFloat(karpet.total) || 0
+                        };
+                    }
+                });
+            }
+        });
+
+        // Convert to array and sort by quantity
+        aggregated.top_karpets = Object.values(allKarpets)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5);
+
+        // Aggregate top products from all outlets
+        const allProducts = {};
+        data.forEach(outlet => {
+            if (outlet.top_products && Array.isArray(outlet.top_products)) {
+                outlet.top_products.forEach(product => {
+                    if (allProducts[product.name]) {
+                        allProducts[product.name].quantity += parseFloat(product.quantity) || 0;
+                        allProducts[product.name].total += parseFloat(product.total) || 0;
+                    } else {
+                        allProducts[product.name] = {
+                            name: product.name,
+                            quantity: parseFloat(product.quantity) || 0,
+                            total: parseFloat(product.total) || 0
+                        };
+                    }
+                });
+            }
+        });
+
+        // Convert to array and sort by quantity
+        aggregated.top_products = Object.values(allProducts)
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5);
+
+        // Aggregate top bonus products from all outlets
+        const allBonusProducts = {};
+        data.forEach(outlet => {
+            if (outlet.top_bonus_products && Array.isArray(outlet.top_bonus_products)) {
+                outlet.top_bonus_products.forEach(product => {
+                    if (allBonusProducts[product.name]) {
+                        allBonusProducts[product.name].bonus_quantity += parseFloat(product.bonus_quantity) || 0;
+                        allBonusProducts[product.name].total_bonus_value += parseFloat(product.total_bonus_value) || 0;
+                        allBonusProducts[product.name].orders_count += parseInt(product.orders_count) || 0;
+                    } else {
+                        allBonusProducts[product.name] = {
+                            name: product.name,
+                            bonus_quantity: parseFloat(product.bonus_quantity) || 0,
+                            total_bonus_value: parseFloat(product.total_bonus_value) || 0,
+                            orders_count: parseInt(product.orders_count) || 0
+                        };
+                    }
+                });
+            }
+        });
+
+        // Convert to array and sort by bonus quantity
+        aggregated.top_bonus_products = Object.values(allBonusProducts)
+            .sort((a, b) => b.bonus_quantity - a.bonus_quantity)
+            .slice(0, 5);
+
+        // Aggregate DP data from all outlets
+        let allDpOrders = [];
+        data.forEach(outlet => {
+            if (outlet.dp_summary && outlet.dp_summary.recent_dp_orders) {
+                aggregated.dp_count += outlet.dp_summary.dp_count || 0;
+                aggregated.total_remaining_balance += parseFloat(outlet.dp_summary.total_remaining_balance) || 0;
+                
+                // Combine all DP orders from all outlets
+                if (Array.isArray(outlet.dp_summary.recent_dp_orders)) {
+                    allDpOrders = allDpOrders.concat(outlet.dp_summary.recent_dp_orders);
+                }
+            }
+        });
+
+        // Sort all DP orders by remaining balance (highest first) and take top 5
+        aggregated.recent_dp_orders = allDpOrders
+            .sort((a, b) => (parseFloat(b.remaining) || 0) - (parseFloat(a.remaining) || 0))
+            .slice(0, 5);
+
+        // Round the total_unit_type_meter to 2 decimal places
+        aggregated.total_unit_type_meter = Math.round(aggregated.total_unit_type_meter * 100) / 100;
+
+        console.log('Aggregated KPI data:', aggregated);
+        return aggregated;
+    }
+
+    // Update KPI cards with aggregated data from all selected outlets
+    function updateKPICardsWithAggregatedData(aggregatedData) {
+        // Update all KPI cards with aggregated totals
+        document.getElementById('totalOrders').textContent = aggregatedData.total_orders;
+        document.getElementById('totalSales').textContent = formatCurrency(aggregatedData.total_sales);
+        document.getElementById('totalDiscount').textContent = formatCurrency(aggregatedData.total_discount);
+        document.getElementById('totalBonus').textContent = formatCurrency(aggregatedData.total_bonus_value);
+        document.getElementById('averageOrder').textContent = formatCurrency(aggregatedData.average_order_value);
+        
+        // Update QTY Meter with properly formatted number
+        document.getElementById('totalQtyMeter').textContent = aggregatedData.total_unit_type_meter + ' Meter';
+        
+        // Update target with aggregated target bulanan and calculate progress
+        document.getElementById('targetOmset').textContent = formatCurrency(aggregatedData.target_bulanan);
+        
+        // Calculate target achievement percentage across all outlets
+        const targetAchievement = aggregatedData.target_bulanan > 0 
+            ? Math.round((aggregatedData.total_sales / aggregatedData.target_bulanan) * 100 * 100) / 100
+            : 0;
+        
+        document.getElementById('targetProgress').textContent = `Progress: ${targetAchievement}% (${aggregatedData.outlet_count} outlet)`;
+        
+        // Show target bulanan info for comparison mode
+        const targetBulananElement = document.getElementById('targetBulanan');
+        if (aggregatedData.target_bulanan && aggregatedData.target_bulanan > 0) {
+            targetBulananElement.textContent = `Target Bulanan Gabungan: ${formatCurrency(aggregatedData.target_bulanan)}`;
+            targetBulananElement.style.display = 'block';
+        } else {
+            targetBulananElement.style.display = 'none';
+        }
+        
+        // Show target tahunan info for comparison mode
+        const targetTahunanElement = document.getElementById('targetTahunan');
+        if (aggregatedData.target_tahunan && aggregatedData.target_tahunan > 0) {
+            targetTahunanElement.textContent = `Target Tahunan Gabungan: ${formatCurrency(aggregatedData.target_tahunan)}`;
+            targetTahunanElement.style.display = 'block';
+        } else {
+            targetTahunanElement.style.display = 'none';
+        }
+        
+        // Update progress color based on achievement
+        const progressElement = document.getElementById('targetProgress');
+        if (targetAchievement >= 100) {
+            progressElement.className = 'text-xs text-green-600';
+        } else if (targetAchievement >= 80) {
+            progressElement.className = 'text-xs text-yellow-600';
+        } else {
+            progressElement.className = 'text-xs text-red-500';
+        }
+
+        // Update top products with aggregated data
+        updateTopProducts(aggregatedData.top_products);
+
+        // Update top bonus products with aggregated data
+        updateTopBonusProducts(aggregatedData.top_bonus_products);
+
+        // Update top karpets with aggregated data
+        updateTopKarpets(aggregatedData.top_karpets);
+
+        // Update DP widget with aggregated data
+        updateDpWidget(aggregatedData);
+
+        console.log('KPI cards updated with aggregated data');
+    }
+
     // Display comparison results
     function displayComparisonResults(data) {
         console.log('Displaying comparison results:', data);
         document.getElementById('comparisonResults').classList.remove('hidden');
+        
+        // Store data for sorting
+        currentComparisonData = data;
+        
+        // Calculate aggregated KPI data for all selected outlets
+        const aggregatedData = calculateAggregatedKPIData(data);
+        
+        // Update KPI cards with aggregated data
+        updateKPICardsWithAggregatedData(aggregatedData);
         
         // Update Overview section with comparison data
         updateComparisonOverview(data);
@@ -1422,7 +1747,7 @@
         console.log('Populating comparison table with data:', data);
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-gray-500">Tidak ada data untuk ditampilkan</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data untuk ditampilkan</td></tr>';
             return;
         }
 
@@ -1435,14 +1760,6 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.total_discount || 0)}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.total_bonus_value || 0)}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${outlet.total_orders || 0}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${outlet.total_unpaid || 0}</td>
-
-                <!-- 
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${outlet.total_items || 0}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(outlet.average_order_value || 0)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">${formatCurrency(outlet.total_cancelled || 0)}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-600 font-medium">${formatCurrency(outlet.total_refunded || 0)}</td> 
-                -->
             `;
             tbody.appendChild(row);
         });
@@ -1744,6 +2061,127 @@
     //         window.pollingManager.stop('dashboardData');
     //     }
     // });
+
+    // Table sorting functionality
+    let currentComparisonData = [];
+    let sortDirection = {};
+
+    function initializeTableSorting() {
+        const sortableHeaders = document.querySelectorAll('[data-sort]');
+        
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.getAttribute('data-sort');
+                sortComparisonTable(sortField);
+            });
+        });
+    }
+
+    function sortComparisonTable(field) {
+        if (!currentComparisonData || currentComparisonData.length === 0) return;
+
+        // Toggle sort direction
+        if (!sortDirection[field]) {
+            sortDirection[field] = 'desc';
+        } else {
+            sortDirection[field] = sortDirection[field] === 'desc' ? 'asc' : 'desc';
+        }
+
+        const direction = sortDirection[field];
+
+        // Clear other sort indicators and set current one
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>';
+            icon.classList.remove('text-green-600');
+            icon.classList.add('text-gray-400');
+        });
+
+        const currentHeader = document.querySelector(`[data-sort="${field}"] .sort-icon`);
+        currentHeader.classList.remove('text-gray-400');
+        currentHeader.classList.add('text-green-600');
+
+        if (direction === 'desc') {
+            currentHeader.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4l6 6 6-6"/>';
+        } else {
+            currentHeader.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 20l6-6 6 6"/>';
+        }
+
+        // Sort the data
+        const sortedData = [...currentComparisonData].sort((a, b) => {
+            let valueA, valueB;
+
+            switch (field) {
+                case 'omset':
+                    valueA = a.total_sales || 0;
+                    valueB = b.total_sales || 0;
+                    break;
+                case 'discount':
+                    valueA = a.total_discount || 0;
+                    valueB = b.total_discount || 0;
+                    break;
+                case 'bonus':
+                    valueA = a.total_bonus_value || 0;
+                    valueB = b.total_bonus_value || 0;
+                    break;
+                case 'transactions':
+                    valueA = a.total_orders || 0;
+                    valueB = b.total_orders || 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (direction === 'desc') {
+                return valueB - valueA;
+            } else {
+                return valueA - valueB;
+            }
+        });
+
+        // Re-populate the table with sorted data
+        populateComparisonTable(sortedData);
+    }
+
+    // Karpet filtering functionality
+    let currentKarpetData = [];
+
+    function initializeKarpetFilter() {
+        const filterSelect = document.getElementById('karpetSortFilter');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', function() {
+                const sortType = this.value;
+                sortKarpetData(sortType);
+            });
+        }
+    }
+
+    function sortKarpetData(sortType) {
+        if (!currentKarpetData || currentKarpetData.length === 0) return;
+
+        const sortedData = [...currentKarpetData].sort((a, b) => {
+            switch (sortType) {
+                case 'quantity_desc':
+                    return (parseFloat(b.quantity) || 0) - (parseFloat(a.quantity) || 0);
+                case 'quantity_asc':
+                    return (parseFloat(a.quantity) || 0) - (parseFloat(b.quantity) || 0);
+                case 'omset_desc':
+                    return (parseFloat(b.total) || 0) - (parseFloat(a.total) || 0);
+                case 'omset_asc':
+                    return (parseFloat(a.total) || 0) - (parseFloat(b.total) || 0);
+                default:
+                    return 0;
+            }
+        });
+
+        // Update the display
+        updateTopKarpets(sortedData);
+    }
+
+    // Initialize sorting functionality when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTableSorting();
+        initializeKarpetFilter();
+    });
 
 </script>
 @endsection

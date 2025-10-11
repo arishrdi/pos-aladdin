@@ -14,7 +14,7 @@
     </div>
 
     {{-- Body --}}
-    <div class="p-6 space-y-6">
+    <div class="p-6 space-y-6 max-h-[80vh] overflow-y-scroll">
       {{-- Invoice + Tanggal & Status --}}
       <div class="space-y-4">
         <div>
@@ -68,7 +68,7 @@
       <div id="modalBonusSection" class="hidden">
         <h4 class="font-medium text-green-600 mb-2">
           <i class="fas fa-gift mr-1"></i>Item Bonus
-        </h4>
+        </h4> 
         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
           <div id="modalBonusItems" class="space-y-2">
             <!-- Bonus items akan diisi di sini -->
@@ -79,7 +79,7 @@
       {{-- Layanan Karpet Masjid --}}
       <div id="modalCarpetServiceSection" class="hidden">
         <h4 class="font-medium text-green-600 mb-2">
-          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid 19
+          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid 
         </h4>
         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
           <div class="space-y-2 text-sm">
@@ -98,6 +98,18 @@
             <div id="modalInstallationNotesInfo" class="hidden">
               <div class="text-gray-600 mb-1">Rincian Pemasangan:</div>
               <div id="modalInstallationNotes" class="bg-white border rounded p-2 text-gray-700 text-xs leading-relaxed">-</div>
+            </div>
+            <div id="modalLeadsCabangInfo" class="hidden">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Leads Cabang:</span>
+                <span id="modalLeadsCabang" class="font-medium">-</span>
+              </div>
+            </div>
+            <div id="modalDealMakerInfo" class="hidden">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Deal Maker:</span>
+                <span id="modalDealMaker" class="font-medium">-</span>
+              </div>
             </div>
           </div>
         </div>

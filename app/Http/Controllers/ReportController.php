@@ -604,7 +604,7 @@ class ReportController extends Controller
 
             // 5. Stock aktual saat ini
             $stockAktual = $currentInventory ? $currentInventory->quantity : 0;
-            
+
             // 6. Selisih antara stock aktual dengan saldo akhir
             $selisih = $stockAktual - $saldoAkhir;
 
@@ -957,18 +957,15 @@ class ReportController extends Controller
                 $startDate = Carbon::today()->startOfMonth();
                 $endDate = Carbon::today()->endOfDay();
             }
-            $yesterday = $startDate->copy()->subDay();
-            $thisMonth = Carbon::now()->startOfMonth();
-            $lastMonth = Carbon::now()->subMonth()->startOfMonth();
 
-            // Get start and end of week
-            $startOfWeek = Carbon::now()->startOfWeek();
-            $endOfWeek = Carbon::now()->endOfWeek();
+            $lastMonth = Carbon::now()->subMonth()->startOfMonth();
 
             // Data untuk response
             $responseData = [
                 'outlet' => $outlet->name,
                 'cash' => $outlet->cashRegisters->balance,
+                'target_bulanan' => $outlet->target_bulanan ?? 0,
+                'target_tahunan' => $outlet->target_tahunan ?? 0,
                 'period' => [
                     'start_date' => $startDate->format('Y-m-d'),
                     'end_date' => $endDate->format('Y-m-d'),
@@ -997,7 +994,7 @@ class ReportController extends Controller
 
                 // Calculate new metrics
                 $totalDiscount = $sales->sum('discount') ?? 0;
-                
+
                 // Total bonus items value dari bonus_items table (approved/used)
                 $totalBonusValue = DB::table('bonus_items')
                     ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
@@ -1005,18 +1002,30 @@ class ReportController extends Controller
                     ->whereBetween('bonus_transactions.created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
                     ->whereIn('bonus_items.status', ['approved', 'used'])
                     ->sum('bonus_items.bonus_value') ?? 0;
-                
+
                 // Total cancelled orders value (dalam rupiah)
                 $totalCancelledValue = Order::where('outlet_id', $outlet->id)
                     ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
                     ->where('status', 'cancelled')
                     ->sum('total') ?? 0;
-                
+
                 // Total refunded orders value (dalam rupiah)
                 $totalRefundedValue = Order::where('outlet_id', $outlet->id)
                     ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
                     ->where('status', 'refunded')
                     ->sum('total') ?? 0;
+
+                // Total unpaid orders count (jumlah transaksi belum dilunasi)
+                $totalUnpaidCount = Order::where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->where('remaining_balance', '>', 0)
+                    ->count() ?? 0;
+
+                $totalUnitTypeMeterCount = OrderItem::whereIn('order_id', $sales->pluck('id'))
+                    ->whereHas('product', function ($query) {
+                        $query->where('unit_type', 'meter');
+                    })
+                    ->sum('quantity');
 
                 $responseData['summary'] = [
                     'total_sales' => $totalSales,
@@ -1025,6 +1034,8 @@ class ReportController extends Controller
                     'average_order_value' => $averageOrderValue,
                     'total_discount' => $totalDiscount,
                     'total_bonus_value' => $totalBonusValue,
+                    'total_unpaid' => $totalUnpaidCount,
+                    'total_unit_type_meter' => round($totalUnitTypeMeterCount, 2),
                     'total_cancelled' => $totalCancelledValue,
                     'total_refunded' => $totalRefundedValue,
                 ];
@@ -1060,6 +1071,15 @@ class ReportController extends Controller
                     ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100
                     : ($thisMonthSales > 0 ? 100 : 0);
 
+                // Calculate target achievement percentage
+                $targetAchievementMonthly = $outlet->target_bulanan > 0 
+                    ? round(($thisMonthSales / $outlet->target_bulanan) * 100, 2) 
+                    : 0;
+                
+                $targetAchievementYearly = $outlet->target_tahunan > 0 
+                    ? round(($thisMonthSales / $outlet->target_tahunan) * 100, 2) 
+                    : 0;
+
                 $responseData['sales'] = [
                     'current_period' => $totalSales,
                     'previous_period' => $previousPeriodSales,
@@ -1067,6 +1087,8 @@ class ReportController extends Controller
                     'this_month' => $thisMonthSales,
                     'last_month' => $lastMonthSales,
                     'monthly_change_percentage' => round($monthlySalesChange, 2),
+                    'target_achievement_monthly' => $targetAchievementMonthly,
+                    'target_achievement_yearly' => $targetAchievementYearly,
                 ];
 
                 // Daily sales data for selected period
@@ -1127,13 +1149,13 @@ class ReportController extends Controller
                     ->get();
 
                 // Payment method sales data
-                $responseData['payment_method_sales'] = $sales->groupBy('payment_method')
-                    ->map(function ($items) {
-                        return [
-                            'count' => $items->count(),
-                            'total' => $items->sum('total'),
-                        ];
-                    });
+                // $responseData['payment_method_sales'] = $sales->groupBy('payment_method')
+                //     ->map(function ($items) {
+                //         return [
+                //             'count' => $items->count(),
+                //             'total' => $items->sum('total'),
+                //         ];
+                //     });
 
                 // Top products data
                 $responseData['top_products'] = DB::table('order_items')
@@ -1151,6 +1173,29 @@ class ReportController extends Controller
                     ->orderByDesc('quantity')
                     ->limit(5)
                     ->get();
+
+                $responseData['top_karpets'] = DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->select(
+                        'products.name',
+                        DB::raw('SUM(order_items.quantity) as quantity'),
+                        DB::raw('SUM(order_items.subtotal) as total')
+                    )
+                    ->where('orders.outlet_id', $outlet->id)
+                    ->whereBetween('orders.created_at', [$startDate, $endDate])
+                    ->where('orders.status', 'completed')
+                    ->where('products.unit_type', 'meter')
+                    ->groupBy('products.name')
+                    ->orderByDesc('quantity')
+                    ->limit(5)
+                    ->get()
+                    ->map(function ($item) {
+                        $item->quantity = rtrim(rtrim(number_format((float)$item->quantity, 3, '.', ''), '0'), '.');
+                        $item->total = rtrim(rtrim(number_format((float)$item->total, 2, '.', ''), '0'), '.');
+                        return $item;
+                    });
+
 
                 // Top bonus products data
                 $responseData['top_bonus_products'] = DB::table('bonus_items')
@@ -1171,31 +1216,31 @@ class ReportController extends Controller
                     ->get();
 
                 // Low stock items
-                $minStock = $outlet->min_stock ?? 10;
-                $responseData['low_stock_items'] = Inventory::where('outlet_id', $outlet->id)
-                    ->where('quantity', '<', $minStock)
-                    ->with('product')
-                    ->get()
-                    ->map(function ($item) use ($minStock) {
-                        return [
-                            'product_name' => $item->product->name,
-                            'quantity' => $item->quantity,
-                            'min_stock' => $minStock,
-                        ];
-                    });
+                // $minStock = $outlet->min_stock ?? 10;
+                // $responseData['low_stock_items'] = Inventory::where('outlet_id', $outlet->id)
+                //     ->where('quantity', '<', $minStock)
+                //     ->with('product')
+                //     ->get()
+                //     ->map(function ($item) use ($minStock) {
+                //         return [
+                //             'product_name' => $item->product->name,
+                //             'quantity' => $item->quantity,
+                //             'min_stock' => $minStock,
+                //         ];
+                //     });
 
-                // Active shift
-                $activeShift = Shift::where('outlet_id', $outlet->id)
-                    ->with('user')
-                    ->first();
+                // // Active shift
+                // $activeShift = Shift::where('outlet_id', $outlet->id)
+                //     ->with('user')
+                //     ->first();
 
-                if ($activeShift) {
-                    $responseData['active_shift'] = [
-                        'cashier' => $activeShift->user->name,
-                        'started_at' => $activeShift->start_time,
-                        'duration' => Carbon::parse($activeShift->start_time)->diffForHumans(null, true),
-                    ];
-                }
+                // if ($activeShift) {
+                //     $responseData['active_shift'] = [
+                //         'cashier' => $activeShift->user->name,
+                //         'started_at' => $activeShift->start_time,
+                //         'duration' => Carbon::parse($activeShift->start_time)->diffForHumans(null, true),
+                //     ];
+                // }
 
                 return $this->successResponse($responseData, 'Successfully getting dashboard data');
             } catch (\Exception $e) {
@@ -1228,7 +1273,7 @@ class ReportController extends Controller
             // Parse outlet IDs
             $outletIds = array_map('intval', explode(',', $request->outlet_ids));
             \Log::info('Comparison request for outlets:', $outletIds);
-            
+
             // Set dates based on request or defaults - use same default as dashboard (first day of month to today)
             if ($request->start_date && $request->end_date) {
                 $startDate = Carbon::parse($request->start_date)->startOfDay();
@@ -1243,7 +1288,7 @@ class ReportController extends Controller
             // Check user access to outlets - validate user can access these outlets
             $user = $request->user();
             $accessibleOutletIds = [];
-            
+
             if ($user->role === 'admin') {
                 $accessibleOutletIds = $outletIds; // Admin can access all
             } elseif ($user->role === 'supervisor') {
@@ -1252,13 +1297,13 @@ class ReportController extends Controller
                 $accessibleOutletIds = $user->outlet_id ? [$user->outlet_id] : [];
                 $accessibleOutletIds = array_intersect($accessibleOutletIds, $outletIds);
             }
-            
+
             \Log::info('User accessible outlets:', ['user_id' => $user->id, 'role' => $user->role, 'accessible' => $accessibleOutletIds]);
 
             // Get outlets user can access
             $outlets = Outlet::whereIn('id', $accessibleOutletIds)->get();
             \Log::info('Found outlets for comparison:', ['count' => $outlets->count(), 'outlets' => $outlets->pluck('name')->toArray()]);
-            
+
             if ($outlets->count() < 2) {
                 return $this->errorResponse('Minimum 2 accessible outlets required for comparison');
             }
@@ -1267,31 +1312,31 @@ class ReportController extends Controller
 
             foreach ($outlets as $outlet) {
                 \Log::info('Processing outlet for comparison:', ['outlet_id' => $outlet->id, 'name' => $outlet->name]);
-                
+
                 // Get all orders for this outlet in date range - include all statuses initially
                 $allOrders = Order::where('outlet_id', $outlet->id)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->get();
-                
+
                 // Also check with debug query to see what dates are actually in database
                 $orderDates = Order::where('outlet_id', $outlet->id)
                     ->orderBy('created_at', 'desc')
                     ->limit(5)
                     ->pluck('created_at')
                     ->toArray();
-                
+
                 // Check total orders in outlet regardless of date
                 $totalOrdersEver = Order::where('outlet_id', $outlet->id)->count();
-                    
+
                 \Log::info('Total orders found:', [
-                    'outlet_id' => $outlet->id, 
+                    'outlet_id' => $outlet->id,
                     'total_orders' => $allOrders->count(),
                     'total_orders_ever' => $totalOrdersEver,
                     'completed' => $allOrders->where('status', 'completed')->count(),
                     'search_range' => ['start' => $startDate->format('Y-m-d H:i:s'), 'end' => $endDate->format('Y-m-d H:i:s')],
                     'sample_order_dates' => $orderDates
                 ]);
-                
+
                 // Filter completed orders for sales calculation
                 $sales = $allOrders->where('status', 'completed');
 
@@ -1302,7 +1347,7 @@ class ReportController extends Controller
                 $averageOrderValue = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
 
                 \Log::info('Sales metrics calculated:', [
-                    'outlet_id' => $outlet->id, 
+                    'outlet_id' => $outlet->id,
                     'total_sales' => $totalSales,
                     'total_orders' => $totalOrders,
                     'total_items' => $totalItems,
@@ -1311,7 +1356,7 @@ class ReportController extends Controller
 
                 // Calculate metrics
                 $totalDiscount = $sales->sum('discount') ?? 0;
-                
+
                 // Total bonus value dari bonus_items table - fix date range
                 $totalBonusValue = DB::table('bonus_items')
                     ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
@@ -1319,10 +1364,44 @@ class ReportController extends Controller
                     ->whereBetween('bonus_transactions.created_at', [$startDate, $endDate])
                     ->whereIn('bonus_items.status', ['approved', 'used'])
                     ->sum('bonus_items.bonus_value') ?? 0;
-                
+
+                // Calculate total unit type meter for this outlet
+                $totalUnitTypeMeter = !empty($salesIds) ? OrderItem::whereIn('order_id', $salesIds)
+                    ->whereHas('product', function ($query) {
+                        $query->where('unit_type', 'meter');
+                    })
+                    ->sum('quantity') : 0;
+
+                // Get DP (Down Payment) data for this outlet
+                $dpOrders = Order::dpPending()
+                    ->where('outlet_id', $outlet->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->with(['user:id,name', 'outlet:id,name'])
+                    ->get();
+
+                $dpSummary = [
+                    'dp_count' => $dpOrders->count(),
+                    'total_remaining_balance' => $dpOrders->sum('remaining_balance'),
+                    'recent_dp_orders' => $dpOrders->take(5)->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'order_number' => $order->order_number,
+                            'customer' => $order->member ? $order->member->name : 'Customer',
+                            'total' => $order->total,
+                            'paid' => $order->total_paid,
+                            'remaining' => $order->remaining_balance,
+                            'created_at' => $order->created_at->format('d/m/Y'),
+                            'outlet' => $order->outlet->name
+                        ];
+                    })
+                ];
+
                 // Get cancelled and refunded orders from already fetched data
                 $totalCancelledValue = $allOrders->where('status', 'cancelled')->sum('total') ?? 0;
                 $totalRefundedValue = $allOrders->where('status', 'refunded')->sum('total') ?? 0;
+
+                // Get unpaid orders count (orders with remaining balance > 0)
+                $totalUnpaidCount = $allOrders->where('remaining_balance', '>', 0)->count() ?? 0;
 
                 // Payment method breakdown
                 $paymentMethodSales = $sales->groupBy('payment_method')
@@ -1356,23 +1435,65 @@ class ReportController extends Controller
                 // Generate daily sales data for comparison chart
                 $dailySales = [];
                 $currentDate = $startDate->copy();
-                
+
                 while ($currentDate <= $endDate) {
                     $dayStart = $currentDate->copy()->startOfDay();
                     $dayEnd = $currentDate->copy()->endOfDay();
-                    
+
                     $dailySalesAmount = Order::where('outlet_id', $outlet->id)
                         ->whereBetween('created_at', [$dayStart, $dayEnd])
                         ->where('status', 'completed')
                         ->sum('total');
-                        
+
                     $dailySales[$currentDate->format('Y-m-d')] = [
                         'date' => $currentDate->format('Y-m-d'),
                         'sales' => $dailySalesAmount
                     ];
-                    
+
                     $currentDate->addDay();
                 }
+
+                // Get top karpets for this outlet
+                $topKarpets = [];
+                if (!empty($salesIds)) {
+                    $topKarpets = DB::table('order_items')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->join('products', 'order_items.product_id', '=', 'products.id')
+                        ->select(
+                            'products.name',
+                            DB::raw('SUM(order_items.quantity) as quantity'),
+                            DB::raw('SUM(order_items.subtotal) as total')
+                        )
+                        ->whereIn('order_items.order_id', $salesIds)
+                        ->where('products.unit_type', 'meter')
+                        ->groupBy('products.id', 'products.name')
+                        ->orderByDesc('quantity')
+                        ->limit(5)
+                        ->get()
+                        ->map(function ($item) {
+                            $item->quantity = round((float)$item->quantity, 2);
+                            $item->total = round((float)$item->total, 2);
+                            return $item;
+                        });
+                }
+
+                // Get top bonus products for this outlet
+                $topBonusProducts = DB::table('bonus_items')
+                    ->join('bonus_transactions', 'bonus_items.bonus_transaction_id', '=', 'bonus_transactions.id')
+                    ->join('products', 'bonus_items.product_id', '=', 'products.id')
+                    ->select(
+                        'products.name',
+                        DB::raw('SUM(bonus_items.quantity) as bonus_quantity'),
+                        DB::raw('SUM(bonus_items.bonus_value) as total_bonus_value'),
+                        DB::raw('COUNT(bonus_items.id) as orders_count')
+                    )
+                    ->where('bonus_transactions.outlet_id', $outlet->id)
+                    ->whereBetween('bonus_transactions.created_at', [$startDate, $endDate])
+                    ->whereIn('bonus_items.status', ['approved', 'used'])
+                    ->groupBy('products.name')
+                    ->orderByDesc('bonus_quantity')
+                    ->limit(5)
+                    ->get();
 
                 $outletData = [
                     'outlet_id' => $outlet->id,
@@ -1381,20 +1502,27 @@ class ReportController extends Controller
                     'total_sales' => $totalSales,
                     'total_orders' => $totalOrders,
                     'total_items' => $totalItems,
+                    'total_unit_type_meter' => round($totalUnitTypeMeter, 2),
                     'average_order_value' => round($averageOrderValue, 2),
                     'total_discount' => $totalDiscount,
                     'total_bonus_value' => $totalBonusValue,
+                    'total_unpaid' => $totalUnpaidCount,
                     'total_cancelled' => $totalCancelledValue,
                     'total_refunded' => $totalRefundedValue,
+                    'target_bulanan' => $outlet->target_bulanan ?? 0,
+                    'target_tahunan' => $outlet->target_tahunan ?? 0,
+                    'dp_summary' => $dpSummary,
                     'payment_methods' => $paymentMethodSales,
                     'top_products' => $topProducts,
+                    'top_bonus_products' => $topBonusProducts,
+                    'top_karpets' => $topKarpets,
                     'daily_sales' => $dailySales,
                     'period' => [
                         'start_date' => $startDate->format('Y-m-d'),
                         'end_date' => $endDate->format('Y-m-d'),
                     ]
                 ];
-                
+
                 \Log::info('Outlet comparison data prepared:', ['outlet_id' => $outlet->id, 'data_keys' => array_keys($outletData)]);
                 $comparisonData[] = $outletData;
             }
@@ -1402,7 +1530,7 @@ class ReportController extends Controller
             \Log::info('Final comparison data:', ['total_outlets' => count($comparisonData), 'outlet_names' => array_column($comparisonData, 'outlet_name')]);
 
             // Sort by total sales descending
-            usort($comparisonData, function($a, $b) {
+            usort($comparisonData, function ($a, $b) {
                 return $b['total_sales'] <=> $a['total_sales'];
             });
 
@@ -1412,7 +1540,6 @@ class ReportController extends Controller
             }
 
             return $this->successResponse($comparisonData, 'Successfully retrieved outlet comparison data');
-
         } catch (\Exception $e) {
             \Log::error('Outlet comparison error: ' . $e->getMessage());
             return $this->errorResponse('Error in outlet comparison', $e->getMessage());

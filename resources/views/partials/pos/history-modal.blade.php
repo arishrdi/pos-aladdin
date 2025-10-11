@@ -61,25 +61,26 @@
             </div>
 
             <!-- Table -->
-            <div class="overflow-auto border border-gray-200 rounded-md">
-                <table class="w-full text-sm md:text-base text-left">
+            <div class="overflow-x-auto border border-gray-200 rounded-md">
+                <table class="min-w-max text-sm md:text-base text-left whitespace-nowrap">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
-                            <th class="p-3">No</th>
-                            <th class="p-3">Invoice</th>
-                            <th class="p-3">Waktu</th>
-                            <th class="p-3">Kasir</th>
-                            <th class="p-3">Kategori</th>
-                            <th class="p-3">Pembayaran</th>
-                            <th class="p-3">Status</th>
-                            <th class="p-3">Total</th>
-                            <th class="p-3">Sisa Bayar</th>
-                            <th class="p-3">Aksi</th>
+                            <th class="p-3 min-w-[50px]">No</th>
+                            <th class="p-3 min-w-[120px]">Invoice</th>
+                            <th class="p-3 min-w-[140px]">Waktu</th>
+                            <th class="p-3 min-w-[100px]">Kasir</th>
+                            <th class="p-3 min-w-[120px]">Nama Member</th>
+                            <th class="p-3 min-w-[80px]">Kategori</th>
+                            <th class="p-3 min-w-[100px]">Pembayaran</th>
+                            <th class="p-3 min-w-[100px]">Status</th>
+                            <th class="p-3 min-w-[100px]">Total</th>
+                            <th class="p-3 min-w-[100px]">Sisa Bayar</th>
+                            <th class="p-3 min-w-[150px]">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="transactionTable">
                         <tr class="border-t border-gray-200">
-                            <td colspan="10" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
+                            <td colspan="11" class="text-center py-6 text-gray-500">Memuat data transaksi...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -227,9 +228,10 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Jumlah Pelunasan <span class="text-red-500">*</span>
                         </label>
-                        <input type="number" id="jumlahPelunasan"
+                        <input type="text" id="jumlahPelunasan"
                             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Masukkan jumlah pelunasan..." min="1" step="1000">
+                            placeholder="Masukkan jumlah pelunasan...">
+                        <input type="hidden" id="jumlahPelunasanRaw" name="amount_received">
                         <p class="text-xs text-gray-500 mt-1">Masukkan jumlah yang akan dibayar (maksimal sisa bayar)
                         </p>
                     </div>
@@ -289,6 +291,117 @@
     </div>
 </div>
 
+<!-- Modal Edit Transaksi -->
+<div id="editTransactionModal" class="fixed inset-0 z-50 hidden">
+    <!-- Overlay -->
+    <div class="absolute w-full h-full bg-gray-900 opacity-50" onclick="tutupModal('editTransactionModal')"></div>
+
+    <!-- Modal Box -->
+    <div class="bg-white w-[95%] md:w-11/12 md:max-w-4xl mx-auto rounded shadow-lg z-50 relative mt-10 mb-10 max-h-[90vh] flex flex-col">
+        <!-- Header -->
+        <div class="p-4 md:p-6 border-b sticky top-0 bg-white z-10">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-blue-600">Edit Transaksi</h3>
+                    <p class="text-sm text-gray-600">Invoice: <span id="editInvoiceNumber" class="font-mono font-bold"></span></p>
+                </div>
+                <button onclick="tutupModal('editTransactionModal')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto flex-1">
+            <!-- Current Items -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-3">Item Saat Ini</h4>
+                <div class="overflow-x-auto border border-gray-200 rounded-md">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">Produk</th>
+                                <th class="p-3 text-center">Qty</th>
+                                <th class="p-3 text-center">Harga</th>
+                                <th class="p-3 text-center">Diskon</th>
+                                <th class="p-3 text-right">Subtotal</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="editItemsList">
+                            <!-- Items will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Add Item Button -->
+                {{-- <button onclick="tambahItemBaru()" class="mt-3 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Tambah Item
+                </button> --}}
+            </div>
+
+            <!-- Summary -->
+            <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-lg font-semibold mb-3">Ringkasan</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-600">Subtotal Baru:</span>
+                        <span id="editSubtotal" class="font-bold ml-2">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Total Baru:</span>
+                        <span id="editTotal" class="font-bold ml-2">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Total Lama:</span>
+                        <span id="editOriginalTotal" class="font-bold ml-2">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Selisih:</span>
+                        <span id="editDifference" class="font-bold ml-2">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="space-y-4">
+                <!-- Reason -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Alasan Edit <span class="text-red-500">*</span>
+                    </label>
+                    <select id="editReason" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="">Pilih alasan...</option>
+                        <option value="quantity_adjustment">Penyesuaian Jumlah di Lokasi</option>
+                        <option value="customer_request">Permintaan Tambahan Customer</option>
+                        <option value="measurement_correction">Koreksi Pengukuran</option>
+                        <option value="item_change">Perubahan Item</option>
+                        <option value="other">Lainnya</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Catatan Tambahan
+                    </label>
+                    <textarea id="editNotes" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Jelaskan detail perubahan yang dilakukan..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t p-4 bg-gray-50 rounded-b flex-shrink-0">
+            <div class="flex justify-end gap-3">
+                <button onclick="tutupModal('editTransactionModal')" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                    Batal
+                </button>
+                <button onclick="submitTransactionEdit()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    Ajukan Edit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Include Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <!-- Include Flatpickr JS -->
@@ -329,7 +442,7 @@
             sedangMemuat = true;
             document.getElementById("transactionTable").innerHTML = `
                 <tr class="border-t border-gray-200">
-                    <td colspan="9" class="text-center py-6 text-gray-500">Sedang memuat data...</td>
+                    <td colspan="11" class="text-center py-6 text-gray-500">Sedang memuat data...</td>
                 </tr>
             `;
 
@@ -417,12 +530,18 @@
                     // Tambahkan status cancellation
                     cancellation_request: transaksi.cancellation_request || null,
                     has_pending_cancellation: transaksi.has_pending_cancellation || false,
+                    // Tambahkan status edit
+                    pending_edit: transaksi.pending_edit || false,
+                    has_edit_history: transaksi.has_edit_history || false,
                     // Tambahkan bonus items
                     bonus_items: transaksi.bonus_items || [],
                     // Tambahkan carpet service information
                     service_type: transaksi.service_type || null,
                     installation_date: transaksi.installation_date || null,
-                    installation_notes: transaksi.installation_notes || null
+                    installation_notes: transaksi.installation_notes || null,
+                    // Tambahkan outlet collaboration information
+                    leads_cabang_outlet: transaksi.leads_cabang_outlet || null,
+                    deal_maker_outlet: transaksi.deal_maker_outlet || null
                     };
                 });
                 
@@ -444,7 +563,7 @@
             console.error('Error:', error);
             document.getElementById("transactionTable").innerHTML = `
                 <tr class="border-t border-gray-200">
-                    <td colspan="9" class="text-center py-6 text-red-500">${error.message}</td>
+                    <td colspan="11" class="text-center py-6 text-red-500">${error.message}</td>
                 </tr>
             `;
             document.getElementById("summaryText").innerHTML = `
@@ -483,6 +602,7 @@
                     <td class="p-2 border font-mono">${transaksi.invoice}</td>
                     <td class="p-2 border">${formatWaktu(transaksi.waktu)}</td>
                     <td class="p-2 border">${transaksi.kasir}</td>
+                    <td class="p-2 border">${transaksi.member ? transaksi.member.name : '-'}</td>
                     <td class="p-2 border">${transaksi.transaction_category}</td>
                     <td class="p-2 border">${transaksi.pembayaran}</td>
                     <td class="p-2 border">
@@ -490,6 +610,11 @@
                             <span class="px-2 py-1 rounded-full text-xs ${getClassStatus(transaksi.status)}">
                                 ${transaksi.status}
                             </span>
+                            ${transaksi.pending_edit ? `
+                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                    Menunggu Edit
+                                </span>
+                            ` : ''}
                             ${transaksi.has_pending_cancellation ? `
                                 <span class="px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800">
                                     Menunggu ${transaksi.status === 'Selesai' ? 'Refund' : 'Pembatalan'}
@@ -514,6 +639,21 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                             </button>
+                            ${canEditTransaction(transaksi) ? `
+                            <button onclick="bukaModalEditTransaksi('${transaksi.invoice}')" class="text-blue-500 hover:text-blue-700" title="Edit Transaksi">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            ` : ''}
+                            ${transaksi.pending_edit ? `
+                                <div class="flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700" title="Edit sedang menunggu approval">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Edit Pending
+                                </div>
+                            ` : ''}
                             ${transaksi.has_pending_cancellation ? `
                                 <div class="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700" title="Sedang diproses oleh admin">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -547,7 +687,7 @@
                     </td>
                 </tr>
             `).join("")
-            : `<tr><td colspan="10" class="text-center py-4 text-gray-500">Tidak ada transaksi yang sesuai.</td></tr>`;
+            : `<tr><td colspan="11" class="text-center py-4 text-gray-500">Tidak ada transaksi yang sesuai.</td></tr>`;
     }
 
     // Fungsi untuk mencetak struk
@@ -631,6 +771,19 @@
     }
 
     function generateReceiptContent(transaction, templateData) {
+        // Helper function to format date object to Indonesian format
+        const formatDateObject = (date) => {
+            const day = date.getDate().toString().padStart(2, '0');
+            const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                              'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            const hour = date.getHours().toString().padStart(2, '0');
+            const minute = date.getMinutes().toString().padStart(2, '0');
+            
+            return `${day} ${month} ${year}, ${hour}.${minute}`;
+        };
+
         // Format tanggal dengan lebih baik
         const formatDate = (dateString) => {
             if (!dateString) return 'Tanggal tidak tersedia';
@@ -663,14 +816,7 @@
                         throw new Error('Invalid date');
                     }
                     
-                    return date.toLocaleString('id-ID', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        timeZone: 'Asia/Jakarta'
-                    });
+                    return formatDateObject(date);
                 }
                 
                 // Jika bukan format DD/MM/YYYY, coba parsing biasa
@@ -688,14 +834,7 @@
                     throw new Error('Invalid date format');
                 }
                 
-                return date.toLocaleString('id-ID', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'Asia/Jakarta'
-                });
+                return formatDateObject(date);
             } catch (e) {
                 console.error('Error formatting date:', e, 'Input:', dateString);
                 return 'Tanggal tidak valid';
@@ -754,10 +893,10 @@
         <!DOCTYPE html>
 <html>
 <head>
-    <title>Struk Thermal 58mm</title>
+    <title>Struk Thermal 80mm</title>
     <meta charset="UTF-8">
     <style>
-        /* Reset dan base styling untuk thermal printer 58mm */
+        /* Reset dan base styling untuk thermal printer 80mm */
         * {
             margin: 0;
             padding: 0;
@@ -768,10 +907,10 @@
         }
         
         body {
-            width: 58mm; /* Lebar maksimum untuk thermal 58mm */
-            max-width: 58mm;
-            font-size: 12px; /* Ukuran font lebih kecil */
-            padding: 2mm;
+            width: 80mm; /* Lebar maksimum untuk thermal 80mm */
+            max-width: 80mm;
+            font-size: 14px; /* Ukuran font lebih besar untuk 80mm */
+            padding: 3mm;
             color: #000;
         }
         
@@ -784,9 +923,9 @@
         }
         
         .logo-container {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 3px auto;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 5px auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -801,14 +940,14 @@
         }
         
         .company-name {
-            font-size: 14px;
-            font-weight: normal;;
-            margin-bottom: 2px;
+            font-size: 16px;
+            font-weight: normal;
+            margin-bottom: 3px;
         }
         
         .company-info {
-            font-size: 10px;
-            line-height: 1.1;
+            font-size: 12px;
+            line-height: 1.2;
         }
         
         /* Divider */
@@ -845,8 +984,8 @@
         .item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 3px;
-            font-size: 11px;
+            margin-bottom: 4px;
+            font-size: 13px;
         }
         
         .item-name {
@@ -872,10 +1011,10 @@
         }
         
         .grand-total {
-            font-weight: normal;;
-            font-size: 13px;
-            margin-top: 5px;
-            padding-top: 3px;
+            font-weight: normal;
+            font-size: 15px;
+            margin-top: 6px;
+            padding-top: 4px;
             border-top: 1px dashed #000;
         }
         
@@ -886,10 +1025,10 @@
         
         /* Footer */
         .receipt-footer {
-            margin-top: 8px;
+            margin-top: 10px;
             text-align: center;
-            font-size: 10px;
-            line-height: 1.2;
+            font-size: 12px;
+            line-height: 1.3;
         }
         
         /* Utilities */
@@ -906,7 +1045,7 @@
         }
         
         .text-small {
-            font-size: 10px;
+            font-size: 12px;
         }
         
         /* Menghindari page break di tempat tidak tepat */
@@ -925,7 +1064,7 @@
                 alt="Logo Toko" 
                 class="logo"
                 onerror="this.style.display='none'"> -->
-            <img class="logo" src="images/logo-black.jpg" >
+            <img class="logo" src="images/logo.png" >
         </div>
         <div class="company-name">${templateData.company_name || outletData.name || 'TOKO ANDA'}</div>
         <div class="company-info">
@@ -938,16 +1077,11 @@
         </div>
     </div>
     
-    <span>
-    --------------------------
-    </span>
     <div class="text-center">
         <div class="info-row text-bold">STRUK PEMBAYARAN</div>
     </div>
     <!-- <div class="divider-thin"></div> -->
-     <span>
-    --------------------------
-    </span>
+     <div class="divider"></div>
     
     <!-- Info transaksi -->
     <div class="transaction-info avoid-break">
@@ -970,9 +1104,7 @@
     </div>
     
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     
     
     <!-- Daftar item -->
@@ -984,7 +1116,8 @@
                     quantity: safeNumber(item.quantity),
                     price: safeNumber(item.price),
                     discount: safeNumber(item.discount),
-                    product: item.product || 'Produk'
+                    product: item.product || 'Produk',
+                    unit_type: item.unit_type || 'pcs'
                 };
                 
                 // Potong nama produk jika terlalu panjang
@@ -992,9 +1125,8 @@
                     ? safeItem.product.substring(0, 17) + '...' 
                     : safeItem.product;
                 
-                // Check if unit_type is 'pasang' or 'kirim' to hide quantity
-                const hideQuantity = ['pasang', 'kirim'].includes(item.unit_type);
-                const quantityDisplay = hideQuantity ? '' : `${safeItem.quantity}x `;
+                // Format quantity based on unit_type
+                const quantityDisplay = formatQuantityForDisplay(safeItem.quantity, safeItem.unit_type);
                 
                 return `
                     <div class="item-row">
@@ -1020,9 +1152,7 @@
     <!-- Bonus items section -->
     ${safeTransaction.bonus_items && safeTransaction.bonus_items.length > 0 ? `
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     
     <div class="items-list avoid-break">
         <div class="text-center text-bold" style="margin-bottom: 3px;">BONUS ITEMS</div>
@@ -1030,7 +1160,8 @@
             const safeBonusItem = {
                 ...bonusItem,
                 quantity: safeNumber(bonusItem.quantity),
-                product: bonusItem.product || bonusItem.product_name || 'Bonus Item'
+                product: bonusItem.product || bonusItem.product_name || 'Bonus Item',
+                unit_type: bonusItem.unit_type || 'pcs'
             };
             
             // Potong nama produk jika terlalu panjang
@@ -1041,7 +1172,7 @@
             return `
                 <div class="item-row">
                     <div class="item-name">
-                        ${safeBonusItem.quantity}x ${productName}
+                        ${formatQuantityForDisplay(safeBonusItem.quantity, safeBonusItem.unit_type)}${productName}
                     </div>
                     <div class="item-price">
                         GRATIS
@@ -1053,9 +1184,7 @@
     ` : ''}
     
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     
     <!-- Total pembelian -->
     <div class="totals avoid-break">
@@ -1122,9 +1251,7 @@
     
     ${safeTransaction.member ? `
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     <div class="avoid-break">
         <div class="info-row">
             <span class="info-label">Tuan:</span>
@@ -1147,9 +1274,7 @@
 
     ${safeTransaction.service_type ? `
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     <div class="avoid-break">
         <div class="text-center text-bold" style="margin-bottom: 3px;">LAYANAN KARPET MASJID</div>
         <div class="info-row">
@@ -1175,9 +1300,7 @@
     
     <!-- Footer -->
     <!-- <div class="divider"></div> -->
-    <span>
-    --------------------------
-    </span>
+    <div class="divider"></div>
     <div class="avoid-break">
         <div class="info-row">
             <span class="info-label">Tanda Terima,</span>
@@ -1230,6 +1353,7 @@
 
     function lihatDetail(nomorInvoice) {
         const t = semuaTransaksi.find(x => x.invoice === nomorInvoice);
+        // console.log("Lihat detail transaksi:", t);
         if (!t) return alert('Transaksi tidak ditemukan');
         
         // Debug log untuk melihat data transaksi
@@ -1278,9 +1402,8 @@
         const itemsEl = document.getElementById('modalItems');
         if (t.items && t.items.length > 0) {
             itemsEl.innerHTML = t.items.map(i => {
-                // Check if unit_type is 'pasang' or 'kirim' to hide quantity
-                const hideQuantity = ['pasang', 'kirim'].includes(i.unit_type);
-                const quantityDisplay = hideQuantity ? '' : `${i.quantity || 0}x`;
+                // Format quantity based on unit_type
+                const quantityDisplay = formatQuantityForDisplay(i.quantity || 0, i.unit_type);
                 
                 return `
                     <tr>
@@ -1346,7 +1469,7 @@
                             <i class="fas fa-gift mr-1"></i>
                             ${bonusItem.product || bonusItem.product_name || '-'}
                         </p>
-                        <p class="text-sm text-green-600">${bonusItem.quantity || 0} unit bonus</p>
+                        <p class="text-sm text-green-600">${formatQuantityWithUnit(bonusItem.quantity || 0, bonusItem.unit_type || 'tanpa satuan')} bonus</p>
                     </div>
                     <div class="text-sm text-green-600 font-medium">
                         GRATIS
@@ -1400,6 +1523,28 @@
             installationNotesInfo.classList.add('hidden');
         }
 
+        // Handle leads cabang and deal maker information
+        const leadsCabangInfo = document.getElementById('modalLeadsCabangInfo');
+        const dealMakerInfo = document.getElementById('modalDealMakerInfo');
+
+        // Show leads cabang if available
+        if (t.leads_cabang_outlet && t.leads_cabang_outlet.name) {
+            document.getElementById('modalLeadsCabang').textContent = t.leads_cabang_outlet.name;
+            leadsCabangInfo.classList.remove('hidden');
+            showCarpetServiceSection = true;
+        } else {
+            leadsCabangInfo.classList.add('hidden');
+        }
+
+        // Show deal maker if available
+        if (t.deal_maker_outlet && t.deal_maker_outlet.name) {
+            document.getElementById('modalDealMaker').textContent = 'BC-' + t.deal_maker_outlet.name;
+            dealMakerInfo.classList.remove('hidden');
+            showCarpetServiceSection = true;
+        } else {
+            dealMakerInfo.classList.add('hidden');
+        }
+
         // Show/hide carpet service section
         if (showCarpetServiceSection) {
             carpetServiceSection.classList.remove('hidden');
@@ -1437,6 +1582,31 @@
     // Format uang (1.000.000)
     function formatUang(jumlah) {
         return jumlah ? jumlah.toLocaleString('id-ID') : '0';
+    }
+
+    // Format quantity with unit type
+    function formatQuantityWithUnit(qty, unitType) {
+        // Convert to number first
+        const numQty = parseFloat(qty);
+        if (isNaN(numQty) || numQty === 0) return '0 pcs';
+        
+        const formattedQty = numQty % 1 === 0 ? numQty.toString() : numQty.toFixed(1);
+        const unit = unitType || 'pcs';
+        
+        return `${formattedQty} ${unit}`;
+    }
+
+    // Format quantity for display (with multiplier if needed)
+    function formatQuantityForDisplay(qty, unitType) {
+        // Convert to number first
+        const numQty = parseFloat(qty);
+        if (isNaN(numQty) || numQty === 0) return '';
+        
+        const hideQuantity = ['pasang', 'kirim'].includes(unitType);
+        if (hideQuantity) return '';
+        
+        const formattedQty = numQty % 1 === 0 ? numQty.toString() : numQty.toFixed(1);
+        return `${formattedQty}x `;
     }
 
     // Dapatkan class CSS berdasarkan status
@@ -1637,9 +1807,10 @@
         document.getElementById('pelunasanPaid').textContent = `Rp ${formatUang(transaksi.total_paid)}`;
         document.getElementById('pelunasanRemaining').textContent = `Rp ${formatUang(transaksi.remaining_balance)}`;
         
-        // Set nilai default jumlah pelunasan ke sisa bayar
-        document.getElementById('jumlahPelunasan').value = transaksi.remaining_balance;
-        document.getElementById('jumlahPelunasan').max = transaksi.remaining_balance;
+        // Set nilai default jumlah pelunasan ke sisa bayar dengan format
+        const formattedRemaining = transaksi.remaining_balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        document.getElementById('jumlahPelunasan').value = formattedRemaining;
+        document.getElementById('jumlahPelunasanRaw').value = transaksi.remaining_balance;
         
         // Reset form
         document.getElementById('metodePembayaranPelunasan').value = '';
@@ -1736,13 +1907,16 @@
         const catatan = document.getElementById('catatanPelunasan').value;
 
         // Validasi jumlah pelunasan
-        if (!jumlahPelunasan || jumlahPelunasan <= 0) {
+        const rawAmount = document.getElementById('jumlahPelunasanRaw').value;
+        const validatedAmount = rawAmount ? parseFloat(rawAmount) : parseFloat(document.getElementById('jumlahPelunasan').value.replace(/[^\d]/g, ''));
+        
+        if (!validatedAmount || validatedAmount <= 0) {
             alert('Silakan masukkan jumlah pelunasan yang valid');
             document.getElementById('jumlahPelunasan').focus();
             return;
         }
 
-        if (jumlahPelunasan > transaksiPelunasan.remaining_balance) {
+        if (validatedAmount > transaksiPelunasan.remaining_balance) {
             alert(`Jumlah pelunasan tidak boleh melebihi sisa bayar (Rp ${formatUang(transaksiPelunasan.remaining_balance)})`);
             document.getElementById('jumlahPelunasan').focus();
             return;
@@ -1765,9 +1939,9 @@
         // Konfirmasi pelunasan
         const confirmMessage = `Anda akan melakukan pelunasan DP:\\n\\n` +
                                `Invoice: ${transaksiPelunasan.invoice}\\n` +
-                               `Jumlah Pelunasan: Rp ${formatUang(jumlahPelunasan)}\\n` +
+                               `Jumlah Pelunasan: Rp ${formatUang(validatedAmount)}\\n` +
                                `Metode Pembayaran: ${metodePembayaran.toUpperCase()}\\n` +
-                               `Sisa setelah pelunasan: Rp ${formatUang(transaksiPelunasan.remaining_balance - jumlahPelunasan)}\\n\\n` +
+                               `Sisa setelah pelunasan: Rp ${formatUang(transaksiPelunasan.remaining_balance - validatedAmount)}\\n\\n` +
                                `Apakah Anda yakin ingin melanjutkan?`;
         
         if (!confirm(confirmMessage)) {
@@ -1789,7 +1963,7 @@
 
             // Siapkan FormData untuk upload file
             const formData = new FormData();
-            formData.append('amount_received', jumlahPelunasan);
+            formData.append('amount_received', validatedAmount);
             formData.append('payment_method', metodePembayaran);
             formData.append('payment_proof', buktiPembayaran);
             if (catatan) {
@@ -1818,12 +1992,12 @@
                 tutupModal('pelunasanModal');
                 
                 // Tampilkan pesan sukses
-                const sisaBayar = transaksiPelunasan.remaining_balance - jumlahPelunasan;
+                const sisaBayar = transaksiPelunasan.remaining_balance - validatedAmount;
                 const statusLunas = sisaBayar <= 0 ? 'LUNAS' : `Sisa: Rp ${formatUang(sisaBayar)}`;
                 
                 alert(`Pelunasan DP berhasil!\\n\\n` +
                       `Invoice: ${transaksiPelunasan.invoice}\\n` +
-                      `Jumlah Dibayar: Rp ${formatUang(jumlahPelunasan)}\\n` +
+                      `Jumlah Dibayar: Rp ${formatUang(validatedAmount)}\\n` +
                       `Status: ${statusLunas}\\n\\n` +
                       `Terima kasih!`);
                 
@@ -1849,4 +2023,73 @@
             }
         }
     }
+
+    // Setup currency formatting for Jumlah Pelunasan field
+    document.addEventListener('DOMContentLoaded', function() {
+        const jumlahPelunasanInput = document.getElementById('jumlahPelunasan');
+        if (jumlahPelunasanInput) {
+            // Format on input
+            jumlahPelunasanInput.addEventListener('input', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                // Update hidden field with raw value
+                const hiddenInput = document.getElementById('jumlahPelunasanRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                // Format display value
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+            
+            // Format on paste
+            jumlahPelunasanInput.addEventListener('paste', function() {
+                setTimeout(() => {
+                    const rawValue = this.value.replace(/[^\d]/g, '');
+                    
+                    const hiddenInput = document.getElementById('jumlahPelunasanRaw');
+                    if (hiddenInput) {
+                        hiddenInput.value = rawValue;
+                    }
+                    
+                    if (rawValue) {
+                        const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        this.value = formatted;
+                    } else {
+                        this.value = '';
+                    }
+                }, 10);
+            });
+            
+            // Keep formatting on focus but select all for easy replacement
+            jumlahPelunasanInput.addEventListener('focus', function() {
+                this.select();
+            });
+            
+            // Re-format on blur
+            jumlahPelunasanInput.addEventListener('blur', function() {
+                const rawValue = this.value.replace(/[^\d]/g, '');
+                
+                const hiddenInput = document.getElementById('jumlahPelunasanRaw');
+                if (hiddenInput) {
+                    hiddenInput.value = rawValue;
+                }
+                
+                if (rawValue) {
+                    const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = formatted;
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+    });
+
+    // ========== TRANSACTION EDIT FUNCTIONS ==========
+    // Functions are loaded from /js/pos/transaction-edit.js
 </script>

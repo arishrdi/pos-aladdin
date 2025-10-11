@@ -364,19 +364,34 @@
                 if (selectedDates.length > 0) {
                     // Pastikan tanggal dikirim dalam format YYYY-MM-DD dengan timezone yang benar
                     const date = formatDateForAPI(selectedDates[0]);
-                    fetchBonusHistory(date);
+                    const searchValue = document.getElementById('searchMember').value;
+                    fetchBonusHistory(date, searchValue);
                 } else {
                     // Jika tidak ada tanggal terpilih, tampilkan semua bonus
-                    fetchBonusHistory(null);
+                    const searchValue = document.getElementById('searchMember').value;
+                    fetchBonusHistory(null, searchValue);
                 }
             }
         });
 
-        // Load data awal
-        fetchBonusHistory();
+        // Load data awal dan handle URL parameters
+        initializeFromUrlParams();
+        const initialSearch = document.getElementById('searchMember').value;
+        fetchBonusHistory(null, initialSearch);
         
         // Pencarian dan Filter
-        document.getElementById('searchMember').addEventListener('input', applyFilters);
+        document.getElementById('searchMember').addEventListener('input', function() {
+            const searchValue = this.value;
+            const datePicker = document.getElementById('transDateInput');
+            let date = null;
+            if (datePicker && datePicker._flatpickr && datePicker._flatpickr.selectedDates.length > 0) {
+                date = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
+            }
+            // Update URL parameters
+            updateUrlParams();
+            // Fetch data from backend with search parameter
+            fetchBonusHistory(date, searchValue);
+        });
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('typeFilter').addEventListener('change', applyFilters);
 
@@ -408,6 +423,34 @@
         return 1;
     }
 
+    // Function to initialize form fields from URL parameters
+    function initializeFromUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search');
+        
+        if (searchParam) {
+            const searchInput = document.getElementById('searchMember');
+            if (searchInput) {
+                searchInput.value = searchParam;
+            }
+        }
+    }
+
+    // Function to update URL parameters when searching
+    function updateUrlParams() {
+        const searchValue = document.getElementById('searchMember').value;
+        const currentUrl = new URL(window.location);
+        
+        if (searchValue.trim()) {
+            currentUrl.searchParams.set('search', searchValue.trim());
+        } else {
+            currentUrl.searchParams.delete('search');
+        }
+        
+        // Update URL without page reload
+        window.history.replaceState({}, '', currentUrl);
+    }
+
     // Connect to outlet selection dropdown
     function connectOutletSelectionToHistory() {
         // Listen for outlet changes in localStorage
@@ -421,7 +464,8 @@
                 }
                 
                 // Reload history with new outlet
-                fetchBonusHistory(date);
+                const searchValue = document.getElementById('searchMember').value;
+                fetchBonusHistory(date, searchValue);
             }
         });
         
@@ -445,7 +489,8 @@
                             date = formatDateForAPI(datePicker._flatpickr.selectedDates[0]);
                         }
                         
-                        fetchBonusHistory(date);
+                        const searchValue = document.getElementById('searchMember').value;
+                        fetchBonusHistory(date, searchValue);
                     }, 100);
                 }
             });
@@ -500,7 +545,7 @@
     }
 
     // Fungsi untuk fetch data bonus - dimodifikasi untuk menyertakan outlet_id
-    async function fetchBonusHistory(date = null) {
+    async function fetchBonusHistory(date = null, search = null) {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -522,6 +567,11 @@
             
             // Tambahkan outlet_id ke parameters
             params.append('outlet_id', outletId);
+            
+            // Tambahkan search parameter jika ada
+            if (search && search.trim()) {
+                params.append('search', search.trim());
+            }
             
             // Fetch data dari endpoint bonus dengan token authorization
             const response = await fetch(`/api/bonus/history?${params.toString()}`, {

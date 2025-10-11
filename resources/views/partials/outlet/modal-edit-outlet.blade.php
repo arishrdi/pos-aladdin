@@ -60,6 +60,22 @@
             <p id="errorEditTaxType" class="text-red-500 text-xs mt-1 hidden">Jenis pajak default wajib dipilih</p>
             <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
           </div>
+          <div>
+            <label class="block font-medium mb-1">Target Tahunan</label>
+            <input type="text" id="editTargetTahunan"
+              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              placeholder="Rp 0">
+            <input type="hidden" id="editTargetTahunanRaw" name="target_tahunan">
+            <p class="text-xs text-gray-500 mt-1">Target penjualan per tahun dalam Rupiah</p>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Target Bulanan</label>
+            <input type="text" id="editTargetBulanan"
+              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              placeholder="Rp 0">
+            <input type="hidden" id="editTargetBulananRaw" name="target_bulanan">
+            <p class="text-xs text-gray-500 mt-1">Target penjualan per bulan dalam Rupiah</p>
+          </div>
         </div>
       </div>
 

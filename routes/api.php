@@ -19,6 +19,7 @@ use App\Http\Controllers\BonusController;
 use App\Http\Controllers\CashRequestController;
 use App\Http\Controllers\CashReportController;
 use App\Http\Controllers\MosqueController;
+use App\Http\Controllers\TransactionEditController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
@@ -171,6 +172,15 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/approve-operational/{id}', 'approveOperational'); // Operational approval
         });
 
+        // Transaction Edit approval routes (Admin only)
+        Route::controller(TransactionEditController::class)->prefix('transaction-edits')->middleware('role:admin')->group(function () {
+            Route::get('/pending', 'getPendingEdits'); // Get pending edits
+            Route::get('/{transactionEdit}', 'show'); // Get individual edit request
+            Route::post('/{transactionEdit}/approve-finance', 'approveFinance'); // Finance approval
+            Route::post('/{transactionEdit}/approve-operational', 'approveOperational'); // Operational approval
+            Route::post('/{transactionEdit}/reject', 'reject'); // Reject edit
+        });
+
         // Cash request approval routes (Admin/Supervisor only)
         Route::controller(CashRequestController::class)->prefix('cash-requests')->group(function () {
             Route::get('/pending', 'getPendingRequests'); // Get pending cash requests for approval
@@ -203,6 +213,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products/barcode/{barcode}', [ProductController::class, 'findByBarcode'])->middleware('role:kasir');
 
+        Route::get('/all-outlets', [OutletController::class, 'allOutlets']);
         Route::get('/print-template/{outlet_id}', [PrintTemplateController::class, 'show']);
         Route::post('/update-profile', [AuthController::class, 'updateProfile']);
         Route::get('/members', [MemberController::class, 'index']);
@@ -241,6 +252,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/orders/{id}/settle', 'settleOrder'); // Settlement DP
             Route::get('/orders/{id}/settlement-history', 'getSettlementHistory'); // Get DP settlement history
             Route::get('/dashboard/dp-summary', 'getDpSummary'); // DP summary for dashboard
+            
+            // Transaction Edit routes
+            Route::post('/orders/{order}/request-edit', [TransactionEditController::class, 'requestEdit']); // Request edit
+            Route::get('/orders/{order}/edit-history', [TransactionEditController::class, 'getEditHistory']); // Get edit history
         });
 
         Route::controller(CashRegisterController::class)->group(function () {

@@ -26,6 +26,8 @@ class Outlet extends Model
         'non_pkp_nama_bank',
         'non_pkp_nomor_transaksi_bank',
         'qris',
+        'target_tahunan',
+        'target_bulanan',
     ];
 
     protected $casts = [

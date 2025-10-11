@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    {{-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> --}}
+    {{--
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> --}}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Aladdin Karpet - POS System</title>
@@ -100,6 +101,7 @@
             .cart-item-grid {
                 display: none;
             }
+
             .cart-item-mobile {
                 display: flex;
             }
@@ -199,7 +201,7 @@
                 flex-direction: column;
                 height: calc(100vh - 60px) !important;
             }
-            
+
             .products-section {
                 width: 100% !important;
                 height: 60% !important;
@@ -207,7 +209,7 @@
                 border-bottom: 2px solid #b3c5ba !important;
                 min-height: 280px;
             }
-            
+
             .cart-section {
                 width: 100% !important;
                 height: 40% !important;
@@ -216,43 +218,43 @@
                 display: flex;
                 flex-direction: column;
             }
-            
+
             .navbar {
                 padding: 8px 12px !important;
                 min-height: 60px;
             }
-            
+
             .navbar .flex {
                 gap: 4px !important;
             }
-            
+
             .navbar button {
                 padding: 4px 6px !important;
                 font-size: 11px !important;
                 min-height: 32px !important;
             }
-            
+
             .navbar button i {
                 font-size: 12px !important;
                 margin-right: 2px !important;
             }
-            
+
             .navbar a {
                 font-size: 16px !important;
             }
-            
+
             /* Stack navbar buttons on very small screens */
             @media (max-width: 480px) {
                 .navbar .flex.flex-wrap {
                     flex-direction: column;
                     align-items: stretch;
                 }
-                
-                .navbar .flex.flex-wrap > * {
+
+                .navbar .flex.flex-wrap>* {
                     margin-bottom: 4px;
                 }
             }
-            
+
             /* Product cards mobile optimization */
             .product-card {
                 padding: 12px !important;
@@ -260,198 +262,200 @@
                 align-items: stretch !important;
                 gap: 12px !important;
             }
-            
+
             .product-card .flex.items-center {
                 justify-content: flex-start !important;
             }
-            
+
             .product-card .flex.items-center.space-x-3 {
                 width: 100% !important;
             }
-            
+
             .product-card button {
                 width: 100% !important;
                 padding: 12px !important;
                 font-size: 14px !important;
             }
-            
+
             /* Cart item mobile layout - use mobile specific layout */
             .cart-item-grid {
                 display: none !important;
             }
-            
+
             .cart-column-headers {
                 display: none !important;
             }
-            
+
             /* Mobile specific product grid */
             .product-item {
                 margin-bottom: 8px !important;
             }
-            
+
             /* Touch-friendly buttons */
             button {
                 min-height: 44px !important;
                 min-width: 44px !important;
             }
-            
+
             /* Category tabs mobile */
             .category-container {
                 padding: 0 !important;
             }
-            
+
             .nav-link {
                 white-space: nowrap !important;
                 padding: 8px 12px !important;
                 font-size: 12px !important;
             }
-            
+
             /* Search input mobile */
             #searchInput {
-                font-size: 16px !important; /* Prevents zoom on iOS */
+                font-size: 16px !important;
+                /* Prevents zoom on iOS */
                 padding: 12px !important;
             }
-            
+
             /* Payment section mobile */
             .payment-section {
                 padding: 12px 8px !important;
                 flex-shrink: 0;
                 margin-top: auto;
             }
-            
-            .payment-section .space-y-2 > * {
+
+            .payment-section .space-y-2>* {
                 margin-bottom: 6px !important;
             }
-            
+
             /* Tax selection mobile - make more compact */
             .payment-section .flex.space-x-3 {
                 flex-direction: row !important;
                 gap: 8px !important;
                 justify-content: space-around;
             }
-            
+
             .payment-section .flex.space-x-3 label {
                 font-size: 12px !important;
                 flex: 1;
                 text-align: center;
             }
-            
+
             /* Make tax selection area more compact */
             .payment-section .mb-4 {
                 margin-bottom: 8px !important;
                 padding: 8px !important;
             }
-            
+
             /* Summary text mobile */
             .summary-item {
                 font-size: 13px !important;
             }
-            
+
             #total {
                 font-size: 18px !important;
             }
-            
+
             /* Cart items container mobile */
             .cart-items-container {
                 flex: 1;
                 overflow-y: auto;
                 min-height: 120px;
             }
-            
+
             /* Cart header mobile */
             .cart-header {
                 padding: 8px 12px !important;
                 flex-shrink: 0;
             }
-            
+
             .cart-header h4 {
                 font-size: 16px !important;
                 margin: 0 !important;
             }
-            
+
             /* Summary section mobile */
             .summary-section {
                 margin-bottom: 12px !important;
             }
-            
+
             .summary-section .flex {
                 margin-bottom: 4px !important;
             }
-            
+
             .summary-section .mb-3 {
                 margin-bottom: 8px !important;
             }
-            
+
             /* Action buttons mobile */
             .space-y-2 button {
                 padding: 10px 16px !important;
                 font-size: 14px !important;
             }
-            
+
             /* Prevent horizontal scroll */
             body {
                 overflow-x: hidden !important;
             }
-            
+
             /* Mobile specific adjustments */
             .container-fluid {
                 padding: 0 !important;
             }
-            
+
             /* Ensure content fits in viewport */
             * {
                 box-sizing: border-box;
             }
-            
+
             /* Better scrolling on mobile */
-            .cart-items-container, .products-list-container {
+            .cart-items-container,
+            .products-list-container {
                 -webkit-overflow-scrolling: touch;
             }
-            
+
             /* Ensure cart content can scroll when service section is expanded */
             .cart-section .flex-1 {
                 min-height: 0;
                 -webkit-overflow-scrolling: touch;
             }
-            
+
             /* Improve text readability */
             .product-name {
                 line-height: 1.3 !important;
             }
-            
+
             /* Better spacing for mobile */
             .p-4 {
                 padding: 12px !important;
             }
-            
+
             .p-5 {
                 padding: 16px !important;
             }
-            
+
             /* Force all content to be visible */
             .payment-section {
                 max-height: none !important;
                 overflow: visible !important;
             }
-            
+
             /* Ensure buttons are accessible */
             .payment-section button {
                 margin-bottom: 4px !important;
             }
-            
+
             /* Compact margins for mobile */
             .mb-1 {
                 margin-bottom: 2px !important;
             }
-            
+
             .mb-2 {
                 margin-bottom: 4px !important;
             }
-            
+
             .mb-3 {
                 margin-bottom: 6px !important;
             }
-            
+
             .my-2 {
                 margin-top: 4px !important;
                 margin-bottom: 4px !important;
@@ -463,15 +467,15 @@
             .products-section {
                 width: 60% !important;
             }
-            
+
             .cart-section {
                 width: 40% !important;
             }
-            
+
             .product-card {
                 padding: 14px !important;
             }
-            
+
             .cart-item-grid {
                 grid-template-columns: minmax(140px, 2fr) 90px 80px 90px 35px !important;
                 gap: 8px !important;
@@ -547,6 +551,40 @@
 
         .member-item.active {
             background-color: #F97316;
+            color: white;
+        }
+
+        /* Outlet search dropdowns */
+        .outlet-search-container {
+            position: relative;
+        }
+
+        .outlet-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+
+        .outlet-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .outlet-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .outlet-item.active {
+            background-color: #354c41;
             color: white;
         }
 
@@ -686,7 +724,8 @@
         }
 
         .service-content.expanded {
-            max-height: 300px; /* Adjust based on content height */
+            max-height: 600px;
+            /* Adjust based on content height */
         }
 
         .service-toggle {
@@ -710,9 +749,9 @@
         /* Mobile responsive for service section */
         @media (max-width: 768px) {
             .service-content.expanded {
-                max-height: 250px;
+                max-height: 450px;
             }
-            
+
             .carpet-service-section {
                 padding: 12px 8px !important;
             }
@@ -817,91 +856,102 @@
 
                     <!-- Carpet Service Section -->
                     <div class="carpet-service-section border-t border-green-200 bg-gray-50">
-                    <!-- Collapsible Header -->
-                    <div class="service-toggle p-3 flex items-center justify-between" onclick="toggleServiceSection()">
-                        <h5 class="text-sm font-semibold text-gray-700 flex items-center">
-                            <i class="fas fa-rug mr-2 text-green-500"></i>Layanan Karpet Masjid
-                        </h5>
-                        <i class="fas fa-chevron-down chevron-icon text-gray-500 text-xs" id="serviceChevron"></i>
-                    </div>
-                    
-                    <!-- Collapsible Content -->
-                    <div class="service-content" id="serviceContent">
-                        <div class="px-3 pb-3 space-y-3">
-                            <!-- Service Type Selection -->
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Jenis Layanan</label>
-                                <select id="serviceType" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                    <option value="">Pilih layanan...</option>
-                                    <option value="potong_obras_kirim">Potong, Obras & Kirim</option>
-                                    <option value="pasang_ditempat">Pasang di Tempat</option>
-                                </select>
-                            </div>
+                        <!-- Collapsible Header -->
+                        <div class="service-toggle p-3 flex items-center justify-between"
+                            onclick="toggleServiceSection()">
+                            <h5 class="text-sm font-semibold text-gray-700 flex items-center">
+                                <i class="fas fa-rug mr-2 text-green-500"></i>Layanan Karpet Masjid
+                            </h5>
+                            <i class="fas fa-chevron-down chevron-icon text-gray-500 text-xs" id="serviceChevron"></i>
+                        </div>
 
-                            <!-- Masjid Selection -->
-                            {{-- <div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <label class="block text-xs font-medium text-gray-600">Masjid Tujuan</label>
-                                    <button type="button" onclick="openAddMasjidModal()" 
-                                        class="text-xs text-green-600 hover:text-green-700 font-medium flex items-center">
-                                        <i class="fas fa-plus mr-1"></i>
-                                        Tambah Masjid
-                                    </button>
-                                </div>
-                                <div class="masjid-dropdown-container relative">
-                                    <div class="flex items-center relative">
-                                        <input
-                                            id="masjidSearch"
-                                            type="text"
-                                            class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
-                                            placeholder="Cari masjid (nama/alamat)"
-                                            autocomplete="off"
-                                        >
-                                        <div class="absolute right-0 top-0 h-full flex items-center pr-3">
-                                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                        <!-- Collapsible Content -->
+                        <div class="service-content" id="serviceContent">
+                            <div class="px-3 pb-3 space-y-3">
+
+
+                                <!-- Leads Cabang Selection -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Leads Cabang</label>
+                                    <div class="outlet-search-container">
+                                        <div class="flex items-center relative">
+                                            <input id="leadsCabangSearch" type="text"
+                                                class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
+                                                placeholder="Cari cabang leads..." autocomplete="off">
+                                            <div class="absolute right-0 top-0 h-full flex items-center pr-3">
+                                                <i class="fas fa-chevron-down text-gray-500 text-xs"></i>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div id="masjidDropdownList" class="dropdown-list absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg hidden">
-                                        <div id="masjidResults" class="max-h-48 overflow-y-auto p-1">
+                                        <div id="leadsCabangResults" class="outlet-results">
                                             <!-- Results will appear here -->
                                         </div>
-                                        <!-- Add masjid button in dropdown -->
-                                        <div class="border-t border-gray-200 p-2">
-                                            <button type="button" onclick="openAddMasjidModal()" 
-                                                class="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded flex items-center">
-                                                <i class="fas fa-plus mr-2"></i>
-                                                Tambah Masjid Baru
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div id="selectedMasjid" class="mt-2 hidden">
-                                        <div class="flex justify-between items-center bg-green-50 p-2 rounded">
-                                            <div class="flex flex-col">
-                                                <span id="masjidName" class="font-medium text-sm"></span>
-                                                <span id="masjidAddress" class="text-xs text-gray-500"></span>
+                                        <div id="selectedLeadsCabang" class="mt-2 hidden">
+                                            <div class="flex justify-between items-center bg-green-50 p-2 rounded">
+                                                <span id="leadsCabangName" class="font-medium text-sm"></span>
+                                                <button id="removeLeadsCabang" class="text-red-500 hover:text-red-700">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </div>
-                                            <button id="removeMasjid" class="text-red-500 hover:text-red-700">
-                                                <i class="fas fa-times"></i>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div> --}}
 
-                            <!-- Installation Date - Always visible when expanded -->
-                            <div id="installationDateContainer">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Estimasi Pemasangan</label>
-                                <input type="date" id="installationDate" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                            </div>
+                                <!-- Deal Maker Selection -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Deal Maker</label>
+                                    <div class="outlet-search-container">
+                                        <div class="flex items-center relative">
+                                            <input id="dealMakerSearch" type="text"
+                                                class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 placeholder-gray-400"
+                                                placeholder="Cari deal maker..." autocomplete="off">
+                                            <div class="absolute right-0 top-0 h-full flex items-center pr-3">
+                                                <i class="fas fa-chevron-down text-gray-500 text-xs"></i>
+                                            </div>
+                                        </div>
+                                        <div id="dealMakerResults" class="outlet-results">
+                                            <!-- Results will appear here -->
+                                        </div>
+                                        <div id="selectedDealMaker" class="mt-2 hidden">
+                                            <div class="flex justify-between items-center bg-green-50 p-2 rounded">
+                                                <span id="dealMakerName" class="font-medium text-sm"></span>
+                                                <button id="removeDealMaker" class="text-red-500 hover:text-red-700">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <!-- Installation Notes - Always visible when expanded -->
-                            <div id="installationNotesContainer">
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Rincian Pemasangan</label>
-                                <textarea id="installationNotes" rows="3" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none" placeholder="Masukkan rincian pemasangan..."></textarea>
+                                <!-- Service Type Selection -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Jenis Layanan</label>
+                                    <select id="serviceType"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                        <option value="">Pilih layanan...</option>
+                                        <option value="potong_obras_kirim">Potong, Obras & Kirim</option>
+                                        <option value="pasang_ditempat">Pasang di Tempat</option>
+                                    </select>
+                                </div>
+
+                                <!-- Installation Date - Always visible when expanded -->
+                                <div id="installationDateContainer">
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Estimasi
+                                        Pemasangan</label>
+                                    <input type="date" id="installationDate"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                                </div>
+
+                                <!-- Installation Notes - Always visible when expanded -->
+                                <div id="installationNotesContainer">
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Rincian
+                                        Pemasangan</label>
+                                    <textarea id="installationNotes" rows="3"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                                        placeholder="Masukkan rincian pemasangan..."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
 
                 <!-- Payment Section - Now sticks to bottom -->
@@ -988,6 +1038,7 @@
     <script src="/js/pos/cart.js"></script>
     <script src="/js/pos/simple-payment.js"></script>
     <script src="/js/pos/refund.js"></script>
+    <script src="/js/pos/transaction-edit.js"></script>
 
     <!-- Main POS App -->
     <script>
@@ -1025,6 +1076,9 @@ async function initializePOSApp() {
         
         // Load products
         await loadProducts();
+        
+        // Load outlets for carpet service dropdowns
+        await loadOutlets();
         
         // Attach event listeners
         attachEventListeners();
@@ -1131,6 +1185,209 @@ async function loadProducts() {
     } catch (error) {
         console.error('Error loading products:', error);
         showNotification('Gagal memuat produk', 'error');
+    }
+}
+
+// Load outlets for carpet service dropdowns
+async function loadOutlets() {
+    try {
+        const response = await fetch('/api/all-outlets', {
+            headers: {
+                'Authorization': `Bearer ${POS_CONFIG.API_TOKEN}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            const outlets = data.data;
+            populateOutletDropdowns(outlets);
+        }
+    } catch (error) {
+        console.error('Error loading outlets:', error);
+    }
+}
+
+// Store outlets data globally for search functionality
+let outletsData = [];
+
+// Populate outlet dropdowns
+function populateOutletDropdowns(outlets) {
+    outletsData = outlets;
+    initializeOutletSearch();
+}
+
+// Initialize outlet search functionality
+function initializeOutletSearch() {
+    // Initialize Leads Cabang search
+    initializeOutletSearchField(
+        'leadsCabangSearch',
+        'leadsCabangResults', 
+        'selectedLeadsCabang',
+        'leadsCabangName',
+        'removeLeadsCabang',
+        outletsData,
+        (outlet) => outlet.name, // Display original name
+        'leads_cabang'
+    );
+
+    // Initialize Deal Maker search
+    initializeOutletSearchField(
+        'dealMakerSearch',
+        'dealMakerResults',
+        'selectedDealMaker', 
+        'dealMakerName',
+        'removeDealMaker',
+        outletsData,
+        (outlet) => `BC-${outlet.name}`, // Display with BC- prefix
+        'deal_maker'
+    );
+}
+
+// Initialize outlet search field
+function initializeOutletSearchField(searchInputId, resultsId, selectedId, nameId, removeId, outlets, displayFormatter, fieldType) {
+    const searchInput = document.getElementById(searchInputId);
+    const resultsContainer = document.getElementById(resultsId);
+    const selectedContainer = document.getElementById(selectedId);
+    const nameElement = document.getElementById(nameId);
+    const removeButton = document.getElementById(removeId);
+    
+    if (!searchInput || !resultsContainer) return;
+    
+    let selectedOutlet = null;
+    let filteredOutlets = outlets;
+    let currentIndex = -1;
+
+    // Search input handler
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        if (searchTerm === '') {
+            filteredOutlets = outlets;
+        } else {
+            filteredOutlets = outlets.filter(outlet => 
+                outlet.name.toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        currentIndex = -1;
+        displayResults();
+        showResults();
+    });
+
+    // Show results on focus
+    searchInput.addEventListener('focus', function() {
+        if (!selectedOutlet) {
+            filteredOutlets = outlets;
+            displayResults();
+            showResults();
+        }
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+            hideResults();
+        }
+    });
+
+    // Keyboard navigation
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentIndex = Math.min(currentIndex + 1, filteredOutlets.length - 1);
+            updateActiveItem();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentIndex = Math.max(currentIndex - 1, -1);
+            updateActiveItem();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentIndex >= 0 && filteredOutlets[currentIndex]) {
+                selectOutlet(filteredOutlets[currentIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            hideResults();
+        }
+    });
+
+    // Remove button handler
+    if (removeButton) {
+        removeButton.addEventListener('click', function() {
+            clearSelection();
+        });
+    }
+
+    function displayResults() {
+        resultsContainer.innerHTML = '';
+        
+        if (filteredOutlets.length === 0) {
+            resultsContainer.innerHTML = '<div class="outlet-item text-gray-500">Tidak ada outlet ditemukan</div>';
+            return;
+        }
+
+        filteredOutlets.forEach((outlet, index) => {
+            const item = document.createElement('div');
+            item.className = 'outlet-item';
+            item.textContent = displayFormatter(outlet);
+            item.dataset.outletId = outlet.id;
+            
+            item.addEventListener('click', function() {
+                selectOutlet(outlet);
+            });
+
+            resultsContainer.appendChild(item);
+        });
+    }
+
+    function updateActiveItem() {
+        const items = resultsContainer.querySelectorAll('.outlet-item');
+        items.forEach((item, index) => {
+            if (index === currentIndex) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    function selectOutlet(outlet) {
+        selectedOutlet = outlet;
+        searchInput.value = displayFormatter(outlet);
+        
+        if (nameElement) {
+            nameElement.textContent = displayFormatter(outlet);
+        }
+        
+        if (selectedContainer) {
+            selectedContainer.classList.remove('hidden');
+        }
+        
+        hideResults();
+        
+        // Store the selected outlet ID for form submission
+        searchInput.dataset.outletId = outlet.id;
+    }
+
+    function clearSelection() {
+        selectedOutlet = null;
+        searchInput.value = '';
+        searchInput.dataset.outletId = '';
+        
+        if (selectedContainer) {
+            selectedContainer.classList.add('hidden');
+        }
+        
+        hideResults();
+    }
+
+    function showResults() {
+        resultsContainer.style.display = 'block';
+    }
+
+    function hideResults() {
+        resultsContainer.style.display = 'none';
+        currentIndex = -1;
     }
 }
 

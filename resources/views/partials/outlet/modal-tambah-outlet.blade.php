@@ -1,6 +1,8 @@
-<div id="modalTambahOutlet" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" onclick="closeModalTambah()">
-  <div class="bg-white w-full max-w-4xl rounded-xl shadow-lg max-h-screen flex flex-col" onclick="event.stopPropagation()">
-    
+<div id="modalTambahOutlet" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center"
+  onclick="closeModalTambah()">
+  <div class="bg-white w-full max-w-4xl rounded-xl shadow-lg max-h-screen flex flex-col"
+    onclick="event.stopPropagation()">
+
     <!-- Header -->
     <div class="p-6 border-b">
       <h2 class="text-xl font-semibold">Tambah Outlet Baru</h2>
@@ -16,17 +18,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nama Outlet <span class="text-red-500">*</span></label>
-            <input type="text" id="namaOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan nama outlet" required>
+            <input type="text" id="namaOutlet" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Masukkan nama outlet" required>
             <p id="errorNama" class="text-red-500 text-xs mt-1 hidden">Nama outlet wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Nomor Telepon <span class="text-red-500">*</span></label>
-            <input type="text" id="teleponOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan nomor telepon" required>
+            <input type="text" id="teleponOutlet" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Masukkan nomor telepon" required>
             <p id="errorTelepon" class="text-red-500 text-xs mt-1 hidden">Nomor telepon wajib diisi</p>
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-            <textarea id="alamatOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan alamat lengkap" required></textarea>
+            <textarea id="alamatOutlet" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Masukkan alamat lengkap" required></textarea>
             <p id="errorAlamat" class="text-red-500 text-xs mt-1 hidden">Alamat wajib diisi</p>
           </div>
         </div>
@@ -38,16 +43,18 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Email <span class="text-red-500">*</span> </label>
-            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Masukkan email (wajib diisi)">
+            <input type="email" id="emailOutlet" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Masukkan email (wajib diisi)">
             <p id="errorEmail" class="text-red-500 text-xs mt-1 hidden">Format email tidak valid</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Persentase Pajak (%)</label>
             <input type="number" id="pajakOutlet" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="0%">
           </div>
-          <div>
+          <div class="md:col-span-2">
             <label class="block font-medium mb-1">Jenis Pajak Default <span class="text-red-500">*</span></label>
-            <select id="taxType" class="w-full border rounded-lg px-4 py-2 text-sm" onchange="updateDefaultTaxPercentage()" required>
+            <select id="taxType" class="w-full border rounded-lg px-4 py-2 text-sm"
+              onchange="updateDefaultTaxPercentage()" required>
               <option value="">Pilih jenis pajak default</option>
               <option value="pkp">PKP (11%)</option>
               <option value="non_pkp">Non-PKP (0%)</option>
@@ -55,27 +62,24 @@
             <p id="errorTaxType" class="text-red-500 text-xs mt-1 hidden">Jenis pajak default wajib dipilih</p>
             <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
           </div>
+          <div>
+            <label class="block font-medium mb-1">Target Tahunan</label>
+            <input type="text" id="targetTahunan"
+              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              placeholder="Rp 0">
+            <input type="hidden" id="targetTahunanRaw" name="target_tahunan">
+            <p class="text-xs text-gray-500 mt-1">Target penjualan per tahun dalam Rupiah</p>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Target Bulanan</label>
+            <input type="text" id="targetBulanan"
+              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              placeholder="Rp 0">
+            <input type="hidden" id="targetBulananRaw" name="target_bulanan">
+            <p class="text-xs text-gray-500 mt-1">Target penjualan per bulan dalam Rupiah</p>
+          </div>
         </div>
       </div>
-
-      <!-- Nomor Transaksi -->
-      {{-- <div class="p-5 bg-gray-100 border rounded-lg shadow-sm">
-        <h3 class="font-semibold mb-4 text-gray-700">Nomor Transaksi</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-medium mb-1">Nomor Transaksi Default</label>
-            <input type="text" id="nomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: 001">
-          </div>
-          <div>
-            <label class="block font-medium mb-1">Nama Bank</label>
-            <input type="text" id="namaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
-          </div>
-          <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Atas Nama</label>
-            <input type="text" id="atasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening">
-          </div>
-        </div>
-      </div> --}}
 
       <!-- PKP Banking Info -->
       <div id="pkpBankingSection" class="p-5 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
@@ -83,17 +87,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nomor Rekening PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="pkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nomor rekening PKP">
+            <input type="text" id="pkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Nomor rekening PKP">
             <p id="errorPkpNomor" class="text-red-500 text-xs mt-1 hidden">Nomor rekening PKP wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Nama Bank PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="pkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
+            <input type="text" id="pkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Contoh: BCA">
             <p id="errorPkpBank" class="text-red-500 text-xs mt-1 hidden">Nama bank PKP wajib diisi</p>
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Atas Nama PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="pkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening PKP">
+            <input type="text" id="pkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Nama pemilik rekening PKP">
             <p id="errorPkpAtasNama" class="text-red-500 text-xs mt-1 hidden">Atas nama PKP wajib diisi</p>
           </div>
         </div>
@@ -105,17 +112,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium mb-1">Nomor Rekening Non-PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="nonPkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nomor rekening Non-PKP">
+            <input type="text" id="nonPkpNomorTransaksi" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Nomor rekening Non-PKP">
             <p id="errorNonPkpNomor" class="text-red-500 text-xs mt-1 hidden">Nomor rekening Non-PKP wajib diisi</p>
           </div>
           <div>
             <label class="block font-medium mb-1">Nama Bank Non-PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="nonPkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Contoh: BCA">
+            <input type="text" id="nonPkpNamaBank" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Contoh: BCA">
             <p id="errorNonPkpBank" class="text-red-500 text-xs mt-1 hidden">Nama bank Non-PKP wajib diisi</p>
           </div>
           <div class="md:col-span-2">
             <label class="block font-medium mb-1">Atas Nama Non-PKP <span class="text-red-500">*</span></label>
-            <input type="text" id="nonPkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm" placeholder="Nama pemilik rekening Non-PKP">
+            <input type="text" id="nonPkpAtasNama" class="w-full border rounded-lg px-4 py-2 text-sm"
+              placeholder="Nama pemilik rekening Non-PKP">
             <p id="errorNonPkpAtasNama" class="text-red-500 text-xs mt-1 hidden">Atas nama Non-PKP wajib diisi</p>
           </div>
         </div>
@@ -137,7 +147,8 @@
           <!-- Upload Foto Baru -->
           <div>
             <label class="block font-medium mb-1">Ganti Foto</label>
-            <input type="file" id="fotoOutlet" class="w-full text-sm" accept=".jpg,.jpeg,.png" onchange="previewFotoOutlet(this)">
+            <input type="file" id="fotoOutlet" class="w-full text-sm" accept=".jpg,.jpeg,.png"
+              onchange="previewFotoOutlet(this)">
             <p class="text-gray-500 text-xs mt-1">Format: JPG, PNG. Ukuran maksimal: 2MB</p>
             <p id="errorFoto" class="text-red-500 text-xs mt-1 hidden">Ukuran file terlalu besar (maks 2MB)</p>
           </div>
@@ -150,8 +161,11 @@
         <div class="flex items-center space-x-4">
           <label class="flex items-center cursor-pointer">
             <input type="checkbox" class="sr-only peer" id="statusAktif" checked>
-            <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 relative transition-all duration-300">
-              <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 peer-checked:translate-x-5"></div>
+            <div
+              class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 relative transition-all duration-300">
+              <div
+                class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 peer-checked:translate-x-5">
+              </div>
             </div>
             <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-green-600">Aktif</span>
           </label>
@@ -164,7 +178,8 @@
     <!-- Footer -->
     <div class="p-6 border-t flex justify-end gap-3">
       <button id="btnBatalModalTambah" class="px-4 py-2 border rounded hover:bg-gray-100">Batal</button>
-      <button id="btnTambahOutlet" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2">
+      <button id="btnTambahOutlet"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2">
         <i data-lucide="plus" class="w-4 h-4"></i>
         <span>Tambah Outlet</span>
       </button>
@@ -173,7 +188,7 @@
 </div>
 
 <script>
-// Fungsi untuk preview foto outlet
+  // Fungsi untuk preview foto outlet
 function previewFotoOutlet(input) {
   const preview = document.getElementById('currentFotoOutlet');
   const icon = document.getElementById('defaultIcon');
@@ -397,6 +412,8 @@ async function submitForm() {
     formData.append('non_pkp_nama_bank', document.getElementById('nonPkpNamaBank').value);
     formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('nonPkpNomorTransaksi').value);
     
+    // formData.append('target_tahunan', document.getElementById('targetTahunanRaw').value);
+    
     // Add QRIS file if selected
     const fotoFile = document.getElementById('fotoOutlet').files[0];
     if (fotoFile) {
@@ -566,4 +583,75 @@ document.querySelectorAll('#modalTambahOutlet input').forEach(input => {
     }
   });
 });
+
+// document.addEventListener('DOMContentLoaded', function() {
+//     const targetTahunanInput = document.getElementById('targetTahunan');
+    
+//     if (targetTahunanInput) {
+//         // Format on input - immediately format and update display
+//         targetTahunanInput.addEventListener('input', function() {
+//             const rawValue = this.value.replace(/[^\d]/g, '');
+            
+//             // Update hidden field with raw value
+//             const hiddenInput = document.getElementById('targetTahunanRaw');
+//             if (hiddenInput) {
+//                 hiddenInput.value = rawValue;
+//             }
+            
+//             // Format display value like kembalian does
+//             if (rawValue) {
+//                 const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+//                 this.value = formatted;
+//             } else {
+//                 this.value = '';
+//             }
+//         });
+        
+//         // Format on paste
+//         targetTahunanInput.addEventListener('paste', function() {
+//             setTimeout(() => {
+//                 const rawValue = this.value.replace(/[^\d]/g, '');
+                
+//                 // Update hidden field with raw value
+//                 const hiddenInput = document.getElementById('targetTahunanRaw');
+//                 if (hiddenInput) {
+//                     hiddenInput.value = rawValue;
+//                 }
+                
+//                 // Format display value
+//                 if (rawValue) {
+//                     const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+//                     this.value = formatted;
+//                 } else {
+//                     this.value = '';
+//                 }
+//             }, 10);
+//         });
+        
+//         // Keep formatting on focus but select all for easy replacement
+//         targetTahunanInput.addEventListener('focus', function() {
+//             // Select all text for easier replacement while keeping format
+//             this.select();
+//         });
+        
+//         // Re-format on blur to ensure consistency
+//         targetTahunanInput.addEventListener('blur', function() {
+//             const rawValue = this.value.replace(/[^\d]/g, '');
+            
+//             // Update hidden field with raw value
+//             const hiddenInput = document.getElementById('targetTahunanRaw');
+//             if (hiddenInput) {
+//                 hiddenInput.value = rawValue;
+//             }
+            
+//             // Format display value
+//             if (rawValue) {
+//                 const formatted = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+//                 this.value = formatted;
+//             } else {
+//                 this.value = '';
+//             }
+//         });
+//     }
+// });
 </script>

@@ -631,6 +631,12 @@ class SimplePaymentManager {
         if (cartData.installation_notes) {
             formData.append('installation_notes', cartData.installation_notes);
         }
+        if (cartData.leads_cabang_outlet_id) {
+            formData.append('leads_cabang_outlet_id', cartData.leads_cabang_outlet_id);
+        }
+        if (cartData.deal_maker_outlet_id) {
+            formData.append('deal_maker_outlet_id', cartData.deal_maker_outlet_id);
+        }
 
         // Handle payment amounts
         if (this.transactionCategory === 'dp') {

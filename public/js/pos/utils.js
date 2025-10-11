@@ -38,6 +38,23 @@ function parseQuantity(value) {
     return isNaN(parsed) || parsed <= 0 ? 1 : parsed;
 }
 
+// Parse quantity berdasarkan unit type
+function parseQuantityByUnitType(value, unitType) {
+    if (typeof value !== 'string' && typeof value !== 'number') return 1;
+    const cleanValue = String(value).replace(/[^0-9.,]/g, '').replace(',', '.');
+    const parsed = parseFloat(cleanValue);
+    
+    if (isNaN(parsed) || parsed <= 0) return 1;
+    
+    // Untuk meter, izinkan desimal
+    if (unitType === 'meter') {
+        return parsed;
+    }
+    
+    // Untuk pcs/unit, bulatkan ke integer
+    return Math.floor(parsed);
+}
+
 // Format quantity untuk display
 function formatQuantity(qty) {
     const parsed = parseFloat(qty);

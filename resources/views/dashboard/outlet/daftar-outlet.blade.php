@@ -19,13 +19,16 @@
             <div class="flex-1">
                 <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Hapus</h3>
                 <div class="mt-2">
-                    <p class="text-sm text-gray-600">Anda yakin ingin menghapus outlet ini? Data yang dihapus tidak dapat dikembalikan.</p>
+                    <p class="text-sm text-gray-600">Anda yakin ingin menghapus outlet ini? Data yang dihapus tidak
+                        dapat dikembalikan.</p>
                 </div>
                 <div class="mt-4 flex justify-end gap-3">
-                    <button id="btnBatalHapus" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                    <button id="btnBatalHapus" type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
                         Batal
                     </button>
-                    <button id="btnKonfirmasiHapus" type="button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
+                    <button id="btnKonfirmasiHapus" type="button"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md shadow-sm hover:bg-red-700 focus:outline-none">
                         Hapus
                     </button>
                 </div>
@@ -80,6 +83,8 @@
                     <th class="py-3 font-semibold">Alamat</th>
                     <th class="py-3 font-semibold">Kontak</th>
                     <th class="py-3 font-semibold">PPN</th>
+                    <th class="py-3 font-semibold">Target Tahunan</th>
+                    <th class="py-3 font-semibold">Target Bulanan</th>
                     <th class="py-3 font-semibold">Status</th>
                     <th class="py-3 font-semibold">Aksi</th>
                 </tr>
@@ -87,7 +92,7 @@
             <tbody id="outletTableBody" class="text-gray-700 divide-y">
                 <!-- Loading row -->
                 <tr id="loadingRow">
-                    <td colspan="7" class="py-8 text-center">
+                    <td colspan="9" class="py-8 text-center">
                         <div class="flex justify-center items-center">
                             <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
                         </div>
@@ -102,7 +107,7 @@
 @include('partials.outlet.modal-edit-outlet')
 
 <script>
-   // Variabel global
+    // Variabel global
         let outletIdToDelete = null;
         let allOutlets = [];
         let currentAlertId = null;
@@ -177,7 +182,7 @@
             // Kosongkan tabel kecuali loading row
             tableBody.innerHTML = `
                 <tr id="loadingRow" class="hidden">
-                    <td colspan="7" class="py-8 text-center">
+                    <td colspan="9" class="py-8 text-center">
                         <div class="flex justify-center items-center">
                             <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
                         </div>
@@ -192,7 +197,7 @@
             if (outlets.length === 0) {
                 tableBody.innerHTML += `
                     <tr>
-                        <td colspan="7" class="py-4 text-center text-gray-500">Tidak ada data outlet</td>
+                        <td colspan="9" class="py-4 text-center text-gray-500">Tidak ada data outlet</td>
                     </tr>
                 `;
                 return;
@@ -203,6 +208,17 @@
                 const addressDisplay = outlet.address.length > 25 
                     ? `${outlet.address.substring(0, 25)}...` 
                     : outlet.address;
+                
+                // Format target values
+                const formatCurrency = (value) => {
+                    if (!value || value === 0) return '-';
+                    return new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(value);
+                };
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -221,6 +237,12 @@
                     <td class="py-4" title="${outlet.address}">${addressDisplay}</td>
                     <td class="py-4">${outlet.phone}</td>
                     <td class="py-4">${outlet.tax}%</td>
+                    <td class="py-4">
+                        <span class="text-sm font-medium text-blue-600">${formatCurrency(outlet.target_tahunan)}</span>
+                    </td>
+                    <td class="py-4">
+                        <span class="text-sm font-medium text-green-600">${formatCurrency(outlet.target_bulanan)}</span>
+                    </td>
                     <td class="py-4">
                         <span class="px-3 py-1.5 text-sm font-medium ${outlet.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} rounded-full">
                             ${outlet.is_active ? 'Aktif' : 'Tidak Aktif'}
@@ -458,6 +480,10 @@
             formData.append('non_pkp_nama_bank', getElementValue('nonPkpNamaBank'));
             formData.append('non_pkp_nomor_transaksi_bank', getElementValue('nonPkpNomorTransaksi'));
             
+            // Add target fields
+            formData.append('target_tahunan', getElementValue('targetTahunanRaw', '0'));
+            formData.append('target_bulanan', getElementValue('targetBulananRaw', '0'));
+            
             const fileInput = document.getElementById('fotoOutlet');
             if (fileInput.files[0]) {
                 formData.append('qris', fileInput.files[0]);
@@ -544,6 +570,10 @@
         formData.append('non_pkp_atas_nama_bank', document.getElementById('editNonPkpAtasNama').value);
         formData.append('non_pkp_nama_bank', document.getElementById('editNonPkpNamaBank').value);
         formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('editNonPkpNomorTransaksi').value);
+        
+        // Add target fields
+        formData.append('target_tahunan', document.getElementById('editTargetTahunanRaw').value || '0');
+        formData.append('target_bulanan', document.getElementById('editTargetBulananRaw').value || '0');
         
         // Tambahkan file jika ada
         const fileInput = document.getElementById('editFotoOutlet');
@@ -638,6 +668,10 @@
             document.getElementById('editNonPkpAtasNama').value = outlet.non_pkp_atas_nama_bank || '';
             document.getElementById('editNonPkpNamaBank').value = outlet.non_pkp_nama_bank || '';
             document.getElementById('editNonPkpNomorTransaksi').value = outlet.non_pkp_nomor_transaksi_bank || '';
+            
+            // Load target fields
+            document.getElementById('editTargetTahunan').value = outlet.target_tahunan || '';
+            document.getElementById('editTargetBulanan').value = outlet.target_bulanan || '';
 
             // Set preview foto
             const preview = document.getElementById('editCurrentFoto');
@@ -864,7 +898,7 @@
                 'namaOutlet', 'teleponOutlet', 'alamatOutlet', 'emailOutlet', 
                 'pajakOutlet', 'taxType', 'fotoOutlet', 'pkpAtasNama', 
                 'pkpNamaBank', 'pkpNomorTransaksi', 'nonPkpAtasNama', 
-                'nonPkpNamaBank', 'nonPkpNomorTransaksi'
+                'nonPkpNamaBank', 'nonPkpNomorTransaksi', 'targetTahunan', 'targetBulanan'
             ];
             
             // Reset only existing elements
@@ -1030,6 +1064,37 @@
             document.getElementById('btnBatalModalEdit').addEventListener('click', closeModalEdit);
             updateSidebarVisibility();
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+    // Ambil semua input yang ingin diformat
+    const formatInputs = document.querySelectorAll('.format-angka');
+
+    formatInputs.forEach(input => {
+        const id = input.id;
+        const hiddenInput = document.getElementById(id + 'Raw');
+
+        // Fungsi bantu: update dan format
+        function updateAndFormat() {
+            const rawValue = input.value.replace(/[^\d]/g, '');
+            if (hiddenInput) hiddenInput.value = rawValue;
+
+            input.value = rawValue ? rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+        }
+
+        // Saat mengetik
+        input.addEventListener('input', updateAndFormat);
+
+        // Saat paste
+        input.addEventListener('paste', () => setTimeout(updateAndFormat, 10));
+
+        // Saat fokus, pilih semua teks
+        input.addEventListener('focus', () => input.select());
+
+        // Saat blur, format ulang untuk memastikan konsistensi
+        input.addEventListener('blur', updateAndFormat);
+    });
+});
+
 </script>
 
 <style>
@@ -1038,31 +1103,33 @@
             opacity: 0;
             transform: translateY(10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-    
+
     @keyframes fadeOut {
         from {
             opacity: 1;
             transform: translateY(0);
         }
+
         to {
             opacity: 0;
             transform: translateY(10px);
         }
     }
-    
+
     .animate-fade-in-up {
         animation: fadeInUp 0.3s ease-out forwards;
     }
-    
+
     .animate-fade-out {
         animation: fadeOut 0.3s ease-out forwards;
     }
-    
+
     /* Style untuk dropdown */
     .dropdown-menu {
         position: absolute;
@@ -1071,7 +1138,7 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         z-index: 50;
     }
-    
+
     /* Nonaktifkan scroll saat modal aktif */
     body.modal-active {
         overflow: hidden;

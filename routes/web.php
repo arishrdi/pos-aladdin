@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
 
 
         Route::get('/dashboard', function () {
-            return view('dashboard.dashboard');
+            return view('dashboard.dashboard2');
         })->name('dashboard');
 
         Route::get('/per-kategori', function () {

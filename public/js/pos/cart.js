@@ -176,7 +176,8 @@ class CartManager {
 
     addBonusItem(product, quantity = 1) {
     try {
-        const qty = parseQuantity(quantity);
+        const unitType = product.unit_type || 'pcs';
+        const qty = parseQuantityByUnitType(quantity, unitType);
         const existingIndex = this.bonusItems.findIndex(item => item.id === product.id);
 
         if (existingIndex >= 0) {
@@ -209,7 +210,6 @@ class CartManager {
     // Update bonus quantity
     updateBonusQuantity(index, newQuantity) {
         try {
-            const qty = parseQuantity(newQuantity);
             const item = this.bonusItems[index];
             
             if (!item) return false;
@@ -217,6 +217,9 @@ class CartManager {
             // Check available stock (considering both cart and other bonus items)
             const product = window.products.find(p => p.id === item.id);
             if (!product) return false;
+            
+            const unitType = product.unit_type || 'pcs';
+            const qty = parseQuantityByUnitType(newQuantity, unitType);
             
             const cartItem = this.cart.find(cartItem => cartItem.id === item.id);
             const reservedInCart = cartItem ? cartItem.quantity : 0;
@@ -629,7 +632,7 @@ class CartManager {
                                         <!-- <button class="btn-decrease-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}"> -->
                                         <!--     <i data-lucide="minus" class="w-3 h-3"></i> -->
                                         <!-- </button> -->
-                                        <input type="text" class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" value="${formatQuantity(bonus.quantity)}" data-index="${index}" readonly> 
+                                        <input type="text" class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" value="${formatQuantity(bonus.quantity)}" data-index="${index}" data-unit-type="${window.products.find(p => p.id === bonus.id)?.unit_type || 'pcs'}" readonly> 
                                         <!-- <span class="bonus-qty-input w-12 px-1 py-1 text-center text-xs border border-green-300 rounded" data-index="${index}">${formatQuantity(bonus.quantity)}</span> -->
                                         <!-- <button class="btn-increase-bonus px-1 py-1 border border-green-300 bg-green-100 rounded hover:bg-green-200 text-xs" data-index="${index}"> -->
                                         <!--     <i data-lucide="plus" class="w-3 h-3"></i> -->
@@ -1055,8 +1058,8 @@ class CartManager {
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <input type="number" class="bonus-qty-select w-20 px-2 py-1 text-sm border border-gray-300 rounded text-center" 
-                                   min="0.01" step="0.01" max="${availableStock}" value="1" placeholder="Qty">
+                            <input type="text" class="bonus-qty-select w-20 px-2 py-1 text-sm border border-gray-300 rounded text-center" 
+                                   min="0.01" value="1" placeholder="Qty" data-unit-type="${product.unit_type || 'pcs'}"${product.unit_type === 'meter' ? ' step="0.1"' : ' step="1"'}${product.unit_type !== 'meter' ? ' pattern="[0-9]+"' : ''}>
                             <!-- <button class="btn-add-bonus-product px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm" 
                                     data-product-id="${product.id}" ${availableStock <= 0 ? 'disabled' : ''}>
                                 ${availableStock <= 0 ? 'Habis' : 'Tambah'}
@@ -1072,6 +1075,16 @@ class CartManager {
             `;
         }).join('');
 
+        // Add event listeners for quantity validation
+        bonusProductsList.querySelectorAll('.bonus-qty-select').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const productId = parseInt(e.target.closest('.product-bonus-item').querySelector('.btn-add-bonus-product').dataset.productId);
+                const product = window.products.find(p => p.id === productId);
+                const unitType = product?.unit_type || 'pcs';
+                this.validateQuantityInput(e.target, unitType, e.target.value);
+            });
+        });
+
         // Add event listeners for add buttons
         bonusProductsList.querySelectorAll('.btn-add-bonus-product').forEach(button => {
             button.addEventListener('click', async (e) => {
@@ -1080,7 +1093,20 @@ class CartManager {
                 const productId = parseInt(e.target.dataset.productId);
                 const product = window.products.find(p => p.id === productId);
                 const qtyInput = e.target.parentElement.querySelector('.bonus-qty-select');
-                const quantity = parseFloat(qtyInput.value) || 1;
+                const inputValue = qtyInput.value;
+                
+                // Validate quantity based on unit type
+                const unitType = product.unit_type || 'pcs';
+                console.log('Debug bonus quantity - Product:', product.name, 'Unit Type:', unitType, 'Input Value:', inputValue);
+                
+                if (!this.validateQuantityInput(qtyInput, unitType, inputValue)) {
+                    showNotification(`Quantity tidak valid untuk satuan ${unitType}`, 'error');
+                    qtyInput.focus();
+                    return;
+                }
+                
+                const quantity = parseQuantityByUnitType(inputValue, unitType);
+                console.log('Debug bonus quantity - Final quantity:', quantity);
                 
                 // Get reason from modal
                 const reasonSelect = modal.querySelector('#bonusReasonSelect');
@@ -1213,6 +1239,8 @@ class CartManager {
             service_type: serviceData.service_type,
             installation_date: serviceData.installation_date,
             installation_notes: serviceData.installation_notes,
+            leads_cabang_outlet_id: serviceData.leads_cabang_outlet_id,
+            deal_maker_outlet_id: serviceData.deal_maker_outlet_id,
             totals: this.calculateTotals()
         };
     }
@@ -1222,15 +1250,21 @@ class CartManager {
         const serviceTypeSelect = document.getElementById('serviceType');
         const installationDateInput = document.getElementById('installationDate');
         const installationNotesInput = document.getElementById('installationNotes');
+        const leadsCabangInput = document.getElementById('leadsCabangSearch');
+        const dealMakerInput = document.getElementById('dealMakerSearch');
         
         const serviceType = serviceTypeSelect ? serviceTypeSelect.value : null;
         const installationDate = installationDateInput ? installationDateInput.value : null;
         const installationNotes = installationNotesInput ? installationNotesInput.value : null;
+        const leadsCabangOutletId = leadsCabangInput ? leadsCabangInput.dataset.outletId : null;
+        const dealMakerOutletId = dealMakerInput ? dealMakerInput.dataset.outletId : null;
         
         return {
             service_type: serviceType || null,
             installation_date: installationDate || null,
-            installation_notes: installationNotes || null
+            installation_notes: installationNotes || null,
+            leads_cabang_outlet_id: leadsCabangOutletId || null,
+            deal_maker_outlet_id: dealMakerOutletId || null
         };
     }
 
@@ -1239,12 +1273,28 @@ class CartManager {
         const serviceTypeSelect = document.getElementById('serviceType');
         const installationDateInput = document.getElementById('installationDate');
         const installationNotesInput = document.getElementById('installationNotes');
+        const leadsCabangInput = document.getElementById('leadsCabangSearch');
+        const dealMakerInput = document.getElementById('dealMakerSearch');
         const serviceContent = document.getElementById('serviceContent');
         const serviceChevron = document.getElementById('serviceChevron');
         
         if (serviceTypeSelect) serviceTypeSelect.value = '';
         if (installationDateInput) installationDateInput.value = '';
         if (installationNotesInput) installationNotesInput.value = '';
+        
+        // Clear outlet selections
+        if (leadsCabangInput) {
+            leadsCabangInput.value = '';
+            leadsCabangInput.dataset.outletId = '';
+            const selectedLeadsCabang = document.getElementById('selectedLeadsCabang');
+            if (selectedLeadsCabang) selectedLeadsCabang.classList.add('hidden');
+        }
+        if (dealMakerInput) {
+            dealMakerInput.value = '';
+            dealMakerInput.dataset.outletId = '';
+            const selectedDealMaker = document.getElementById('selectedDealMaker');
+            if (selectedDealMaker) selectedDealMaker.classList.add('hidden');
+        }
         
         // Collapse the service section when clearing
         if (serviceContent && serviceContent.classList.contains('expanded')) {

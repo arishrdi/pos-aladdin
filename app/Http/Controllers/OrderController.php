@@ -83,6 +83,8 @@ class OrderController extends Controller
             'installation_date' => 'nullable|date|after_or_equal:today',
             'installation_notes' => 'nullable|string|max:1000',
             'mosque_id' => 'nullable|exists:mosques,id',
+            'leads_cabang_outlet_id' => 'nullable|exists:outlets,id',
+            'deal_maker_outlet_id' => 'nullable|exists:outlets,id',
             'contract_pdf' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB for contract PDF
         ]);
 
@@ -216,6 +218,8 @@ class OrderController extends Controller
                 'service_type' => $request->service_type,
                 'installation_date' => $request->installation_date,
                 'installation_notes' => $request->installation_notes,
+                'leads_cabang_outlet_id' => $request->leads_cabang_outlet_id,
+                'deal_maker_outlet_id' => $request->deal_maker_outlet_id,
                 'contract_pdf' => $contractPdfPath
             ]);
 
@@ -751,6 +755,7 @@ class OrderController extends Controller
         try {
             $validator = Validator::make($request->query(), [
                 'outlet_id' => 'nullable|string', // Allow 'all' or valid outlet ID
+                'search' => 'nullable|string', // Allow 'all' or valid outlet ID
                 'member_id' => 'nullable|exists:members,id',
                 'date_from' => 'nullable|date',
                 'date_to' => 'nullable|date|after_or_equal:date_from',
@@ -772,13 +777,29 @@ class OrderController extends Controller
 
             if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
                 $query->where('outlet_id', $request->outlet_id);
+            } elseif ($request->outlet_id === 'all') {
+                $query->where('outlet_id', '!=', 1);
+            }
+
+            // Check if search is for a specific invoice number
+            $isInvoiceSearch = false;
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                // Detect if this looks like an invoice number (starts with INV-)
+                $isInvoiceSearch = preg_match('/^INV-/i', $searchTerm);
+                
+                $query->where(function ($q) use ($request) {
+                    $q->where('order_number', 'like', '%' . $request->search . '%');
+                    //   ->orWhere('member.name', 'like', '%' . $request->search . '%');
+                });
             }
 
             if ($request->filled('member_id')) {
                 $query->where('member_id', $request->member_id);
             }
 
-            if ($request->filled('date_from') && $request->filled('date_to')) {
+            // Only apply date filters if it's not a specific invoice search
+            if (!$isInvoiceSearch && $request->filled('date_from') && $request->filled('date_to')) {
                 $query->whereBetween('created_at', [
                     $request->date_from,
                     $request->date_to . ' 23:59:59'
@@ -807,6 +828,8 @@ class OrderController extends Controller
                     $q->withTrashed()->select('id', 'name', 'sku', 'unit', 'image');
                 },
                 'outlet:id,name',
+                'leadsCabangOutlet:id,name',
+                'dealMakerOutlet:id,name',
                 'shift:id',
                 'user:id,name',
                 'member:id,name,member_code',
@@ -816,8 +839,11 @@ class OrderController extends Controller
                 'operationalApprover:id,name',
                 'cancellationRequester:id,name',
                 'cancellationProcessor:id,name',
+                'transactionEdits' => function ($q) {
+                    $q->where('status', 'pending')->latest();
+                },
                 'bonusTransactions.bonusItems.product' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'sku', 'image');
+                    $q->withTrashed()->select('id', 'name', 'sku', 'image', 'unit_type');
                 }
             ])->has('outlet')->has('user')->latest()->get();
 
@@ -867,12 +893,21 @@ class OrderController extends Controller
                         'name' => $order->mosque->name,
                         'address' => $order->mosque->address
                     ] : null,
+                    'leads_cabang_outlet' => $order->leadsCabangOutlet ? [
+                        'id' => $order->leadsCabangOutlet->id,
+                        'name' => $order->leadsCabangOutlet->name
+                    ] : null,
+                    'deal_maker_outlet' => $order->dealMakerOutlet ? [
+                        'id' => $order->dealMakerOutlet->id,
+                        'name' => $order->dealMakerOutlet->name
+                    ] : null,
                     'contract_pdf_url' => $order->contract_pdf_url,
                     'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
                         return $bonusTransaction->bonusItems->map(function ($bonusItem) {
                             return [
                                 'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
                                 'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'unit_type' => $bonusItem->product ? $bonusItem->product->unit_type : 'pcs',
                                 'product_image' => $bonusItem->product ? $bonusItem->product->image_url : null,
                                 'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
                                 'quantity' => $bonusItem->quantity,
@@ -911,7 +946,18 @@ class OrderController extends Controller
                     'cancellation_requested_at' => $order->cancellation_requested_at ? $order->cancellation_requested_at->format('d/m/Y H:i') : null,
                     'cancellation_processed_by' => $order->cancellationProcessor ? $order->cancellationProcessor->name : null,
                     'cancellation_processed_at' => $order->cancellation_processed_at ? $order->cancellation_processed_at->format('d/m/Y H:i') : null,
-                    'cancellation_admin_notes' => $order->cancellation_admin_notes
+                    'cancellation_admin_notes' => $order->cancellation_admin_notes,
+                    // Transaction edit status
+                    'can_be_edited' => $order->canBeEdited(),
+                    'has_edit_history' => $order->transactionEdits()->exists(),
+                    'pending_edit' => $order->getPendingEdit() ? [
+                        'id' => $order->getPendingEdit()->id,
+                        'edit_type' => $order->getPendingEdit()->edit_type,
+                        'reason' => $order->getPendingEdit()->reason,
+                        'total_difference' => $order->getPendingEdit()->total_difference,
+                        'approval_status' => $order->getPendingEdit()->getDualApprovalStatus(),
+                        'requested_at' => $order->getPendingEdit()->created_at->format('d/m/Y H:i')
+                    ] : null
                 ];
             });
 
@@ -974,6 +1020,8 @@ class OrderController extends Controller
             $orders = $query->with([
                 'items.product:id,name,sku',
                 'outlet:id,name',
+                'leadsCabangOutlet:id,name',
+                'dealMakerOutlet:id,name',
                 'shift:id',
                 'user:id,name',
                 'bonusTransactions.bonusItems.product' => function ($q) {
@@ -1018,7 +1066,15 @@ class OrderController extends Controller
                                 'status' => $bonusItem->status ?? 'approved'
                             ];
                         });
-                    })
+                    }),
+                    'leads_cabang_outlet' => $order->leadsCabangOutlet ? [
+                        'id' => $order->leadsCabangOutlet->id,
+                        'name' => $order->leadsCabangOutlet->name
+                    ] : null,
+                    'deal_maker_outlet' => $order->dealMakerOutlet ? [
+                        'id' => $order->dealMakerOutlet->id,
+                        'name' => $order->dealMakerOutlet->name
+                    ] : null
                 ];
             });
 
