@@ -320,210 +320,6 @@ class ReportController extends Controller
         ]);
     }
 
-    // public function inventoryReportOld(Request $request, Outlet $outlet)
-    // {
-    //     $request->validate([
-    //         'start_date' => 'required|date',
-    //         'end_date' => 'required|date|after_or_equal:start_date',
-    //     ]);
-
-    //     $startDate = Carbon::parse($request->start_date)->startOfDay();
-    //     $endDate = Carbon::parse($request->end_date)->endOfDay();
-    //     $previousDay = $startDate->copy()->subDay();
-
-    //     $products = Product::whereHas('inventory', function ($q) use ($outlet) {
-    //         $q->where('outlet_id', $outlet->id);
-    //     })->get();
-
-    //     $results = [];
-
-    //     foreach ($products as $product) {
-    //         // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
-    //         $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereDate('created_at', '<=', $previousDay)
-    //             ->latest('created_at')
-    //             ->first();
-
-    //         $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
-
-    //         // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
-    //         $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereBetween('created_at', [$startDate, $endDate])
-    //             ->where(function ($query) {
-    //                 $query->where('type', 'purchase')
-    //                     ->orWhere('type', 'transfer_in')
-    //                     ->orWhere('type', 'shipment')
-    //                     ->orWhere('type', 'other') // Tambahkan transfer_in
-    //                     ->orWhere(function ($q) {
-    //                         $q->where('type', 'adjustment')
-    //                             ->where('quantity_change', '>', 0);
-    //                     });
-    //             })
-    //             ->sum('quantity_change');
-
-    //         // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
-    //         $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereBetween('created_at', [$startDate, $endDate])
-    //             ->where(function ($query) {
-    //                 $query->where('type', 'sale')
-    //                     ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
-    //                     ->orWhere(function ($q) {
-    //                         $q->where('type', 'adjustment')
-    //                             ->where('quantity_change', '<', 0);
-    //                     });
-    //             })
-    //             ->sum('quantity_change');
-
-    //         $outgoingStock = abs($outgoingStock); // Convert to positive number
-
-    //         // 4. Hitung STOCK AKHIR
-    //         $closingStock = $openingStock + $incomingStock - $outgoingStock;
-
-    //         // 5. Dapatkan stok aktual terakhir
-    //         $currentInventory = Inventory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->first();
-
-    //         $results[] = [
-    //             'product_id' => $product->id,
-    //             'product_name' => $product->name,
-    //             'product_code' => $product->sku,
-    //             'unit' => $product->unit,
-    //             'saldo_awal' => $openingStock,
-    //             'stock_masuk' => $incomingStock,
-    //             'stock_keluar' => $outgoingStock,
-    //             'stock_akhir' => $closingStock,
-    //             'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
-    //             'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
-    //         ];
-    //     }
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => [
-    //             'outlet' => $outlet->name,
-    //             'periode' => [
-    //                 'start_date' => $startDate->format('Y-m-d'),
-    //                 'end_date' => $endDate->format('Y-m-d'),
-    //             ],
-    //             'products' => $results,
-    //             'summary' => [
-    //                 'total_saldo_awal' => collect($results)->sum('saldo_awal'),
-    //                 'total_stock_masuk' => collect($results)->sum('stock_masuk'),
-    //                 'total_stock_keluar' => collect($results)->sum('stock_keluar'),
-    //                 'total_stock_akhir' => collect($results)->sum('stock_akhir'),
-    //             ]
-    //         ]
-    //     ]);
-    // }
-
-    // public function inventoryReportBaru(Request $request, Outlet $outlet)
-    // {
-    //     $request->validate([
-    //         'start_date' => 'required|date',
-    //         'end_date' => 'required|date|after_or_equal:start_date',
-    //     ]);
-
-    //     $startDate = Carbon::parse($request->start_date)->startOfDay();
-    //     $endDate = Carbon::parse($request->end_date)->endOfDay();
-    //     $previousDay = $startDate->copy()->subDay();
-
-    //     $products = Product::whereHas('inventory', function ($q) use ($outlet) {
-    //         $q->where('outlet_id', $outlet->id);
-    //     })->get();
-
-    //     $results = [];
-
-    //     foreach ($products as $product) {
-    //         // 1. Hitung SALDO AWAL (stok akhir hari sebelumnya)
-    //         $previousInventory = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereDate('created_at', '<=', $previousDay)
-    //             ->latest('created_at')
-    //             ->first();
-
-    //         $openingStock = $previousInventory ? $previousInventory->quantity_after : 0;
-
-    //         // 2. Hitung STOCK MASUK (pembelian + adjustment plus)
-    //         $incomingStock = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereBetween('created_at', [$startDate, $endDate])
-    //             ->where(function ($query) {
-    //                 $query->where('type', 'purchase')
-    //                     ->orWhere('type', 'transfer_in')
-    //                     ->orWhere('type', 'shipment')
-    //                     ->orWhere('type', 'other') // Tambahkan transfer_in
-    //                     ->orWhere(function ($q) {
-    //                         $q->where('type', 'adjustment')
-    //                             ->where('quantity_change', '>', 0);
-    //                     });
-    //             })
-    //             ->sum('quantity_change');
-
-    //         // 3. Hitung STOCK KELUAR (penjualan + adjustment minus + transfer_out)
-    //         $outgoingStock = InventoryHistory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->whereBetween('created_at', [$startDate, $endDate])
-    //             ->where(function ($query) {
-    //                 $query->where('type', 'sale')
-    //                     ->orWhere('type', 'transfer_out') // Tambahkan transfer_out
-    //                     ->orWhere(function ($q) {
-    //                         $q->where('type', 'adjustment')
-    //                             ->where('quantity_change', '<', 0);
-    //                     });
-    //             })
-    //             ->sum('quantity_change');
-
-    //         $outgoingStock = abs($outgoingStock); // Convert to positive number
-
-    //         //saldo akhir
-    //         $saldoAkhir = $openingStock + $incomingStock - $outgoingStock;
-
-    //         // 4. Hitung STOCK AKHIR
-    //         $closingStock = $saldoAkhir + $incomingStock - $outgoingStock;
-
-
-    //         // 5. Dapatkan stok aktual terakhir
-    //         $currentInventory = Inventory::where('outlet_id', $outlet->id)
-    //             ->where('product_id', $product->id)
-    //             ->first();
-
-    //         $results[] = [
-    //             'product_id' => $product->id,
-    //             'product_name' => $product->name,
-    //             'product_code' => $product->sku,
-    //             'unit' => $product->unit,
-    //             'saldo_awal' => $openingStock,
-    //             'stock_masuk' => $incomingStock,
-    //             'stock_keluar' => $outgoingStock,
-    //             'stock_akhir' => $closingStock,
-    //             'saldo_akhir' => $saldoAkhir,
-    //             'stock_aktual' => $currentInventory ? $currentInventory->quantity : 0,
-    //             'selisih' => ($currentInventory ? $currentInventory->quantity : 0) - $closingStock
-    //         ];
-    //     }
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => [
-    //             'outlet' => $outlet->name,
-    //             'periode' => [
-    //                 'start_date' => $startDate->format('Y-m-d'),
-    //                 'end_date' => $endDate->format('Y-m-d'),
-    //             ],
-    //             'products' => $results,
-    //             'summary' => [
-    //                 'total_saldo_awal' => collect($results)->sum('saldo_awal'),
-    //                 'total_stock_masuk' => collect($results)->sum('stock_masuk'),
-    //                 'total_stock_keluar' => collect($results)->sum('stock_keluar'),
-    //                 'total_stock_akhir' => collect($results)->sum('stock_akhir'),
-    //             ]
-    //         ]
-    //     ]);
-    // }
 
     public function inventoryReport(Request $request, Outlet $outlet)
     {
@@ -1215,33 +1011,6 @@ class ReportController extends Controller
                     ->limit(5)
                     ->get();
 
-                // Low stock items
-                // $minStock = $outlet->min_stock ?? 10;
-                // $responseData['low_stock_items'] = Inventory::where('outlet_id', $outlet->id)
-                //     ->where('quantity', '<', $minStock)
-                //     ->with('product')
-                //     ->get()
-                //     ->map(function ($item) use ($minStock) {
-                //         return [
-                //             'product_name' => $item->product->name,
-                //             'quantity' => $item->quantity,
-                //             'min_stock' => $minStock,
-                //         ];
-                //     });
-
-                // // Active shift
-                // $activeShift = Shift::where('outlet_id', $outlet->id)
-                //     ->with('user')
-                //     ->first();
-
-                // if ($activeShift) {
-                //     $responseData['active_shift'] = [
-                //         'cashier' => $activeShift->user->name,
-                //         'started_at' => $activeShift->start_time,
-                //         'duration' => Carbon::parse($activeShift->start_time)->diffForHumans(null, true),
-                //     ];
-                // }
-
                 return $this->successResponse($responseData, 'Successfully getting dashboard data');
             } catch (\Exception $e) {
                 \Log::error('Error in data gathering: ' . $e->getMessage());
@@ -1794,5 +1563,161 @@ class ReportController extends Controller
                 'members' => $membersWithProducts
             ]
         ]);
+    }
+
+    public function compareProducts(Request $request)
+    {
+        try {
+            $request->validate([
+                'outlet_ids' => 'required|string',
+                'start_date' => 'required|date_format:Y-m-d',
+                'end_date' => 'required|date_format:Y-m-d',
+            ]);
+
+            $outletIds = array_map('intval', explode(',', $request->outlet_ids));
+
+            // Validate that all outlet IDs exist
+            $outlets = Outlet::whereIn('id', $outletIds)->get();
+
+            if ($outlets->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Outlet tidak ditemukan',
+                    'data' => []
+                ], 404);
+            }
+
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+            $comparisonData = [];
+
+            foreach ($outlets as $outlet) {
+                $result = $this->listProductsByDateRange($request, $outlet);
+                $responseData = json_decode($result->getContent(), true);
+
+                if ($responseData['status']) {
+                    $comparisonData[] = [
+                        'outlet_id' => $outlet->id,
+                        'outlet_name' => $outlet->name,
+                        'products' => $responseData['data']['products']
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $comparisonData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function compareCategories(Request $request)
+    {
+        try {
+            $request->validate([
+                'outlet_ids' => 'required|string',
+                'start_date' => 'required|date_format:Y-m-d',
+                'end_date' => 'required|date_format:Y-m-d',
+            ]);
+
+            $outletIds = array_map('intval', explode(',', $request->outlet_ids));
+
+            // Validate that all outlet IDs exist
+            $outlets = Outlet::whereIn('id', $outletIds)->get();
+
+            if ($outlets->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Outlet tidak ditemukan',
+                    'data' => []
+                ], 404);
+            }
+
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+            $comparisonData = [];
+
+            foreach ($outlets as $outlet) {
+                $result = $this->salesByCategory($request, $outlet);
+                $responseData = json_decode($result->getContent(), true);
+
+                if ($responseData['status']) {
+                    $comparisonData[] = [
+                        'outlet_id' => $outlet->id,
+                        'outlet_name' => $outlet->name,
+                        'categories' => $responseData['data']['categories']
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $comparisonData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function compareMembers(Request $request)
+    {
+        try {
+            $request->validate([
+                'outlet_ids' => 'required|string',
+                'start_date' => 'required|date_format:Y-m-d',
+                'end_date' => 'required|date_format:Y-m-d',
+            ]);
+
+            $outletIds = array_map('intval', explode(',', $request->outlet_ids));
+
+            // Validate that all outlet IDs exist
+            $outlets = Outlet::whereIn('id', $outletIds)->get();
+
+            if ($outlets->count() === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Outlet tidak ditemukan',
+                    'data' => []
+                ], 404);
+            }
+
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+
+            $comparisonData = [];
+
+            foreach ($outlets as $outlet) {
+                $result = $this->listProductByMember($request, $outlet);
+                $responseData = json_decode($result->getContent(), true);
+
+                if ($responseData['status']) {
+                    $comparisonData[] = [
+                        'outlet_id' => $outlet->id,
+                        'outlet_name' => $outlet->name,
+                        'members' => $responseData['data']['members']
+                    ];
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $comparisonData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

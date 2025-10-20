@@ -8,6 +8,7 @@ use App\Models\DpSettlementHistory;
 use App\Models\Inventory;
 use App\Models\InventoryHistory;
 use App\Models\Order;
+use App\Models\Outlet;
 use App\Services\CashBalanceService;
 use App\Services\LeadsService;
 use App\Traits\ApiResponse;
@@ -754,8 +755,8 @@ class OrderController extends Controller
         // knnnnninini
         try {
             $validator = Validator::make($request->query(), [
-                'outlet_id' => 'nullable|string', // Allow 'all' or valid outlet ID
-                'search' => 'nullable|string', // Allow 'all' or valid outlet ID
+                'outlet_id' => 'nullable', // Allow string 'all' or numeric outlet ID
+                'search' => 'nullable|string',
                 'member_id' => 'nullable|exists:members,id',
                 'date_from' => 'nullable|date',
                 'date_to' => 'nullable|date|after_or_equal:date_from',
@@ -1559,6 +1560,96 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function compareOrders(Request $request)
+    {
+        try {
+            $request->validate([
+                'outlet_ids' => 'required|string',
+                'date_from' => 'required|date_format:Y-m-d',
+                'date_to' => 'required|date_format:Y-m-d',
+            ]);
+
+            $outletIds = array_map('intval', explode(',', $request->outlet_ids));
+            
+            // Validate that all outlet IDs exist
+            $existingOutlets = Outlet::whereIn('id', $outletIds)->pluck('id')->toArray();
+            $missingOutlets = array_diff($outletIds, $existingOutlets);
+            
+            if (!empty($missingOutlets)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Outlet tidak ditemukan: ' . implode(', ', $missingOutlets),
+                    'data' => null
+                ], 404);
+            }
+            $dateFrom = $request->date_from;
+            $dateTo = $request->date_to;
+
+            $comparisonData = [];
+
+            foreach ($outletIds as $outletId) {
+                $outlet = Outlet::find($outletId);
+                if (!$outlet) {
+                    \Log::warning("Outlet dengan ID {$outletId} tidak ditemukan untuk komparasi");
+                    continue;
+                }
+
+                // Create a new request for each outlet with query parameters
+                $singleOutletRequest = new Request();
+                $singleOutletRequest->merge([
+                    'outlet_id' => (string) $outletId,
+                    'date_from' => $dateFrom,
+                    'date_to' => $dateTo
+                ]);
+
+                try {
+                    $result = $this->orderHistory($singleOutletRequest);
+                    $responseData = json_decode($result->getContent(), true);
+                    
+                    \Log::info("Data untuk outlet {$outlet->name}: ", [
+                        'success' => $responseData['success'] ?? false,
+                        'data_count' => isset($responseData['data']) ? (is_array($responseData['data']) ? count($responseData['data']) : 'not_array') : 'no_data',
+                        'message' => $responseData['message'] ?? 'no_message'
+                    ]);
+                    
+                    if ($responseData['success']) {
+                        $comparisonData[] = [
+                            'outlet_id' => $outletId,
+                            'outlet_name' => $outlet->name,
+                            'total_orders' => $responseData['data']['total_orders'] ?? 0,
+                            'total_revenue' => $responseData['data']['total_revenue'] ?? 0,
+                            'average_order_value' => $responseData['data']['average_order_value'] ?? 0,
+                            'total_items_sold' => $responseData['data']['total_items_sold'] ?? 0,
+                            'gross_sales' => $responseData['data']['gross_sales'] ?? 0,
+                            'total_discount' => $responseData['data']['total_discount'] ?? 0
+                        ];
+                    } else {
+                        $errorMessage = $responseData['message'] ?? 'Unknown error';
+                        if (is_array($errorMessage)) {
+                            $errorMessage = json_encode($errorMessage);
+                        }
+                        \Log::warning("Gagal mendapatkan data untuk outlet {$outlet->name}: " . $errorMessage);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("Error saat mengambil data untuk outlet {$outlet->name}: " . $e->getMessage());
+                }
+            }
+
+            \Log::info("Mengirim data komparasi untuk " . count($comparisonData) . " outlet");
+            
+            return response()->json([
+                'success' => true,
+                'data' => $comparisonData,
+                'message' => 'Data komparasi berhasil dimuat untuk ' . count($comparisonData) . ' outlet'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

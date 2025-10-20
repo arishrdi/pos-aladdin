@@ -125,19 +125,22 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::controller(ReportController::class)->prefix('reports')->group(function () {
+            // Multi-outlet comparison - must be defined before parameterized routes
+            Route::get('/comparison', 'comparison');
+            Route::get('/monthly-sales/compare', 'compareProducts');
+            Route::get('/sales-by-category/compare', 'compareCategories');
+            Route::get('/sales-by-member/compare', 'compareMembers');
+
+            // Single outlet reports
             Route::get('/daily-sales/{outlet}', 'dailySales');
             Route::get('/monthly-sales/{outlet}', 'listProductsByDateRange');
             Route::get('/monthly-inventory/{outlet}', 'inventoryReport');
             Route::get('/inventory-by-date/{outlet}', 'inventoryByDate');
             Route::get('/shift-report/{outlet}', 'shiftReport');
             Route::get('/dashboard-summary/{outlet}', 'dashboardSummary');
-
             Route::get('/sales-by-category/{outlet}', 'salesByCategory');
             Route::get('/inventory-approvals/{outlet}',  'inventoryApprovals');
             Route::get('/sales-by-member/{outlet}', 'listProductByMember');
-            
-            // Multi-outlet comparison
-            Route::get('/comparison', 'comparison');
         });
 
         Route::post('/print-template', [PrintTemplateController::class, 'store']);
@@ -244,6 +247,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/orders/cancel/{orderId}', 'cancelOrder'); // Legacy method
             Route::get('/orders/history', 'orderHistory');
             Route::get('/orders/history/admin', 'orderAdmin');
+            Route::get('/orders/history/compare', 'compareOrders');
             
             // Cancellation request route (for cashiers)
             Route::post('/orders/cancellation/request/{id}', 'requestCancellation'); // Request cancellation/refund

@@ -701,15 +701,19 @@
                 
                 // Handle outlet selection based on role
                 if (staff.role === 'supervisor') {
-                    // Load supervisor outlets and set selected ones
+                    // Show the correct section first
+                    handleEditRoleChange();
+                    // Then load supervisor outlets and set selected ones
                     loadOutletsForEditSupervisor().then(() => {
                         const supervisorOutletIds = staff.outlets ? staff.outlets.map(o => o.id) : [];
-                        setSelectedEditSupervisorOutlets(supervisorOutletIds);
-                        handleEditRoleChange(); // Show the correct section
+                        // Use requestAnimationFrame to ensure DOM is fully rendered
+                        requestAnimationFrame(() => {
+                            setSelectedEditSupervisorOutlets(supervisorOutletIds);
+                        });
                     });
                 } else {
+                    handleEditRoleChange(); // Show the correct section first
                     document.getElementById('editOutletStaff').value = staff.outlet_id;
-                    handleEditRoleChange(); // Show the correct section
                 }
                 
                 if (staff.last_shift) {
@@ -1204,7 +1208,10 @@ function closeModalEditStaff() {
         if (role === 'supervisor') {
             singleOutletSection.classList.add('hidden');
             multipleOutletSection.classList.remove('hidden');
-            loadOutletsForEditSupervisor();
+            // Don't reload outlets if they're already loaded
+            if (!document.querySelectorAll('.edit-supervisor-outlet-checkbox').length) {
+                loadOutletsForEditSupervisor();
+            }
         } else {
             singleOutletSection.classList.remove('hidden');
             multipleOutletSection.classList.add('hidden');
@@ -1307,18 +1314,42 @@ function closeModalEditStaff() {
     }
 
     function setSelectedEditSupervisorOutlets(outletIds) {
-        // Clear all checkboxes first
-        document.querySelectorAll('.edit-supervisor-outlet-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-
-        // Check the selected outlets
-        outletIds.forEach(outletId => {
-            const checkbox = document.getElementById(`edit_supervisor_outlet_${outletId}`);
-            if (checkbox) {
-                checkbox.checked = true;
+        console.log('Setting selected outlets:', outletIds);
+        
+        // Wait for checkboxes to be available
+        const setCheckboxes = () => {
+            const checkboxes = document.querySelectorAll('.edit-supervisor-outlet-checkbox');
+            console.log('Found checkboxes:', checkboxes.length);
+            
+            if (checkboxes.length === 0) {
+                // If no checkboxes found, retry after a short delay
+                setTimeout(setCheckboxes, 50);
+                return;
             }
-        });
+            
+            // Clear all checkboxes first
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Check the selected outlets
+            outletIds.forEach(outletId => {
+                const checkbox = document.getElementById(`edit_supervisor_outlet_${outletId}`);
+                console.log(`Setting checkbox for outlet ${outletId}:`, checkbox);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    console.log(`Checkbox for outlet ${outletId} set to checked`);
+                }
+            });
+            
+            // Verify the checkboxes are actually checked
+            setTimeout(() => {
+                const checkedBoxes = document.querySelectorAll('.edit-supervisor-outlet-checkbox:checked');
+                console.log('Verified checked checkboxes:', checkedBoxes.length);
+            }, 10);
+        };
+        
+        setCheckboxes();
     }
 </script>
 

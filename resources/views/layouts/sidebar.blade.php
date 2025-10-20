@@ -365,10 +365,10 @@
                     <i data-lucide="history" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Stok</span>
                 </a> --}}
-                <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
+                {{-- <a href="/laporan-approve" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="check-circle" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Approve</span>
-                </a>
+                </a> --}}
             </div>
         </div>
 
