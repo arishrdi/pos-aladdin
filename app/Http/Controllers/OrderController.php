@@ -838,6 +838,8 @@ class OrderController extends Controller
                 'approver:id,name',
                 'financeApprover:id,name',
                 'operationalApprover:id,name',
+                'financeRejector:id,name',
+                'operationalRejector:id,name',
                 'cancellationRequester:id,name',
                 'cancellationProcessor:id,name',
                 'transactionEdits' => function ($q) {
@@ -935,6 +937,15 @@ class OrderController extends Controller
                     'is_operational_approved' => $order->isOperationalApproved(),
                     'is_fully_approved' => $order->isFullyApproved(),
                     'is_partially_approved' => $order->isPartiallyApproved(),
+                    // Dual approval rejection data
+                    'finance_rejected_by' => $order->financeRejector ? $order->financeRejector->name : null,
+                    'finance_rejected_at' => $order->finance_rejected_at ? $order->finance_rejected_at->format('d/m/Y H:i') : null,
+                    'finance_rejection_reason' => $order->finance_rejection_reason,
+                    'operational_rejected_by' => $order->operationalRejector ? $order->operationalRejector->name : null,
+                    'operational_rejected_at' => $order->operational_rejected_at ? $order->operational_rejected_at->format('d/m/Y H:i') : null,
+                    'operational_rejection_reason' => $order->operational_rejection_reason,
+                    'is_finance_rejected' => $order->isFinanceRejected(),
+                    'is_operational_rejected' => $order->isOperationalRejected(),
                     // DP Helper flags
                     'needs_settlement' => $order->needsSettlement(),
                     'can_settle' => $order->canSettle(),
@@ -1528,9 +1539,9 @@ class OrderController extends Controller
             if (!$id || $id === 'null' || $id === 'undefined') {
                 return $this->errorResponse('Order ID tidak valid', 400);
             }
-            
+
             $user = auth()->user();
-            
+
             // Only admin can approve
             if ($user->role !== 'admin') {
                 return $this->errorResponse('Hanya admin yang dapat melakukan approval', 403);
@@ -1543,10 +1554,10 @@ class OrderController extends Controller
             }
 
             $order->approveOperational($user);
-            
+
             // Refresh the order to get updated status
             $updatedOrder = $order->fresh()->load(['financeApprover', 'operationalApprover']);
-            
+
             // Check if transaction is now completed
             $message = 'Transaksi berhasil di-approve oleh Operasional';
             if ($updatedOrder->status === 'completed') {
@@ -1557,6 +1568,100 @@ class OrderController extends Controller
                 'order' => $updatedOrder,
                 'message' => $message
             ], 'Operational approval berhasil');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject transaction from Finance perspective (Admin only)
+     */
+    public function rejectFinance(Request $request, $id)
+    {
+        try {
+            // Validate ID parameter
+            if (!$id || $id === 'null' || $id === 'undefined') {
+                return $this->errorResponse('Order ID tidak valid', 400);
+            }
+
+            $request->validate([
+                'reason' => 'required|string|max:1000'
+            ]);
+
+            $user = auth()->user();
+
+            // Only admin can reject
+            if ($user->role !== 'admin') {
+                return $this->errorResponse('Hanya admin yang dapat melakukan penolakan', 403);
+            }
+
+            $order = Order::findOrFail($id);
+
+            if ($order->isFinanceRejected()) {
+                return $this->errorResponse('Transaksi sudah ditolak oleh Keuangan sebelumnya');
+            }
+
+            $success = $order->rejectFinance($user, $request->input('reason'));
+
+            if (!$success) {
+                return $this->errorResponse('Gagal menolak transaksi');
+            }
+
+            // Refresh the order to get updated status
+            $updatedOrder = $order->fresh()->load(['financeRejector']);
+
+            return $this->successResponse([
+                'order' => $updatedOrder,
+                'message' => 'Transaksi berhasil ditolak oleh Keuangan. Kasir perlu memperbaiki transaksi sesuai arahan.'
+            ], 'Keuangan rejection berhasil');
+
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject transaction from Operational perspective (Admin only)
+     */
+    public function rejectOperational(Request $request, $id)
+    {
+        try {
+            // Validate ID parameter
+            if (!$id || $id === 'null' || $id === 'undefined') {
+                return $this->errorResponse('Order ID tidak valid', 400);
+            }
+
+            $request->validate([
+                'reason' => 'required|string|max:1000'
+            ]);
+
+            $user = auth()->user();
+
+            // Only admin can reject
+            if ($user->role !== 'admin') {
+                return $this->errorResponse('Hanya admin yang dapat melakukan penolakan', 403);
+            }
+
+            $order = Order::findOrFail($id);
+
+            if ($order->isOperationalRejected()) {
+                return $this->errorResponse('Transaksi sudah ditolak oleh Operasional sebelumnya');
+            }
+
+            $success = $order->rejectOperational($user, $request->input('reason'));
+
+            if (!$success) {
+                return $this->errorResponse('Gagal menolak transaksi');
+            }
+
+            // Refresh the order to get updated status
+            $updatedOrder = $order->fresh()->load(['operationalRejector']);
+
+            return $this->successResponse([
+                'order' => $updatedOrder,
+                'message' => 'Transaksi berhasil ditolak oleh Operasional. Kasir perlu memperbaiki transaksi sesuai arahan.'
+            ], 'Operational rejection berhasil');
 
         } catch (\Exception $e) {
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());

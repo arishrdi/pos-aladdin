@@ -5,7 +5,7 @@
   <div class="bg-white rounded-lg w-full max-w-lg mx-4 overflow-hidden shadow-lg">
     {{-- Header --}}
     <div class="flex justify-between items-center px-6 py-4 border-b">
-      <h3 class="text-xl font-semibold">Detail Transaksi</h3>
+      <h3 class="text-xl font-semibold">Detail Transaksi 123</h3>
       <button
         type="button"
         onclick="tutupModal('transactionModal')"
@@ -79,7 +79,7 @@
       {{-- Layanan Karpet Masjid --}}
       <div id="modalCarpetServiceSection" class="hidden">
         <h4 class="font-medium text-green-600 mb-2">
-          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid 
+          <i class="fas fa-rug mr-1"></i>Layanan Karpet Masjid
         </h4>
         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
           <div class="space-y-2 text-sm">
@@ -110,6 +110,60 @@
                 <span class="text-gray-600">Deal Maker:</span>
                 <span id="modalDealMaker" class="font-medium">-</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- Informasi Penolakan Keuangan --}}
+      <div id="modalFinanceRejectionSection" class="hidden">
+        <h4 class="font-medium text-red-600 mb-2">
+          <i class="fas fa-times-circle mr-1"></i>Transaksi Ditolak oleh Keuangan
+        </h4>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+          <div class="space-y-2 text-sm">
+            <div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Ditolak oleh:</span>
+                <span id="modalFinanceRejectedBy" class="font-medium text-red-700">-</span>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Tanggal Penolakan:</span>
+                <span id="modalFinanceRejectedAt" class="font-medium">-</span>
+              </div>
+            </div>
+            <div>
+              <div class="text-gray-600 mb-1 font-semibold">Alasan Penolakan:</div>
+              <div id="modalFinanceRejectionReason" class="bg-white border border-red-300 rounded p-2 text-red-700 text-xs leading-relaxed font-medium">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- Informasi Penolakan Operasional --}}
+      <div id="modalOperationalRejectionSection" class="hidden">
+        <h4 class="font-medium text-red-600 mb-2">
+          <i class="fas fa-times-circle mr-1"></i>Transaksi Ditolak oleh Operasional
+        </h4>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+          <div class="space-y-2 text-sm">
+            <div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Ditolak oleh:</span>
+                <span id="modalOperationalRejectedBy" class="font-medium text-red-700">-</span>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Tanggal Penolakan:</span>
+                <span id="modalOperationalRejectedAt" class="font-medium">-</span>
+              </div>
+            </div>
+            <div>
+              <div class="text-gray-600 mb-1 font-semibold">Alasan Penolakan:</div>
+              <div id="modalOperationalRejectionReason" class="bg-white border border-red-300 rounded p-2 text-red-700 text-xs leading-relaxed font-medium">-</div>
             </div>
           </div>
         </div>

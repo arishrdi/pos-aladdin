@@ -173,6 +173,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(OrderController::class)->prefix('orders')->middleware('role:admin')->group(function () {
             Route::post('/approve-finance/{id}', 'approveFinance'); // Keuangan approval
             Route::post('/approve-operational/{id}', 'approveOperational'); // Operational approval
+            Route::post('/reject-finance/{id}', 'rejectFinance'); // Keuangan rejection
+            Route::post('/reject-operational/{id}', 'rejectOperational'); // Operational rejection
         });
 
         // Transaction Edit approval routes (Admin only)

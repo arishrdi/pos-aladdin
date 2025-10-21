@@ -257,6 +257,22 @@
                         <div id="operationalApprovalDate" class="text-xs text-gray-600"></div>
                     </div>
                 </div>
+                <div id="financeRejectionRow" class="hidden">
+                    <p class="text-gray-500">Penolakan Keuangan</p>
+                    <div id="detailFinanceRejection" class="font-medium">
+                        <div id="financeRejectorName" class="text-sm text-red-600"></div>
+                        <div id="financeRejectionDate" class="text-xs text-gray-600"></div>
+                        <div id="financeRejectionReasonDisplay" class="text-xs text-red-700 mt-1 p-2 bg-red-50 rounded border border-red-200"></div>
+                    </div>
+                </div>
+                <div id="operationalRejectionRow" class="hidden">
+                    <p class="text-gray-500">Penolakan Operasional</p>
+                    <div id="detailOperationalRejection" class="font-medium">
+                        <div id="operationalRejectorName" class="text-sm text-red-600"></div>
+                        <div id="operationalRejectionDate" class="text-xs text-gray-600"></div>
+                        <div id="operationalRejectionReasonDisplay" class="text-xs text-red-700 mt-1 p-2 bg-red-50 rounded border border-red-200"></div>
+                    </div>
+                </div>
                 <div id="editRequestRow" class="hidden">
                     <p class="text-gray-500">Permintaan Edit</p>
                     <div id="detailEditRequest" class="font-medium">
@@ -854,13 +870,81 @@
                 Apakah Anda yakin ingin menyetujui transaksi ini dari sisi Operasional?
             </p>
             <div class="flex gap-3">
-                <button onclick="closeOperationalApprovalModal()" 
+                <button onclick="closeOperationalApprovalModal()"
                     class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
                     Batal
                 </button>
-                <button onclick="confirmOperationalApproval()" 
+                <button onclick="confirmOperationalApproval()"
                     class="flex-1 px-4 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700">
                     Ya, Setujui
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Finance Rejection Modal -->
+<div id="financeRejectionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                <i data-lucide="x-circle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Tolak Transaksi (Keuangan)</h3>
+            <p class="text-gray-600 text-center mb-4">
+                Silakan masukkan alasan penolakan transaksi dari sisi Keuangan
+            </p>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea id="financeRejectionReason"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    rows="4"
+                    placeholder="Contoh: Metode pembayaran tidak sesuai, bukti transfer tidak valid, dll."
+                    maxlength="1000"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Maksimal 1000 karakter</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeFinanceRejectionModal()"
+                    class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmFinanceRejection()"
+                    class="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    Ya, Tolak
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Operational Rejection Modal -->
+<div id="operationalRejectionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                <i data-lucide="x-circle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Tolak Transaksi (Operasional)</h3>
+            <p class="text-gray-600 text-center mb-4">
+                Silakan masukkan alasan penolakan transaksi dari sisi Operasional
+            </p>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan <span class="text-red-500">*</span></label>
+                <textarea id="operationalRejectionReason"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    rows="4"
+                    placeholder="Contoh: Data produk tidak lengkap, informasi pengiriman salah, dll."
+                    maxlength="1000"></textarea>
+                <p class="text-xs text-gray-500 mt-1">Maksimal 1000 karakter</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeOperationalRejectionModal()"
+                    class="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmOperationalRejection()"
+                    class="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
+                    Ya, Tolak
                 </button>
             </div>
         </div>
@@ -1435,7 +1519,13 @@
                 </td>
                 <td class="px-4 py-3">
                     <div class="flex flex-col gap-1">
-                        ${transaction.is_finance_approved ? `
+                        ${transaction.is_finance_rejected ? `
+                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                ✗ Ditolak
+                            </span>
+                            <span class="text-xs text-red-600 font-medium">${transaction.finance_rejected_by}</span>
+                            <span class="text-xs text-gray-500">${transaction.finance_rejected_at}</span>
+                        ` : transaction.is_finance_approved ? `
                             <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
                                 ✓ ${transaction.finance_approved_by}
                             </span>
@@ -1449,7 +1539,13 @@
                 </td>
                 <td class="px-4 py-3">
                     <div class="flex flex-col gap-1">
-                        ${transaction.is_operational_approved ? `
+                        ${transaction.is_operational_rejected ? `
+                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium whitespace-nowrap">
+                                ✗ Ditolak
+                            </span>
+                            <span class="text-xs text-red-600 font-medium">${transaction.operational_rejected_by}</span>
+                            <span class="text-xs text-gray-500">${transaction.operational_rejected_at}</span>
+                        ` : transaction.is_operational_approved ? `
                             <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium whitespace-nowrap">
                                 ✓ ${transaction.operational_approved_by}
                             </span>
@@ -1519,16 +1615,24 @@
                             Akad PDF
                         </button>
                         ` : ''}
-                        ${!transaction.is_finance_approved && transaction.id && transaction.id !== 'undefined' ? `
+                        ${!transaction.is_finance_approved && !transaction.is_finance_rejected && transaction.id && transaction.id !== 'undefined' ? `
                         <button onclick="openFinanceApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Approve Keuangan">
-                            <i data-lucide="banknote" class="w-3 h-3 mr-1"></i>
-                            Keuangan
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                            Setujui (K)
+                        </button>
+                        <button onclick="openFinanceRejectionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak (Keuangan)">
+                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
+                            Tolak (K)
                         </button>
                         ` : ''}
-                        ${!transaction.is_operational_approved && transaction.id && transaction.id !== 'undefined' ? `
-                        <button onclick="openOperationalApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Approve Operational">
-                            <i data-lucide="settings" class="w-3 h-3 mr-1"></i>
-                            Operasional
+                        ${!transaction.is_operational_approved && !transaction.is_operational_rejected && transaction.id && transaction.id !== 'undefined' ? `
+                        <button onclick="openOperationalApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Approve Operasional">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                            Setujui (O)
+                        </button>
+                        <button onclick="openOperationalRejectionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak (Operasional)">
+                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
+                            Tolak (O)
                         </button>
                         ` : ''}
                         ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
@@ -1675,7 +1779,43 @@
             } else {
                 operationalApprovalRow.classList.add('hidden');
             }
-            
+
+            // Isi rejection info untuk Finance
+            const financeRejectionRow = document.getElementById('financeRejectionRow');
+            console.log('Finance Rejection Data:', {
+                is_finance_rejected: transaction.is_finance_rejected,
+                finance_rejected_by: transaction.finance_rejected_by,
+                finance_rejected_at: transaction.finance_rejected_at,
+                finance_rejection_reason: transaction.finance_rejection_reason
+            });
+
+            if (transaction.is_finance_rejected && transaction.finance_rejected_by && transaction.finance_rejected_at) {
+                document.getElementById('financeRejectorName').textContent = `Ditolak oleh: ${transaction.finance_rejected_by}`;
+                document.getElementById('financeRejectionDate').textContent = `Pada: ${transaction.finance_rejected_at}`;
+                document.getElementById('financeRejectionReason').textContent = `Alasan: ${transaction.finance_rejection_reason || '-'}`;
+                financeRejectionRow.classList.remove('hidden');
+            } else {
+                financeRejectionRow.classList.add('hidden');
+            }
+
+            // Isi rejection info untuk Operational
+            const operationalRejectionRow = document.getElementById('operationalRejectionRow');
+            console.log('Operational Rejection Data:', {
+                is_operational_rejected: transaction.is_operational_rejected,
+                operational_rejected_by: transaction.operational_rejected_by,
+                operational_rejected_at: transaction.operational_rejected_at,
+                operational_rejection_reason: transaction.operational_rejection_reason
+            });
+
+            if (transaction.is_operational_rejected && transaction.operational_rejected_by && transaction.operational_rejected_at) {
+                document.getElementById('operationalRejectorName').textContent = `Ditolak oleh: ${transaction.operational_rejected_by}`;
+                document.getElementById('operationalRejectionDate').textContent = `Pada: ${transaction.operational_rejected_at}`;
+                document.getElementById('operationalRejectionReason').textContent = `Alasan: ${transaction.operational_rejection_reason || '-'}`;
+                operationalRejectionRow.classList.remove('hidden');
+            } else {
+                operationalRejectionRow.classList.add('hidden');
+            }
+
             // Isi edit request info
             const editRequestRow = document.getElementById('editRequestRow');
             const reviewEditBtn = document.getElementById('reviewEditBtn');
@@ -3288,6 +3428,150 @@
         } catch (error) {
             console.error('Error approving operational:', error);
             showAlert('error', 'Terjadi kesalahan saat melakukan approval Operasional');
+        }
+    }
+
+    // Rejection Modal Functions
+    function openFinanceRejectionModal(orderId) {
+        console.log('openFinanceRejectionModal called with orderId:', orderId);
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk penolakan Keuangan: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('financeRejectionReason').value = ''; // Clear previous input
+        document.getElementById('financeRejectionModal').classList.remove('hidden');
+    }
+
+    function closeFinanceRejectionModal() {
+        currentApprovalOrderId = null;
+        document.getElementById('financeRejectionReason').value = '';
+        document.getElementById('financeRejectionModal').classList.add('hidden');
+    }
+
+    function openOperationalRejectionModal(orderId) {
+        console.log('openOperationalRejectionModal called with orderId:', orderId);
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk penolakan Operasional: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('operationalRejectionReason').value = ''; // Clear previous input
+        document.getElementById('operationalRejectionModal').classList.remove('hidden');
+    }
+
+    function closeOperationalRejectionModal() {
+        currentApprovalOrderId = null;
+        document.getElementById('operationalRejectionReason').value = '';
+        document.getElementById('operationalRejectionModal').classList.add('hidden');
+    }
+
+    async function confirmFinanceRejection() {
+        console.log('confirmFinanceRejection called with currentApprovalOrderId:', currentApprovalOrderId);
+        if (!currentApprovalOrderId) return;
+
+        const reason = document.getElementById('financeRejectionReason').value.trim();
+        if (!reason) {
+            showAlert('error', 'Alasan penolakan wajib diisi');
+            return;
+        }
+
+        const orderId = currentApprovalOrderId;
+        closeFinanceRejectionModal();
+        await rejectFinance(orderId, reason);
+    }
+
+    async function confirmOperationalRejection() {
+        console.log('confirmOperationalRejection called with currentApprovalOrderId:', currentApprovalOrderId);
+        if (!currentApprovalOrderId) return;
+
+        const reason = document.getElementById('operationalRejectionReason').value.trim();
+        if (!reason) {
+            showAlert('error', 'Alasan penolakan wajib diisi');
+            return;
+        }
+
+        const orderId = currentApprovalOrderId;
+        closeOperationalRejectionModal();
+        await rejectOperational(orderId, reason);
+    }
+
+    // Rejection API Functions
+    async function rejectFinance(orderId, reason) {
+        try {
+            console.log('rejectFinance called with orderId:', orderId, 'reason:', reason);
+            if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+                showAlert('error', 'Order ID tidak valid untuk penolakan Keuangan');
+                return;
+            }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('error', 'Token tidak ditemukan. Silakan login ulang.');
+                return;
+            }
+
+            const response = await fetch(`/api/orders/reject-finance/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showAlert('success', 'Transaksi berhasil ditolak oleh Keuangan. Kasir perlu memperbaiki transaksi sesuai arahan.');
+                // Refresh the table
+                await refreshTransactionHistory();
+            } else {
+                showAlert('error', result.message || 'Gagal menolak transaksi dari Keuangan');
+            }
+        } catch (error) {
+            console.error('Error rejecting finance:', error);
+            showAlert('error', 'Terjadi kesalahan saat menolak transaksi (Keuangan)');
+        }
+    }
+
+    async function rejectOperational(orderId, reason) {
+        try {
+            console.log('rejectOperational called with orderId:', orderId, 'reason:', reason);
+            if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+                showAlert('error', 'Order ID tidak valid untuk penolakan Operasional');
+                return;
+            }
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showAlert('error', 'Token tidak ditemukan. Silakan login ulang.');
+                return;
+            }
+
+            const response = await fetch(`/api/orders/reject-operational/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ reason: reason })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showAlert('success', 'Transaksi berhasil ditolak oleh Operasional. Kasir perlu memperbaiki transaksi sesuai arahan.');
+                // Refresh the table
+                await refreshTransactionHistory();
+            } else {
+                showAlert('error', result.message || 'Gagal menolak transaksi dari Operasional');
+            }
+        } catch (error) {
+            console.error('Error rejecting operational:', error);
+            showAlert('error', 'Terjadi kesalahan saat menolak transaksi (Operasional)');
         }
     }
 

@@ -504,14 +504,14 @@
                     if (transaksi.bonus_items && transaksi.bonus_items.length > 0) {
                         console.log('Transaction with bonus:', transaksi.order_number, transaksi.bonus_items);
                     }
-                    
+
                     return {
                     id: transaksi.id,
                     invoice: transaksi.order_number,  // Menggunakan order_number sebagai invoice
                     waktu: transaksi.created_at,      // Menggunakan created_at sebagai waktu
                     kasir: transaksi.user,
                     pembayaran: transaksi.payment_method,
-                    status: transaksi.status === 'completed' ? 'Selesai' : 
+                    status: transaksi.status === 'completed' ? 'Selesai' :
                             transaksi.status === 'canceled' ? 'Dibatalkan' : transaksi.status,
                     total: parseFloat(transaksi.total),
                     date: transaksi.created_at.split(' ')[0],
@@ -541,7 +541,16 @@
                     installation_notes: transaksi.installation_notes || null,
                     // Tambahkan outlet collaboration information
                     leads_cabang_outlet: transaksi.leads_cabang_outlet || null,
-                    deal_maker_outlet: transaksi.deal_maker_outlet || null
+                    deal_maker_outlet: transaksi.deal_maker_outlet || null,
+                    // Tambahkan dual approval rejection data
+                    is_finance_rejected: transaksi.is_finance_rejected || false,
+                    finance_rejected_by: transaksi.finance_rejected_by || null,
+                    finance_rejected_at: transaksi.finance_rejected_at || null,
+                    finance_rejection_reason: transaksi.finance_rejection_reason || null,
+                    is_operational_rejected: transaksi.is_operational_rejected || false,
+                    operational_rejected_by: transaksi.operational_rejected_by || null,
+                    operational_rejected_at: transaksi.operational_rejected_at || null,
+                    operational_rejection_reason: transaksi.operational_rejection_reason || null
                     };
                 });
                 
@@ -1550,6 +1559,28 @@
             carpetServiceSection.classList.remove('hidden');
         } else {
             carpetServiceSection.classList.add('hidden');
+        }
+
+        // Handle Finance Rejection Information
+        const financeRejectionSection = document.getElementById('modalFinanceRejectionSection');
+        if (t.is_finance_rejected && t.finance_rejected_by && t.finance_rejected_at) {
+            document.getElementById('modalFinanceRejectedBy').textContent = t.finance_rejected_by || '-';
+            document.getElementById('modalFinanceRejectedAt').textContent = formatWaktu(t.finance_rejected_at) || '-';
+            document.getElementById('modalFinanceRejectionReason').textContent = t.finance_rejection_reason || 'Tidak ada alasan yang diberikan';
+            financeRejectionSection.classList.remove('hidden');
+        } else {
+            financeRejectionSection.classList.add('hidden');
+        }
+
+        // Handle Operational Rejection Information
+        const operationalRejectionSection = document.getElementById('modalOperationalRejectionSection');
+        if (t.is_operational_rejected && t.operational_rejected_by && t.operational_rejected_at) {
+            document.getElementById('modalOperationalRejectedBy').textContent = t.operational_rejected_by || '-';
+            document.getElementById('modalOperationalRejectedAt').textContent = formatWaktu(t.operational_rejected_at) || '-';
+            document.getElementById('modalOperationalRejectionReason').textContent = t.operational_rejection_reason || 'Tidak ada alasan yang diberikan';
+            operationalRejectionSection.classList.remove('hidden');
+        } else {
+            operationalRejectionSection.classList.add('hidden');
         }
 
         bukaModal('transactionModal');

@@ -48,7 +48,13 @@ class Order extends Model
         'finance_approved_by',
         'finance_approved_at',
         'operational_approved_by',
-        'operational_approved_at'
+        'operational_approved_at',
+        'finance_rejection_reason',
+        'finance_rejected_by',
+        'finance_rejected_at',
+        'operational_rejection_reason',
+        'operational_rejected_by',
+        'operational_rejected_at'
     ];
 
     protected $casts = [
@@ -57,7 +63,9 @@ class Order extends Model
         'cancellation_processed_at' => 'datetime',
         'installation_date' => 'date',
         'finance_approved_at' => 'datetime',
-        'operational_approved_at' => 'datetime'
+        'operational_approved_at' => 'datetime',
+        'finance_rejected_at' => 'datetime',
+        'operational_rejected_at' => 'datetime'
     ];
 
     protected $appends = ['payment_proof_url', 'contract_pdf_url'];
@@ -148,6 +156,16 @@ class Order extends Model
     public function operationalApprover()
     {
         return $this->belongsTo(User::class, 'operational_approved_by');
+    }
+
+    public function financeRejector()
+    {
+        return $this->belongsTo(User::class, 'finance_rejected_by');
+    }
+
+    public function operationalRejector()
+    {
+        return $this->belongsTo(User::class, 'operational_rejected_by');
     }
 
     // Cancellation relationships
@@ -270,6 +288,16 @@ class Order extends Model
         return !is_null($this->operational_approved_by) && !is_null($this->operational_approved_at);
     }
 
+    public function isFinanceRejected(): bool
+    {
+        return !is_null($this->finance_rejected_by) && !is_null($this->finance_rejected_at);
+    }
+
+    public function isOperationalRejected(): bool
+    {
+        return !is_null($this->operational_rejected_by) && !is_null($this->operational_rejected_at);
+    }
+
     public function isFullyApproved(): bool
     {
         return $this->isFinanceApproved() && $this->isOperationalApproved();
@@ -283,7 +311,9 @@ class Order extends Model
 
     public function getDualApprovalStatus(): string
     {
-        if ($this->isFullyApproved()) {
+        if ($this->isFinanceRejected() || $this->isOperationalRejected()) {
+            return 'rejected';
+        } elseif ($this->isFullyApproved()) {
             return 'fully_approved';
         } elseif ($this->isPartiallyApproved()) {
             return 'partially_approved';
@@ -340,6 +370,38 @@ class Order extends Model
         }
 
         $this->update($updateData);
+
+        return true;
+    }
+
+    public function rejectFinance(User $rejector, string $reason): bool
+    {
+        if ($this->isFinanceRejected()) {
+            return false;
+        }
+
+        $this->update([
+            'finance_rejected_by' => $rejector->id,
+            'finance_rejected_at' => now(),
+            'finance_rejection_reason' => $reason,
+            'status' => 'rejected'
+        ]);
+
+        return true;
+    }
+
+    public function rejectOperational(User $rejector, string $reason): bool
+    {
+        if ($this->isOperationalRejected()) {
+            return false;
+        }
+
+        $this->update([
+            'operational_rejected_by' => $rejector->id,
+            'operational_rejected_at' => now(),
+            'operational_rejection_reason' => $reason,
+            'status' => 'rejected'
+        ]);
 
         return true;
     }
