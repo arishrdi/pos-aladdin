@@ -833,6 +833,68 @@
     </div>
 </div>
 
+<!-- Finance Action Selection Modal -->
+<div id="financeActionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
+                <i data-lucide="wallet" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Aksi Keuangan</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Silakan pilih tindakan yang ingin dilakukan untuk transaksi ini dari sisi Keuangan.
+            </p>
+            <div class="space-y-3">
+                <button onclick="handleFinanceAction('approve')"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                    Setujui Transaksi
+                </button>
+                <button onclick="handleFinanceAction('reject')"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i>
+                    Tolak Transaksi
+                </button>
+            </div>
+            <button onclick="closeFinanceActionModal()"
+                class="w-full mt-4 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                Batal
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Operational Action Selection Modal -->
+<div id="operationalActionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-md">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full">
+                <i data-lucide="settings" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-center mb-2">Aksi Operasional</h3>
+            <p class="text-gray-600 text-center mb-6">
+                Pilih tindakan yang sesuai untuk transaksi ini dari sisi Operasional.
+            </p>
+            <div class="space-y-3">
+                <button onclick="handleOperationalAction('approve')"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors">
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                    Setujui Transaksi
+                </button>
+                <button onclick="handleOperationalAction('reject')"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i>
+                    Tolak Transaksi
+                </button>
+            </div>
+            <button onclick="closeOperationalActionModal()"
+                class="w-full mt-4 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                Batal
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Finance Approval Confirmation Modal -->
 <div id="financeApprovalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-md">
@@ -1616,23 +1678,15 @@
                         </button>
                         ` : ''}
                         ${!transaction.is_finance_approved && !transaction.is_finance_rejected && transaction.id && transaction.id !== 'undefined' ? `
-                        <button onclick="openFinanceApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Approve Keuangan">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
-                            Setujui (K)
-                        </button>
-                        <button onclick="openFinanceRejectionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak (Keuangan)">
-                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
-                            Tolak (K)
+                        <button onclick="openFinanceActionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors" title="Aksi Keuangan">
+                            <i data-lucide="wallet" class="w-3 h-3 mr-1"></i>
+                            Keuangan
                         </button>
                         ` : ''}
                         ${!transaction.is_operational_approved && !transaction.is_operational_rejected && transaction.id && transaction.id !== 'undefined' ? `
-                        <button onclick="openOperationalApprovalModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Approve Operasional">
-                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
-                            Setujui (O)
-                        </button>
-                        <button onclick="openOperationalRejectionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-red-100 text-red-700 hover:bg-red-200 rounded transition-colors" title="Tolak (Operasional)">
-                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i>
-                            Tolak (O)
+                        <button onclick="openOperationalActionModal(${transaction.id})" class="inline-flex items-center px-2 py-1 text-xs bg-purple-100 text-purple-700 hover:bg-purple-200 rounded transition-colors" title="Aksi Operasional">
+                            <i data-lucide="settings" class="w-3 h-3 mr-1"></i>
+                            Operasional
                         </button>
                         ` : ''}
                         ${(transaction.status === 'completed' || transaction.status === 'pending') && !transaction.cancellation_status ? `
@@ -3306,6 +3360,71 @@
 
     // Modal Management Variables
     let currentApprovalOrderId = null;
+
+    // Compact Action Modal Functions
+    function openFinanceActionModal(orderId) {
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk aksi Keuangan: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('financeActionModal').classList.remove('hidden');
+    }
+
+    function closeFinanceActionModal(resetId = true) {
+        if (resetId) {
+            currentApprovalOrderId = null;
+        }
+        document.getElementById('financeActionModal').classList.add('hidden');
+    }
+
+    function handleFinanceAction(action) {
+        const orderId = currentApprovalOrderId;
+        if (!orderId) {
+            showAlert('error', 'Order ID tidak valid untuk aksi Keuangan.');
+            return;
+        }
+
+        closeFinanceActionModal(false);
+
+        if (action === 'approve') {
+            openFinanceApprovalModal(orderId);
+        } else if (action === 'reject') {
+            openFinanceRejectionModal(orderId);
+        }
+    }
+
+    function openOperationalActionModal(orderId) {
+        if (!orderId || orderId === 'undefined' || orderId === 'null' || orderId === undefined || orderId === null) {
+            showAlert('error', 'Order ID tidak valid untuk aksi Operasional: ' + orderId);
+            return;
+        }
+        currentApprovalOrderId = orderId;
+        document.getElementById('operationalActionModal').classList.remove('hidden');
+    }
+
+    function closeOperationalActionModal(resetId = true) {
+        if (resetId) {
+            currentApprovalOrderId = null;
+        }
+        document.getElementById('operationalActionModal').classList.add('hidden');
+    }
+
+    function handleOperationalAction(action) {
+        const orderId = currentApprovalOrderId;
+        if (!orderId) {
+            showAlert('error', 'Order ID tidak valid untuk aksi Operasional.');
+            return;
+        }
+
+        closeOperationalActionModal(false);
+
+        if (action === 'approve') {
+            openOperationalApprovalModal(orderId);
+        } else if (action === 'reject') {
+            openOperationalRejectionModal(orderId);
+        }
+    }
 
     // Dual Approval Modal Functions
     function openFinanceApprovalModal(orderId) {
