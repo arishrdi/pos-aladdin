@@ -399,7 +399,7 @@
         connectOutletSelectionToHistory();
 
         // Refresh Lucide icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     });
 
     // Function to get currently selected outlet ID - sama seperti di riwayat stok
@@ -694,7 +694,7 @@
             tbody.appendChild(row);
         });
         
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     // Fungsi untuk fetch detail transaksi
@@ -853,7 +853,7 @@
             modal.classList.add('flex');
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
 
         } catch (error) {
@@ -1212,7 +1212,7 @@
         }, 5000);
         
         // Refresh ikon Lucide
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     // Function untuk apply filters
@@ -1704,7 +1704,7 @@
             modal.classList.add('flex');
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
 
         } catch (error) {

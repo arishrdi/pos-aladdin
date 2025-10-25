@@ -403,7 +403,7 @@
         
         // Initialize Lucide icons after adding new DOM elements
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
     }
 
@@ -644,7 +644,7 @@
         
         // Initialize Lucide icons in the alert
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
         
         setTimeout(() => {

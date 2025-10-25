@@ -130,7 +130,7 @@
         
         // Inisialisasi ikon Lucide
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         // Auto close setelah 5 detik
@@ -443,7 +443,7 @@
             `;
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
         }
     }
@@ -474,7 +474,7 @@
             `;
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
             return;
         }
@@ -536,7 +536,7 @@
         
         // Inisialisasi ikon Lucide
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     }
 
@@ -656,7 +656,7 @@
                 tbody.appendChild(noResultsRow);
                 
                 if (window.lucide) {
-                    window.lucide.createIcons();
+                    window.lucide.createIcons({ icons });
                 }
             } else {
                 // Remove "no results" row if it exists

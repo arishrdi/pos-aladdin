@@ -15,9 +15,11 @@
     <!-- SweetAlert2 -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         @keyframes slideIn {
             from {
@@ -1045,7 +1047,7 @@
         // Initialize POS Application
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize Lucide icons
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 
     // Wait for all dependencies to load
     if (typeof CartManager === 'undefined' || typeof SimplePaymentManager === 'undefined') {
@@ -1452,7 +1454,7 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
                 <p class="text-gray-500 text-lg font-medium mt-4">Produk tidak ditemukan</p>
             </div>
         `;
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         return;
     }
 
@@ -1512,7 +1514,7 @@ function renderProducts(filterCategory = 'all', searchTerm = '') {
         });
     });
 
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 }
 
 // Attach event listeners

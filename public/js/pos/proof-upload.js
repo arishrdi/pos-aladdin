@@ -268,7 +268,7 @@ class ProofUploadManager {
 
         document.body.appendChild(modal);
         this.attachCashManagementEventListeners(modal);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Render proof upload section
@@ -408,7 +408,7 @@ class ProofUploadManager {
             previewContainer.appendChild(previewElement);
         });
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Validate file
@@ -557,7 +557,7 @@ class ProofUploadManager {
         `;
 
         document.body.appendChild(modal);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Show pending approvals dashboard

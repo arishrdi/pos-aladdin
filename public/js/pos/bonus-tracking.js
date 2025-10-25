@@ -178,7 +178,7 @@ class BonusTrackingManager {
         this.attachBonusTrackingEventListeners(modal);
         this.loadBonusData();
         
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Load bonus data from API
@@ -352,7 +352,7 @@ class BonusTrackingManager {
             `;
         }).join('');
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Get status badge class
@@ -526,7 +526,7 @@ class BonusTrackingManager {
         `;
 
             document.body.appendChild(modal);
-            lucide.createIcons();
+            lucide.createIcons({ icons });
             
         } catch (error) {
             console.error('Error loading bonus details:', error);

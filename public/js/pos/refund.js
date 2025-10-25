@@ -44,7 +44,7 @@ class RefundManager {
         `;
 
         this.attachRefundEventListeners(modal);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         return modal;
     }
 
@@ -278,7 +278,7 @@ class RefundManager {
                 this.renderOrderDetails(modal, data.data);
                 modal.querySelector('#refundContent').innerHTML = this.renderRefundForm(orderId);
                 this.attachRefundEventListeners(modal);
-                lucide.createIcons();
+                lucide.createIcons({ icons });
             } else {
                 throw new Error(data.message || 'Gagal memuat detail transaksi');
             }
@@ -556,7 +556,7 @@ class RefundManager {
         // Load initial data
         this.loadRefundsForApproval(modal);
         
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         return modal;
     }
 

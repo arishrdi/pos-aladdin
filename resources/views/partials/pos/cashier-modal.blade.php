@@ -1,6 +1,6 @@
 <!-- Alert Container -->
 <div id="alertContainer" class="fixed top-5 right-5 z-[9999] space-y-3"></div>
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <!-- Kas Kasir Modal -->
 <div id="cashierModal" class="modal fixed inset-0 z-50 hidden">
@@ -125,7 +125,7 @@
 
 <script>
     // Initialize Lucide icons
-    lucide.createIcons();
+    lucide.createIcons({ icons });
     
     let currentCashBalance = 0;
     let currentCashRegisterId = null;

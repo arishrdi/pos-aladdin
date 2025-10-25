@@ -746,7 +746,7 @@ function filterData() {
         alertContainer.appendChild(alert);
 
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         // Auto remove alert after 5 seconds

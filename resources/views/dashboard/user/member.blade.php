@@ -126,7 +126,7 @@
 
     function initializeLucide() {
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     }
 
@@ -224,7 +224,7 @@
         `;
 
         alertContainer.prepend(alertElement);
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         
         // Auto close after 5 seconds
         alertTimeout = setTimeout(() => closeAlert(alertId), 5000);
@@ -308,7 +308,7 @@
                     </td>
                 </tr>
             `;
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons({ icons });
             return;
         }
 
@@ -381,7 +381,7 @@
             tableBody.appendChild(row);
         });
 
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     //fungsi panggil role di localStorage

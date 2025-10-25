@@ -674,7 +674,7 @@ class CartManager {
         const totals = this.calculateTotals();
         this.updateTotalsDisplay(totals);
         
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         this.attachCartEventListeners();
     }
 
@@ -997,7 +997,7 @@ class CartManager {
             }
         });
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Populate bonus products list
@@ -1028,7 +1028,7 @@ class CartManager {
                     <p class="text-sm mt-2">Semua produk sudah habis atau sudah ada di keranjang</p>
                 </div>
             `;
-            lucide.createIcons();
+            lucide.createIcons({ icons });
             return;
         }
 
@@ -1160,7 +1160,7 @@ class CartManager {
             });
         });
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Trigger product list update (realtime stock update)

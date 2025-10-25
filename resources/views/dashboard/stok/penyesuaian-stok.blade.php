@@ -429,7 +429,7 @@
         
         // Re-initialize Lucide icons
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     }
 
@@ -549,7 +549,7 @@
         
         // Inisialisasi ikon Lucide
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         // Auto close setelah 5 detik

@@ -705,7 +705,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Initialize Lucide icons
-        lucide.createIcons();
+        lucide.createIcons({ icons });
 
         // Get DOM elements
         const sidebar = document.getElementById('sidebar');
@@ -999,7 +999,7 @@ async function loadOutletsFromAPI() {
         });
 
         // Re-initialize Lucide icons
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         
         // Set outlet aktif sebagai default
         const savedOutletId = localStorage.getItem('selectedOutletId');

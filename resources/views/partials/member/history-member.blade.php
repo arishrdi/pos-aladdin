@@ -326,7 +326,7 @@
     //     });
         
     //     // Refresh Lucide icons
-    //     if (window.lucide) window.lucide.createIcons();
+    //     if (window.lucide) window.lucide.createIcons({ icons });
     // }
     
     // Render history data to table
@@ -393,7 +393,7 @@
         });
         
         // Refresh Lucide icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
     
     // Fungsi untuk menampilkan detail order

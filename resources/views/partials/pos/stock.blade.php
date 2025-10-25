@@ -170,12 +170,12 @@
 <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-3 w-80"></div>
 
 <!-- Include Lucide Icons -->
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <script>
     // Initialize Lucide Icons
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     });
 
     // Modern notification function
@@ -224,7 +224,7 @@
             setTimeout(() => notification.remove(), 300);
         }, 5000);
         
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Function to override openModal - will be called after all scripts loaded
@@ -383,7 +383,7 @@
         
         const productList = document.getElementById('productList');
         productList.innerHTML = '<div class="p-4 text-center text-gray-500"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto"></i> Memuat produk...</div>';
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     
         const apiUrl = `/api/products/outlet/${outletId}`;
         console.log('API URL:', apiUrl);
@@ -720,7 +720,7 @@
                     historyTableBody.appendChild(row);
                 });
                 
-                lucide.createIcons();
+                lucide.createIcons({ icons });
             } else {
                 showNoDataMessage(historyTableBody);
             }
@@ -738,7 +738,7 @@
                 </tr>
             `;
             
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         });
     }
 
@@ -753,7 +753,7 @@
                 </td>
             </tr>
         `;
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     function submitStockAdjustment() {
@@ -865,7 +865,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Stock modal script loaded');
         console.log('window.openModal function:', window.openModal);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     });
     
     // Also check when window loads (in case DOMContentLoaded already fired)

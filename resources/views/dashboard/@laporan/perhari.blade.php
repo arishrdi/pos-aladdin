@@ -108,10 +108,10 @@
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+
 <script>
     // Initialize lucide icons
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 
     // Global variables
     let currentOutletId = getSelectedOutletId(); // Get initial outlet ID using function
@@ -442,7 +442,7 @@
                 <p class="text-xs text-gray-500 mt-2">Periode ${currentData.date_from} - ${currentData.date_to}</p>
             </div>
         `;
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Render transaction table
@@ -477,7 +477,7 @@
                 </td>
             `;
             tableBody.appendChild(row);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
         });
     }
 
@@ -822,7 +822,7 @@
         alertContainer.appendChild(alert);
 
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         // Auto remove after 5 seconds

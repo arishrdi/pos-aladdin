@@ -333,7 +333,7 @@
         
         // Initialize Lucide icons
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
     }
 
@@ -1016,7 +1016,7 @@
         
         // Initialize Lucide icons for the new alert
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
         
         setTimeout(() => {

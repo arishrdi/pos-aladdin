@@ -6,5 +6,5 @@ window.lucide = { createIcons, icons };
 
 // Auto-initialize icons on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
-    createIcons();
+    createIcons({ icons });
 });

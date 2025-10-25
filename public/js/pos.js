@@ -2,7 +2,7 @@ let processPaymentHandler;
 
 document.addEventListener('DOMContentLoaded', function () {
   // Initialize Lucide icons
-  lucide.createIcons();
+  lucide.createIcons({ icons });
 
   // Initialize cart and product data
   let cart = [];
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
       iconColor: 'white'
     });
 
-    lucide.createIcons();
+    lucide.createIcons({ icons });
   }
 
   // Modal functions
@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <p class="text-gray-400 text-sm mt-1">Silakan perbarui data produk</p>
                     </div>
                 `;
-      lucide.createIcons();
+      lucide.createIcons({ icons });
       return;
     }
 
@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <p class="text-gray-400 text-sm mt-1">Coba kata kunci atau kategori lain</p>
                     </div>
                 `;
-      lucide.createIcons();
+      lucide.createIcons({ icons });
       return;
     }
 
@@ -658,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Refresh Lucide icons
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 
     // Add event listeners to all "Add to Cart" buttons
     document.querySelectorAll('.btn-add-to-cart').forEach(button => {
@@ -822,7 +822,7 @@ document.addEventListener('DOMContentLoaded', function () {
     taxAmountElement.textContent = `Rp ${tax.toLocaleString('id-ID')}`;
     totalElement.textContent = `Rp ${grandTotal.toLocaleString('id-ID')}`;
 
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 
     document.querySelectorAll('.qty-input').forEach(input => {
       input.addEventListener('change', function () {
@@ -1146,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         <p>QR Code tidak tersedia</p>
                                     </div>
                                 `;
-            lucide.createIcons();
+            lucide.createIcons({ icons });
           }
         }
         else {
@@ -1165,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     methodInput.value = '';
     paymentMethodsContainer.appendChild(methodInput);
 
-    lucide.createIcons();
+    lucide.createIcons({ icons });
   }
 
   function setPaymentButtonState(isProcessing) {

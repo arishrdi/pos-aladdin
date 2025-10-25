@@ -273,7 +273,7 @@
 
             // Inisialisasi ikon Lucide
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
         }
 
@@ -323,7 +323,7 @@
             alertContainer.prepend(alertElement);
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
             
             setTimeout(() => {

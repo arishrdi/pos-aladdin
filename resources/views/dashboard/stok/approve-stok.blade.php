@@ -126,7 +126,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+
 <script>
     // Global variables
     let currentApprovalId = null;
@@ -407,7 +407,7 @@ async function updateOutletNameDisplay(outletId) {
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons(); // Cara baru untuk v2+
+        lucide.createIcons({ icons }); // Cara baru untuk v2+
         
         // Event listener untuk modal
         document.getElementById('modalCancel').addEventListener('click', hideConfirmationModal);
@@ -697,7 +697,7 @@ async function updateOutletNameDisplay(outletId) {
 
         // Inisialisasi ulang ikon Lucide
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
     }
 
@@ -765,7 +765,7 @@ async function updateOutletNameDisplay(outletId) {
         
         // Inisialisasi ikon
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
 
         // Hapus alert setelah 5 detik

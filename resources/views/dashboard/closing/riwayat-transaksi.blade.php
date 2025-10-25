@@ -1245,7 +1245,7 @@
         connectOutletSelectionToHistory();
 
         // Refresh Lucide icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     });
 
     // Function to get currently selected outlet ID - sama seperti di riwayat stok
@@ -1707,7 +1707,7 @@
             tbody.appendChild(row);
         });
         
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         
         // Setup scroll indicator untuk tabel
         setupTableScrollIndicator();
@@ -2188,7 +2188,7 @@
             modal.classList.add('flex');
             
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
 
         } catch (error) {
@@ -2547,7 +2547,7 @@
         }, 5000);
         
         // Refresh ikon Lucide
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     // Function to clear all filters
@@ -3192,7 +3192,7 @@
         summaryElement.classList.remove('hidden');
 
         // Refresh Lucide icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     function getPaymentMethodClass(method) {
@@ -4460,7 +4460,7 @@
         `).join('');
 
         // Refresh Lucide icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
 
     // Helper function to get edit type class

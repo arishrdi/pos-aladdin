@@ -92,7 +92,7 @@ function showNotification(message, type = 'success') {
         iconColor: 'white'
     });
 
-    lucide.createIcons();
+    lucide.createIcons({ icons });
 }
 
 // Generate invoice number dengan format: OUTLET-YYYYMMDD-XXXX

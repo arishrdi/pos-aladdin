@@ -227,7 +227,7 @@ class PaymentManager {
         `;
 
         this.attachPaymentEventListeners(totals);
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Render member section
@@ -517,7 +517,7 @@ class PaymentManager {
         // Re-render member section
         const memberSection = document.querySelector('.relative');
         memberSection.innerHTML = this.renderMemberSection();
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Update payment summary when tax changes
@@ -782,6 +782,6 @@ class PaymentManager {
             paymentDetails.innerHTML = '';
         }
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 }

@@ -521,7 +521,7 @@ function showAlert(type, message) {
     `;
     alertContainer.appendChild(alert);
     
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
     
     setTimeout(() => {
         if (alert.parentNode) alert.remove();
@@ -593,7 +593,7 @@ function renderCashRequestHistory(data) {
                 </td>
             </tr>
         `;
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         return;
     }
 
@@ -672,7 +672,7 @@ function renderCashRequestHistory(data) {
         tableBody.appendChild(row);
     });
     
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 }
 
 function viewAdminNotes(notes, status) {
@@ -728,7 +728,7 @@ function renderPendingRequests(data) {
                 </td>
             </tr>
         `;
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         return;
     }
 
@@ -792,7 +792,7 @@ function renderPendingRequests(data) {
         tableBody.appendChild(row);
     });
     
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 }
 
 function updatePendingCount(count) {
@@ -814,7 +814,7 @@ function approveRequest(id, typeText, amount, requesterName) {
     `;
     document.getElementById('approveNotes').value = '';
     document.getElementById('approveModal').classList.remove('hidden');
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 }
 
 function rejectRequest(id, typeText, amount, requesterName) {
@@ -832,7 +832,7 @@ function rejectRequest(id, typeText, amount, requesterName) {
     `;
     document.getElementById('rejectNotes').value = '';
     document.getElementById('rejectModal').classList.remove('hidden');
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 }
 
 function viewProofFiles(requestId) {
@@ -900,7 +900,7 @@ function displayProofFiles(proofUrls) {
     }
     
     document.getElementById('proofModal').classList.remove('hidden');
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 }
 
 function closeApprovalModal() {
@@ -962,7 +962,7 @@ function submitApproval(event) {
     .finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     });
 }
 
@@ -1014,7 +1014,7 @@ function submitRejection(event) {
     .finally(() => {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     });
 }
 
@@ -1446,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Update icons untuk row content
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         
         // Show visual indicators untuk calculation method
         updateBalanceMethodIndicator(useComprehensiveBalance);
@@ -1496,7 +1496,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Update icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     }
     
     function updateInfoBanner(isComprehensive) {
@@ -1603,7 +1603,7 @@ function openAdminCashModal(type) {
         modal.classList.remove('hidden');
         
         // Update icons
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
         
         // Setup currency formatting for admin cash amount
         setupAdminCashCurrencyFormatting();
@@ -1736,7 +1736,7 @@ function openAdminCashModal(type) {
         .finally(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons({ icons });
         });
 }
 </script>

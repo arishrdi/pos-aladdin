@@ -221,7 +221,7 @@ class ApprovalDashboardManager {
         this.attachApprovalDashboardEventListeners(modal);
         this.loadApprovalData();
         
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Load approval data from various sources
@@ -467,7 +467,7 @@ class ApprovalDashboardManager {
             </tr>
         `).join('');
 
-        lucide.createIcons();
+        lucide.createIcons({ icons });
     }
 
     // Get type-specific styling and labels

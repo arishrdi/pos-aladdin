@@ -260,7 +260,7 @@
         });
 
         if (window.lucide) {
-            lucide.createIcons();
+            lucide.createIcons({ icons });
         }
     }
 
@@ -482,7 +482,7 @@
         alertContainer.appendChild(alert);
         
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         setTimeout(() => {

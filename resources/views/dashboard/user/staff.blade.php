@@ -136,7 +136,7 @@
         
         // Initialize Lucide Icons
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         // Setup event listeners
@@ -450,7 +450,7 @@
             
             // Refresh Lucide icons for the empty state
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
             return;
         }
@@ -518,7 +518,7 @@
         
         // Refresh Lucide icons
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     }
 
@@ -586,7 +586,7 @@
         alertContainer.prepend(alertElement);
         
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
         
         setTimeout(() => {

@@ -424,7 +424,7 @@ const ProductManager = (() => {
 
     // Initialize Lucide icons
     const initLucideIcons = () => {
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     };
 
     // Show alert notification
@@ -701,7 +701,7 @@ const ProductManager = (() => {
         // Initialize all barcodes after DOM is updated
         JsBarcode(".barcode").init();
 
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons({ icons });
     };
 
     // Format number for currency display
@@ -785,7 +785,7 @@ const ProductManager = (() => {
             // Set loading state
             btnSimpan.disabled = true;
             btnSimpan.innerHTML = '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons({ icons });
 
             // Prepare form data
             const formData = new FormData(form);
@@ -891,7 +891,7 @@ const ProductManager = (() => {
             if (btnEdit) {
                 btnEdit.disabled = true;
                 btnEdit.innerHTML = '<i data-lucide="loader-circle" class="animate-spin w-4 h-4"></i>';
-                if (window.lucide) window.lucide.createIcons();
+                if (window.lucide) window.lucide.createIcons({ icons });
             }
     
             const token = localStorage.getItem("token");
@@ -1025,7 +1025,7 @@ const ProductManager = (() => {
             if (btnEdit) {
                 btnEdit.disabled = false;
                 btnEdit.innerHTML = originalText;
-                if (window.lucide) window.lucide.createIcons();
+                if (window.lucide) window.lucide.createIcons({ icons });
             }
         }
     };
@@ -1121,7 +1121,7 @@ const ProductManager = (() => {
             btnSimpan.disabled = true;
             btnSimpan.innerHTML =
                 '<i data-lucide="loader-circle" class="animate-spin mr-2"></i> Menyimpan...';
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons({ icons });
     
             const id = document.getElementById("editProdukId").textContent;
             const formData = new FormData();
@@ -1266,7 +1266,7 @@ const ProductManager = (() => {
         } finally {
             btnSimpan.disabled = false;
             btnSimpan.innerHTML = originalText;
-            if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons({ icons });
         }
     };
 

@@ -85,7 +85,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize Lucide icons
-        lucide.createIcons();
+        lucide.createIcons({ icons });
 
         
         // Profile dropdown functionality
@@ -317,7 +317,7 @@ async function loadNotifications() {
 
         // Refresh icons if lucide exists
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     } catch (error) {
         console.error('Error loading notifications:', error);

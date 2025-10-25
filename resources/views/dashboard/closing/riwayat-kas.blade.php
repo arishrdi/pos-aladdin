@@ -347,7 +347,7 @@
             
             // Make sure Lucide icons are initialized for the new alert
             if (window.lucide) {
-                window.lucide.createIcons();
+                window.lucide.createIcons({ icons });
             }
             
             // Auto remove after 5 seconds

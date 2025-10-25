@@ -73,7 +73,7 @@ const showAlert = (type, message) => {
     `;
 
     alertContainer.prepend(alertElement);
-    if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons({ icons });
 
     // Auto-close after 2 seconds
     setTimeout(() => closeAlert(alertId), 1300);

@@ -437,7 +437,7 @@
         
         // Reinitialize Lucide icons for the new content
         if (window.lucide) {
-            window.lucide.createIcons();
+            window.lucide.createIcons({ icons });
         }
     }
 
