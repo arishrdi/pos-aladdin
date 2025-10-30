@@ -86,7 +86,7 @@ class OrderController extends Controller
             'mosque_id' => 'nullable|exists:mosques,id',
             'leads_cabang_outlet_id' => 'nullable|exists:outlets,id',
             'deal_maker_outlet_id' => 'nullable|exists:outlets,id',
-            'contract_pdf' => 'nullable|file|mimes:pdf|max:10240', // Max 10MB for contract PDF
+            'contract_pdf' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // Max 10MB for contract PDF
         ]);
 
         try {
@@ -113,7 +113,8 @@ class OrderController extends Controller
             $contractPdfPath = null;
             if ($request->hasFile('contract_pdf')) {
                 $contractFile = $request->file('contract_pdf');
-                $contractFileName = 'contract_' . time() . '_' . Str::random(10) . '.pdf';
+                $originalExtension = $contractFile->getClientOriginalExtension();
+                $contractFileName = 'akad_' . time() . '_' . Str::random(10) . '.' . $originalExtension;
 
                 // Pastikan direktori ada
                 $contractUploadDir = public_path('uploads/contracts');

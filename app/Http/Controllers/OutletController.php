@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CashRegister;
 use App\Models\Outlet;
+use App\Models\OutletMonthlyTarget;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,19 +20,19 @@ class OutletController extends Controller
     {
         try {
             $user = $request->user();
-            
+
             if ($user->role === 'admin') {
-                $outlets = Outlet::all();
+                $outlets = Outlet::with('monthlyTargets')->get();
             } elseif ($user->role === 'supervisor') {
                 // Get outlets assigned to supervisor via many-to-many relationship
-                $outlets = $user->outlets;
+                $outlets = $user->outlets()->with('monthlyTargets')->get();
             } elseif ($user->role === 'kasir') {
                 // Get only the outlet assigned to kasir
-                $outlets = $user->outlet ? collect([$user->outlet]) : collect([]);
+                $outlets = $user->outlet ? Outlet::with('monthlyTargets')->where('id', $user->outlet->id)->get() : collect([]);
             } else {
                 $outlets = collect([]);
             }
-            
+
             return $this->successResponse($outlets, 'Outlets retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
@@ -41,7 +42,7 @@ class OutletController extends Controller
     public function allOutlets()
     {
         try {
-            $outlets = Outlet::all();
+            $outlets = Outlet::with('monthlyTargets')->get();
             return $this->successResponse($outlets, 'All outlets retrieved successfully');
         } catch (\Throwable $th) {
             return $this->errorResponse($th->getMessage());
@@ -54,7 +55,7 @@ class OutletController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
+            $rules = [
                 'name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
                 'phone' => 'required|string|max:255',
@@ -72,11 +73,17 @@ class OutletController extends Controller
                 'non_pkp_nama_bank' => 'required|string|max:255',
                 'non_pkp_nomor_transaksi_bank' => 'required|string',
                 'target_tahunan' => 'nullable|numeric|min:0',
-                'target_bulanan' => 'nullable|numeric|min:0',
-            ]);
-    
+            ];
+
+            // Validasi monthly targets (Januari - Desember)
+            for ($month = 1; $month <= 12; $month++) {
+                $rules["target_bulanan_$month"] = 'nullable|numeric|min:0';
+            }
+
+            $request->validate($rules);
+
             DB::beginTransaction();
-    
+
             $outletData = [
                 'name' => $request->name,
                 'address' => $request->address,
@@ -94,22 +101,36 @@ class OutletController extends Controller
                 'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
                 'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
                 'target_tahunan' => $request->target_tahunan,
-                'target_bulanan' => $request->target_bulanan,
             ];
-    
+
             // Hanya tambahkan qris jika ada file
             if ($request->hasFile('qris')) {
                 $outletData['qris'] = $request->file('qris')->store('qris', 'uploads');
             }
-    
+
             $outlet = Outlet::create($outletData);
-            
+
+            // Save monthly targets
+            for ($month = 1; $month <= 12; $month++) {
+                $targetAmount = $request->input("target_bulanan_$month", 0);
+                if ($targetAmount > 0) {
+                    OutletMonthlyTarget::create([
+                        'outlet_id' => $outlet->id,
+                        'month' => $month,
+                        'target_amount' => $targetAmount,
+                    ]);
+                }
+            }
+
             CashRegister::create([
                 'outlet_id' => $outlet->id,
                 'balance' => 0,
                 'is_active' => true,
             ]);
-            
+
+            // Load monthly targets
+            $outlet->load('monthlyTargets');
+
             DB::commit();
             return $this->successResponse($outlet, 'Outlet created successfully');
         } catch (ValidationException $th) {
@@ -157,7 +178,7 @@ class OutletController extends Controller
     public function update(Request $request, Outlet $outlet)
     {
         try {
-            $request->validate([
+            $rules = [
                 'name' => 'required|string|max:255',
                 'address' => 'nullable|string|max:255',
                 'phone' => 'nullable|string|max:255',
@@ -176,9 +197,17 @@ class OutletController extends Controller
                 'non_pkp_nama_bank' => 'required|string|max:255',
                 'non_pkp_nomor_transaksi_bank' => 'required|string',
                 'target_tahunan' => 'nullable|numeric|min:0',
-                'target_bulanan' => 'nullable|numeric|min:0',
-            ]);
-    
+            ];
+
+            // Validasi monthly targets (Januari - Desember)
+            for ($month = 1; $month <= 12; $month++) {
+                $rules["target_bulanan_$month"] = 'nullable|numeric|min:0';
+            }
+
+            $request->validate($rules);
+
+            DB::beginTransaction();
+
             $updateData = [
                 'name' => $request->name,
                 'address' => $request->address,
@@ -197,9 +226,8 @@ class OutletController extends Controller
                 'non_pkp_nama_bank' => $request->non_pkp_nama_bank,
                 'non_pkp_nomor_transaksi_bank' => $request->non_pkp_nomor_transaksi_bank,
                 'target_tahunan' => $request->target_tahunan,
-                'target_bulanan' => $request->target_bulanan,
             ];
-    
+
             // Hanya update qris jika ada file baru
             if ($request->hasFile('qris')) {
                 // Hapus file lama jika ada
@@ -208,17 +236,37 @@ class OutletController extends Controller
                 }
                 $updateData['qris'] = $request->file('qris')->store('qris', 'uploads');
             }
-    
+
             $outlet->update($updateData);
-            
+
+            // Update monthly targets
+            for ($month = 1; $month <= 12; $month++) {
+                $targetAmount = $request->input("target_bulanan_$month", 0);
+                OutletMonthlyTarget::updateOrCreate(
+                    [
+                        'outlet_id' => $outlet->id,
+                        'month' => $month,
+                    ],
+                    [
+                        'target_amount' => $targetAmount,
+                    ]
+                );
+            }
+
+            // Load monthly targets
+            $outlet->load('monthlyTargets');
+
+            DB::commit();
             return $this->successResponse($outlet, 'Outlet updated successfully');
         } catch (ValidationException $th) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Terdapat kesalahan validasi pada form',
                 'data' => $th->errors()
             ], 422);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengupdate outlet: ' . $th->getMessage(),

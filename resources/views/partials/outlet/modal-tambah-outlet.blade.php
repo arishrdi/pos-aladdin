@@ -62,7 +62,7 @@
             <p id="errorTaxType" class="text-red-500 text-xs mt-1 hidden">Jenis pajak default wajib dipilih</p>
             <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
           </div>
-          <div>
+          <div class="md:col-span-2">
             <label class="block font-medium mb-1">Target Tahunan</label>
             <input type="text" id="targetTahunan"
               class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -70,15 +70,75 @@
             <input type="hidden" id="targetTahunanRaw" name="target_tahunan">
             <p class="text-xs text-gray-500 mt-1">Target penjualan per tahun dalam Rupiah</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Target Penjualan Bulanan -->
+      <div class="p-5 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-4 text-yellow-700">Target Penjualan Bulanan (Januari - Desember)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
           <div>
-            <label class="block font-medium mb-1">Target Bulanan</label>
-            <input type="text" id="targetBulanan"
-              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-              placeholder="Rp 0">
-            <input type="hidden" id="targetBulananRaw" name="target_bulanan">
-            <p class="text-xs text-gray-500 mt-1">Target penjualan per bulan dalam Rupiah</p>
+            <label class="block font-medium mb-1 text-sm">Januari</label>
+            <input type="text" id="target_bulanan_1" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_1Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Februari</label>
+            <input type="text" id="target_bulanan_2" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_2Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Maret</label>
+            <input type="text" id="target_bulanan_3" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_3Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">April</label>
+            <input type="text" id="target_bulanan_4" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_4Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Mei</label>
+            <input type="text" id="target_bulanan_5" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_5Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Juni</label>
+            <input type="text" id="target_bulanan_6" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_6Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Juli</label>
+            <input type="text" id="target_bulanan_7" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_7Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Agustus</label>
+            <input type="text" id="target_bulanan_8" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_8Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">September</label>
+            <input type="text" id="target_bulanan_9" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_9Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Oktober</label>
+            <input type="text" id="target_bulanan_10" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_10Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">November</label>
+            <input type="text" id="target_bulanan_11" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_11Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Desember</label>
+            <input type="text" id="target_bulanan_12" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="target_bulanan_12Raw">
           </div>
         </div>
+        <p class="text-xs text-gray-600 mt-3">Masukkan target penjualan untuk setiap bulan dalam Rupiah. Kosongkan jika tidak ada target untuk bulan tertentu.</p>
       </div>
 
       <!-- PKP Banking Info -->
@@ -373,216 +433,11 @@ function resetForm() {
   document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
 }
 
-// Fungsi untuk submit form
-async function submitForm() {
-  if (!validateForm()) {
-    return;
-  }
-  
-  const btnTambah = document.getElementById('btnTambahOutlet');
-  const originalText = btnTambah.innerHTML;
-  
-  // Show loading state
-  btnTambah.innerHTML = `
-    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-    Menyimpan...
-  `;
-  btnTambah.disabled = true;
-  
-  try {
-    // Prepare FormData for file upload
-    const formData = new FormData();
-    formData.append('name', document.getElementById('namaOutlet').value);
-    formData.append('phone', document.getElementById('teleponOutlet').value);
-    formData.append('address', document.getElementById('alamatOutlet').value);
-    formData.append('email', document.getElementById('emailOutlet').value);
-    formData.append('tax', document.getElementById('pajakOutlet').value || 0);
-    formData.append('tax_type', document.getElementById('taxType').value);
-    
-    // PKP banking fields
-    formData.append('pkp_atas_nama_bank', document.getElementById('pkpAtasNama').value);
-    formData.append('pkp_nama_bank', document.getElementById('pkpNamaBank').value);
-    formData.append('pkp_nomor_transaksi_bank', document.getElementById('pkpNomorTransaksi').value);
-    
-    // Non-PKP banking fields
-    formData.append('non_pkp_atas_nama_bank', document.getElementById('nonPkpAtasNama').value);
-    formData.append('non_pkp_nama_bank', document.getElementById('nonPkpNamaBank').value);
-    formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('nonPkpNomorTransaksi').value);
-    
-    // formData.append('target_tahunan', document.getElementById('targetTahunanRaw').value);
-    
-    // Add QRIS file if selected
-    const fotoFile = document.getElementById('fotoOutlet').files[0];
-    if (fotoFile) {
-      formData.append('qris', fotoFile);
-    }
-    
-    // Send request to backend
-    const response = await fetch('/api/outlets', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${POS_CONFIG?.API_TOKEN || localStorage.getItem('token')}`,
-        'Accept': 'application/json'
-      },
-      body: formData
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok && data.success) {
-      // Success
-      resetForm();
-      closeModalTambah();
-      showModalAlert('success', data.message || 'Outlet baru berhasil ditambahkan!');
-      
-      // Reload outlets data if function exists
-      if (typeof loadOutlets === 'function') {
-        loadOutlets();
-      }
-    } else {
-      // Handle validation errors
-      if (data.data && typeof data.data === 'object') {
-        // Clear previous errors
-        clearValidationErrors();
-        
-        // Show validation errors
-        Object.keys(data.data).forEach(field => {
-          const errors = data.data[field];
-          if (Array.isArray(errors) && errors.length > 0) {
-            showFieldError(field, errors[0]);
-          }
-        });
-        
-        showModalAlert('error', 'Terdapat kesalahan pada form. Silakan periksa kembali.');
-      } else {
-        showModalAlert('error', data.message || 'Terjadi kesalahan saat menyimpan outlet');
-      }
-    }
-    
-  } catch (error) {
-    console.error('Error submitting form:', error);
-    showModalAlert('error', 'Terjadi kesalahan koneksi. Silakan coba lagi.');
-  } finally {
-    // Restore button state
-    btnTambah.innerHTML = originalText;
-    btnTambah.disabled = false;
-  }
-}
+// All form submission is handled by parent page (daftar-outlet.blade.php)
+// The tambahOutlet() function is defined there and includes monthly targets
 
-// Helper function to show field-specific errors
-function showFieldError(fieldName, errorMessage) {
-  // Map backend field names to frontend element IDs
-  const fieldMapping = {
-    'name': 'namaOutlet',
-    'phone': 'teleponOutlet', 
-    'address': 'alamatOutlet',
-    'email': 'emailOutlet',
-    'tax_type': 'taxType',
-    'pkp_nomor_transaksi_bank': 'pkpNomorTransaksi',
-    'pkp_nama_bank': 'pkpNamaBank',
-    'pkp_atas_nama_bank': 'pkpAtasNama',
-    'non_pkp_nomor_transaksi_bank': 'nonPkpNomorTransaksi',
-    'non_pkp_nama_bank': 'nonPkpNamaBank',
-    'non_pkp_atas_nama_bank': 'nonPkpAtasNama',
-    'qris': 'fotoOutlet'
-  };
-  
-  const elementId = fieldMapping[fieldName];
-  if (elementId) {
-    const inputElement = document.getElementById(elementId);
-    const errorElementId = 'error' + elementId.charAt(0).toUpperCase() + elementId.slice(1).replace('Outlet', '');
-    const errorElement = document.getElementById(errorElementId);
-    
-    if (inputElement) {
-      inputElement.classList.add('border-red-500');
-    }
-    
-    if (errorElement) {
-      errorElement.textContent = errorMessage;
-      errorElement.classList.remove('hidden');
-    } else {
-      // Create temporary error display if element doesn't exist
-      if (inputElement && inputElement.parentNode) {
-        const tempError = document.createElement('p');
-        tempError.className = 'text-red-500 text-xs mt-1';
-        tempError.textContent = errorMessage;
-        tempError.id = 'temp-error-' + elementId;
-        inputElement.parentNode.appendChild(tempError);
-        
-        // Remove after 5 seconds
-        setTimeout(() => {
-          const temp = document.getElementById('temp-error-' + elementId);
-          if (temp) temp.remove();
-        }, 5000);
-      }
-    }
-  }
-}
-
-// Helper function to clear validation errors
-function clearValidationErrors() {
-  // Clear red borders
-  document.querySelectorAll('.border-red-500').forEach(el => {
-    el.classList.remove('border-red-500');
-  });
-  
-  // Hide error messages
-  document.querySelectorAll('[id^="error"]').forEach(el => {
-    el.classList.add('hidden');
-  });
-  
-  // Remove temporary errors
-  document.querySelectorAll('[id^="temp-error-"]').forEach(el => {
-    el.remove();
-  });
-}
-
-// Show alert function - will use parent page's showAlert if available
-function showModalAlert(type, message) {
-  // Check if parent page has showAlert function (outlet management page does)
-  if (typeof showAlert === 'function') {
-    showAlert(type, message);
-  } else if (typeof showNotification === 'function') {
-    // Use POS showNotification if available
-    showNotification(message, type);
-  } else if (typeof Swal !== 'undefined') {
-    // Fallback to SweetAlert
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-    });
-
-    Toast.fire({
-      icon: type === 'error' ? 'error' : 'success',
-      title: message,
-    });
-  } else {
-    // Ultimate fallback to browser alert
-    if (type === 'success') {
-      alert('✅ ' + message);
-    } else {
-      alert('❌ ' + message);
-    }
-  }
-}
-
-// Event listener untuk tombol tambah
-document.getElementById('btnTambahOutlet').addEventListener('click', submitForm);
-
-// Event listener untuk form (submit saat tekan enter)
-document.querySelectorAll('#modalTambahOutlet input').forEach(input => {
-  input.addEventListener('keypress', e => {
-    if (e.key === 'Enter') {
-      submitForm();
-    }
-  });
-});
+// NOTE: Event listeners are set up in parent page (daftar-outlet.blade.php)
+// The btnTambahOutlet button calls tambahOutlet() from parent page, not submitForm() from here
 
 // document.addEventListener('DOMContentLoaded', function() {
 //     const targetTahunanInput = document.getElementById('targetTahunan');

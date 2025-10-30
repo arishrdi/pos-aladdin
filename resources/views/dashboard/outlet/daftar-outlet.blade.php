@@ -241,7 +241,9 @@
                         <span class="text-sm font-medium text-blue-600">${formatCurrency(outlet.target_tahunan)}</span>
                     </td>
                     <td class="py-4">
-                        <span class="text-sm font-medium text-green-600">${formatCurrency(outlet.target_bulanan)}</span>
+                        <button onclick="showMonthlyTargets(${outlet.id})" class="px-3 py-1 text-sm font-medium text-white bg-yellow-500 rounded hover:bg-yellow-600">
+                            Lihat Detail
+                        </button>
                     </td>
                     <td class="py-4">
                         <span class="px-3 py-1.5 text-sm font-medium ${outlet.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'} rounded-full">
@@ -480,9 +482,14 @@
             formData.append('non_pkp_nama_bank', getElementValue('nonPkpNamaBank'));
             formData.append('non_pkp_nomor_transaksi_bank', getElementValue('nonPkpNomorTransaksi'));
             
-            // Add target fields
+            // Add target tahunan field
             formData.append('target_tahunan', getElementValue('targetTahunanRaw', '0'));
-            formData.append('target_bulanan', getElementValue('targetBulananRaw', '0'));
+
+            // Add 12 monthly targets
+            for (let month = 1; month <= 12; month++) {
+                const monthValue = getElementValue(`target_bulanan_${month}Raw`, '0');
+                formData.append(`target_bulanan_${month}`, monthValue);
+            }
             
             const fileInput = document.getElementById('fotoOutlet');
             if (fileInput.files[0]) {
@@ -571,9 +578,14 @@
         formData.append('non_pkp_nama_bank', document.getElementById('editNonPkpNamaBank').value);
         formData.append('non_pkp_nomor_transaksi_bank', document.getElementById('editNonPkpNomorTransaksi').value);
         
-        // Add target fields
+        // Add target tahunan field
         formData.append('target_tahunan', document.getElementById('editTargetTahunanRaw').value || '0');
-        formData.append('target_bulanan', document.getElementById('editTargetBulananRaw').value || '0');
+
+        // Add 12 monthly targets
+        for (let month = 1; month <= 12; month++) {
+            const monthValue = document.getElementById(`editTarget_bulanan_${month}Raw`).value || '0';
+            formData.append(`target_bulanan_${month}`, monthValue);
+        }
         
         // Tambahkan file jika ada
         const fileInput = document.getElementById('editFotoOutlet');
@@ -669,9 +681,29 @@
             document.getElementById('editNonPkpNamaBank').value = outlet.non_pkp_nama_bank || '';
             document.getElementById('editNonPkpNomorTransaksi').value = outlet.non_pkp_nomor_transaksi_bank || '';
             
-            // Load target fields
-            document.getElementById('editTargetTahunan').value = outlet.target_tahunan || '';
-            document.getElementById('editTargetBulanan').value = outlet.target_bulanan || '';
+            // Load target tahunan field
+            const targetTahunanValue = Math.floor(parseFloat(outlet.target_tahunan) || 0).toString();
+            document.getElementById('editTargetTahunanRaw').value = targetTahunanValue;
+            const formattedTahunan = targetTahunanValue ? targetTahunanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            document.getElementById('editTargetTahunan').value = formattedTahunan;
+
+            // Load 12 monthly targets
+            if (outlet.monthly_targets && outlet.monthly_targets.length > 0) {
+                outlet.monthly_targets.forEach(target => {
+                    const monthNum = target.month;
+                    const displayInput = document.getElementById(`editTarget_bulanan_${monthNum}`);
+                    const rawInput = document.getElementById(`editTarget_bulanan_${monthNum}Raw`);
+                    if (displayInput && rawInput) {
+                        // Parse and remove decimal point from database value
+                        const rawValue = Math.floor(parseFloat(target.target_amount) || 0).toString();
+                        rawInput.value = rawValue;
+                        const formatted = rawValue ? rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+                        displayInput.value = formatted;
+                        // Trigger input event to ensure format-angka handler sync
+                        displayInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+            }
 
             // Set preview foto
             const preview = document.getElementById('editCurrentFoto');
@@ -895,12 +927,12 @@
         // Fungsi untuk reset form tambah
         function resetForm() {
             const elementIds = [
-                'namaOutlet', 'teleponOutlet', 'alamatOutlet', 'emailOutlet', 
-                'pajakOutlet', 'taxType', 'fotoOutlet', 'pkpAtasNama', 
-                'pkpNamaBank', 'pkpNomorTransaksi', 'nonPkpAtasNama', 
-                'nonPkpNamaBank', 'nonPkpNomorTransaksi', 'targetTahunan', 'targetBulanan'
+                'namaOutlet', 'teleponOutlet', 'alamatOutlet', 'emailOutlet',
+                'pajakOutlet', 'taxType', 'fotoOutlet', 'pkpAtasNama',
+                'pkpNamaBank', 'pkpNomorTransaksi', 'nonPkpAtasNama',
+                'nonPkpNamaBank', 'nonPkpNomorTransaksi', 'targetTahunan'
             ];
-            
+
             // Reset only existing elements
             elementIds.forEach(id => {
                 const element = document.getElementById(id);
@@ -908,13 +940,21 @@
                     element.value = '';
                 }
             });
-            
+
+            // Reset 12 monthly targets
+            for (let month = 1; month <= 12; month++) {
+                const targetInput = document.getElementById(`target_bulanan_${month}`);
+                const targetRaw = document.getElementById(`target_bulanan_${month}Raw`);
+                if (targetInput) targetInput.value = '';
+                if (targetRaw) targetRaw.value = '';
+            }
+
             // Reset checkbox
             const statusAktif = document.getElementById('statusAktif');
             if (statusAktif) {
                 statusAktif.checked = true;
             }
-            
+
             // Reset photo preview
             const currentFoto = document.getElementById('currentFotoOutlet');
             const defaultIcon = document.getElementById('defaultIcon');
@@ -925,7 +965,7 @@
             if (defaultIcon) {
                 defaultIcon.classList.remove('hidden');
             }
-            
+
             // Reset error messages and border colors
             document.querySelectorAll('[id^="error"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
@@ -974,6 +1014,112 @@
         function closeModalEdit() {
             document.getElementById('modalEditOutlet').classList.add('hidden');
             document.getElementById('modalEditOutlet').classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        // Fungsi untuk menampilkan detail target bulanan
+        function showMonthlyTargets(outletId) {
+            const outlet = allOutlets.find(o => o.id === outletId);
+            if (!outlet) return;
+
+            // Nama-nama bulan dalam Bahasa Indonesia
+            const bulanNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            // Helper function untuk format currency
+            const formatCurrency = (value) => {
+                if (!value || value === 0) return 'Rp 0';
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(value);
+            };
+
+            // Build modal content
+            let targetRows = '';
+            let totalTarget = 0;
+
+            if (outlet.monthly_targets && outlet.monthly_targets.length > 0) {
+                outlet.monthly_targets.forEach(target => {
+                    targetRows += `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 font-medium text-gray-700">${bulanNames[target.month - 1]}</td>
+                            <td class="py-3 px-4 text-right text-gray-900">${formatCurrency(target.target_amount)}</td>
+                        </tr>
+                    `;
+                    totalTarget += parseFloat(target.target_amount) || 0;
+                });
+            } else {
+                targetRows = '<tr><td colspan="2" class="py-4 text-center text-gray-500">Belum ada target bulanan</td></tr>';
+            }
+
+            // Create and show modal
+            let modal = document.getElementById('modalDetailTarget');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalDetailTarget';
+                document.body.appendChild(modal);
+            }
+
+            modal.innerHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onclick="closeModalDetailTarget()">
+                    <div class="bg-white rounded-lg shadow-lg w-full max-w-md" onclick="event.stopPropagation()">
+                        <!-- Header -->
+                        <div class="p-6 border-b">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-semibold">Target Penjualan Bulanan</h2>
+                                <button onclick="closeModalDetailTarget()" class="text-gray-400 hover:text-gray-600">
+                                    <i data-lucide="x" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">${outlet.name}</p>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-6 overflow-y-auto max-h-96">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-2 px-4 text-left font-semibold text-gray-700">Bulan</th>
+                                        <th class="py-2 px-4 text-right font-semibold text-gray-700">Target</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${targetRows}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Footer with total -->
+                        <div class="p-6 border-t bg-gray-50">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-semibold text-gray-700">Total Target Bulanan:</span>
+                                <span class="font-bold text-lg text-blue-600">${formatCurrency(totalTarget)}</span>
+                            </div>
+                            <button onclick="closeModalDetailTarget()" class="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('block');
+            document.body.style.overflow = 'hidden';
+
+            // Re-create lucide icons
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        function closeModalDetailTarget() {
+            const modal = document.getElementById('modalDetailTarget');
+            if (modal) {
+                modal.classList.remove('block');
+                modal.classList.add('hidden');
+            }
             document.body.style.overflow = '';
         }
 

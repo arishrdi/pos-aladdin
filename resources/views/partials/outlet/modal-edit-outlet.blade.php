@@ -60,7 +60,7 @@
             <p id="errorEditTaxType" class="text-red-500 text-xs mt-1 hidden">Jenis pajak default wajib dipilih</p>
             <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
           </div>
-          <div>
+          <div class="md:col-span-2">
             <label class="block font-medium mb-1">Target Tahunan</label>
             <input type="text" id="editTargetTahunan"
               class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -68,15 +68,75 @@
             <input type="hidden" id="editTargetTahunanRaw" name="target_tahunan">
             <p class="text-xs text-gray-500 mt-1">Target penjualan per tahun dalam Rupiah</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Target Penjualan Bulanan -->
+      <div class="p-5 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
+        <h3 class="font-semibold mb-4 text-yellow-700">Target Penjualan Bulanan (Januari - Desember)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
           <div>
-            <label class="block font-medium mb-1">Target Bulanan</label>
-            <input type="text" id="editTargetBulanan"
-              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-              placeholder="Rp 0">
-            <input type="hidden" id="editTargetBulananRaw" name="target_bulanan">
-            <p class="text-xs text-gray-500 mt-1">Target penjualan per bulan dalam Rupiah</p>
+            <label class="block font-medium mb-1 text-sm">Januari</label>
+            <input type="text" id="editTarget_bulanan_1" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_1Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Februari</label>
+            <input type="text" id="editTarget_bulanan_2" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_2Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Maret</label>
+            <input type="text" id="editTarget_bulanan_3" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_3Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">April</label>
+            <input type="text" id="editTarget_bulanan_4" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_4Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Mei</label>
+            <input type="text" id="editTarget_bulanan_5" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_5Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Juni</label>
+            <input type="text" id="editTarget_bulanan_6" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_6Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Juli</label>
+            <input type="text" id="editTarget_bulanan_7" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_7Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Agustus</label>
+            <input type="text" id="editTarget_bulanan_8" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_8Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">September</label>
+            <input type="text" id="editTarget_bulanan_9" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_9Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Oktober</label>
+            <input type="text" id="editTarget_bulanan_10" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_10Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">November</label>
+            <input type="text" id="editTarget_bulanan_11" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_11Raw">
+          </div>
+          <div>
+            <label class="block font-medium mb-1 text-sm">Desember</label>
+            <input type="text" id="editTarget_bulanan_12" class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500" placeholder="Rp 0">
+            <input type="hidden" id="editTarget_bulanan_12Raw">
           </div>
         </div>
+        <p class="text-xs text-gray-600 mt-3">Masukkan target penjualan untuk setiap bulan dalam Rupiah. Kosongkan jika tidak ada target untuk bulan tertentu.</p>
       </div>
 
       <!-- PKP Banking Info -->

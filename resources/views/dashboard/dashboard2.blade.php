@@ -270,6 +270,35 @@
     </div>
 </div>
 
+<!-- Third Row - Monthly Target -->
+<div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
+    <!-- Target Bulanan (Indigo) -->
+    <div class="bg-white rounded-lg p-4 card-shadow">
+        <div class="flex justify-between items-start">
+            <div class="flex-grow">
+                <p class="text-sm text-gray-500 mb-2">TARGET BULANAN</p>
+                <div class="flex items-baseline space-x-2">
+                    <p class="text-3xl font-bold text-indigo-600" id="monthlyTargetTotal">Rp 0</p>
+                    <span class="text-xs text-gray-400" id="monthlyTargetsCount">(0 bulan)</span>
+                </div>
+                <div class="mt-3">
+                    <div id="monthlyTargetsBreakdown" class="text-xs text-gray-600 space-y-1 max-h-20 overflow-y-auto">
+                        <p class="text-gray-400">Memuat data target bulanan...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-indigo-100 p-2 rounded-lg h-fit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                    <path d="M21 3v5h-5"></path>
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                    <path d="M3 21v-5h5"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- DP Summary Widget -->
 <div class="mb-6">
@@ -710,7 +739,7 @@
         } else {
             targetTahunanElement.style.display = 'none';
         }
-        
+
         // Update progress color based on achievement
         const progressElement = document.getElementById('targetProgress');
         if (targetProgress >= 100) {
@@ -720,6 +749,9 @@
         } else {
             progressElement.className = 'text-xs text-red-500';
         }
+
+        // Update monthly targets
+        updateMonthlyTargets(data.monthly_targets);
         
         // Update top products
         updateTopProducts(data.top_products);
@@ -834,7 +866,43 @@
             </div>
         `).join('');
     }
-    
+
+    // Function to update monthly targets widget
+    function updateMonthlyTargets(monthlyTargetsData) {
+        if (!monthlyTargetsData) {
+            console.warn('No monthly targets data provided');
+            document.getElementById('monthlyTargetTotal').textContent = 'Rp 0';
+            document.getElementById('monthlyTargetsCount').textContent = '(0 bulan)';
+            document.getElementById('monthlyTargetsBreakdown').innerHTML = '<p class="text-gray-400">Tidak ada target bulanan</p>';
+            return;
+        }
+
+        // Update total target
+        document.getElementById('monthlyTargetTotal').textContent = formatCurrency(monthlyTargetsData.total_target || 0);
+
+        // Update months count
+        const monthsCount = monthlyTargetsData.months_covered || 0;
+        document.getElementById('monthlyTargetsCount').textContent = `(${monthsCount} bulan)`;
+
+        // Update breakdown
+        const breakdownContainer = document.getElementById('monthlyTargetsBreakdown');
+
+        if (!monthlyTargetsData.breakdown || monthlyTargetsData.breakdown.length === 0) {
+            breakdownContainer.innerHTML = '<p class="text-gray-400">Tidak ada target bulanan untuk periode ini</p>';
+            return;
+        }
+
+        // Generate breakdown HTML
+        const breakdownHTML = monthlyTargetsData.breakdown.map(item => `
+            <div class="flex justify-between items-center py-1 border-b border-gray-200 last:border-b-0">
+                <span class="font-medium text-gray-700">${item.month_name}</span>
+                <span class="text-gray-600 font-semibold">${formatCurrency(item.target_amount || 0)}</span>
+            </div>
+        `).join('');
+
+        breakdownContainer.innerHTML = breakdownHTML;
+    }
+
     // Format date for display
     function formatDate(dateString) {
         const date = new Date(dateString);
@@ -1527,7 +1595,12 @@
             top_products: [],
             top_bonus_products: [],
             top_karpets: [],
-            recent_dp_orders: []
+            recent_dp_orders: [],
+            monthly_targets: {
+                total_target: 0,
+                breakdown: [],
+                months_covered: 0
+            }
         };
 
         // Sum up all the metrics
@@ -1541,6 +1614,39 @@
             aggregated.target_bulanan += parseFloat(outlet.target_bulanan) || 0;
             aggregated.target_tahunan += parseFloat(outlet.target_tahunan) || 0;
         });
+
+        // Aggregate monthly targets from all outlets
+        if (data && data.length > 0) {
+            const aggregatedBreakdown = {};
+            let totalMonthlyTarget = 0;
+            let monthsCovered = new Set();
+
+            data.forEach(outlet => {
+                if (outlet.monthly_targets && outlet.monthly_targets.breakdown) {
+                    outlet.monthly_targets.breakdown.forEach(monthTarget => {
+                        const month = monthTarget.month;
+                        monthsCovered.add(month);
+                        totalMonthlyTarget += parseFloat(monthTarget.target_amount) || 0;
+
+                        if (!aggregatedBreakdown[month]) {
+                            aggregatedBreakdown[month] = {
+                                month: month,
+                                month_name: monthTarget.month_name,
+                                target_amount: 0
+                            };
+                        }
+                        aggregatedBreakdown[month].target_amount += parseFloat(monthTarget.target_amount) || 0;
+                    });
+                }
+            });
+
+            // Convert breakdown to array and sort by month
+            aggregated.monthly_targets = {
+                total_target: totalMonthlyTarget,
+                breakdown: Object.values(aggregatedBreakdown).sort((a, b) => a.month - b.month),
+                months_covered: monthsCovered.size
+            };
+        }
 
         // Calculate average order value across all outlets
         aggregated.average_order_value = aggregated.total_orders > 0 
@@ -1708,6 +1814,11 @@
 
         // Update DP widget with aggregated data
         updateDpWidget(aggregatedData);
+
+        // Update monthly targets widget with aggregated data
+        if (aggregatedData.monthly_targets) {
+            updateMonthlyTargets(aggregatedData.monthly_targets);
+        }
 
         console.log('KPI cards updated with aggregated data');
     }

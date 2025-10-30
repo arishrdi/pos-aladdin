@@ -293,13 +293,19 @@
                     <p id="detailMasjid" class="font-medium"></p>
                 </div>
                 <div id="contractPdfInfoRow" class="hidden">
-                    <p class="text-gray-500">Akad Jual Beli</p>
-                    <div id="detailContractPdf" class="font-medium">
+                    <p class="text-gray-500">Akad Jual Beli/Sketsa Masjid</p>
+                    <div id="detailContractPdf" class="font-medium flex gap-2">
+                        <button
+                            onclick="previewContractPdf(window.currentTransactionDetail.contract_pdf_url, window.currentTransactionDetail.order_number)"
+                            class="inline-flex items-center px-3 py-1 text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 rounded transition-colors">
+                            <i class="fas fa-eye mr-2"></i>
+                            Preview
+                        </button>
                         <button
                             onclick="downloadContractPdf(window.currentTransactionDetail.contract_pdf_url, window.currentTransactionDetail.order_number)"
                             class="inline-flex items-center px-3 py-1 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors">
-                            <i class="fas fa-file-pdf mr-2"></i>
-                            Download Akad Jual Beli
+                            <i class="fas fa-download mr-2"></i>
+                            Download
                         </button>
                     </div>
                 </div>
@@ -1669,12 +1675,6 @@
                         <button onclick="openEditHistoryModal('${transaction.order_number}', '${transaction.id}')" class="inline-flex items-center px-2 py-1 text-xs bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded transition-colors" title="Lihat Riwayat Edit Transaksi">
                             <i data-lucide="edit-3" class="w-3 h-3 mr-1"></i>
                             Riwayat Edit
-                        </button>
-                        ` : ''}
-                        ${transaction.transaction_category === 'dp' && transaction.contract_pdf_url ? `
-                        <button onclick="downloadContractPdf('${transaction.contract_pdf_url}', '${transaction.order_number}')" class="inline-flex items-center px-2 py-1 text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 rounded transition-colors" title="Download Akad Jual Beli">
-                            <i data-lucide="file-text" class="w-3 h-3 mr-1"></i>
-                            Akad PDF
                         </button>
                         ` : ''}
                         ${!transaction.is_finance_approved && !transaction.is_finance_rejected && transaction.id && transaction.id !== 'undefined' ? `
@@ -3319,24 +3319,149 @@
         }
     });
     
+    // Function to preview contract PDF/image
+    function previewContractPdf(pdfUrl, orderNumber) {
+        try {
+            // Validate URL
+            if (!pdfUrl || typeof pdfUrl !== 'string') {
+                showAlert('error', 'URL file tidak valid');
+                return;
+            }
+
+            // Determine file type from URL
+            const urlParts = pdfUrl.split('?')[0]; // Remove query parameters if any
+            const fileExtension = urlParts.substring(urlParts.lastIndexOf('.') + 1).toLowerCase();
+            const isPdf = fileExtension === 'pdf';
+            const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
+
+            if (!isPdf && !isImage) {
+                showAlert('error', 'Format file tidak didukung untuk preview');
+                return;
+            }
+
+            // Create modal for preview with escaped URL
+            const escapedUrl = pdfUrl.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            const modalHTML = `
+                <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" style="animation: fadeIn 0.3s ease-in;">
+                    <div class="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+                        <div class="flex justify-between items-center p-4 border-b">
+                            <h3 class="text-lg font-semibold">Preview - Akad Jual Beli/Sketsa Masjid (${orderNumber})</h3>
+                            <button onclick="closePreviewModal()" class="text-gray-500 hover:text-gray-700" type="button">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="flex-1 p-4 overflow-auto" style="max-height: calc(90vh - 180px);">
+                            ${isPdf ?
+                                `<iframe src="${escapedUrl}" width="100%" height="600" style="border: 1px solid #ddd; display: block;"></iframe>` :
+                                `<div style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                                    <img src="${escapedUrl}" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="handleImageError()">
+                                </div>`
+                            }
+                        </div>
+                        <div class="flex justify-end gap-2 p-4 border-t bg-gray-50">
+                            <button onclick="downloadContractPdf('${pdfUrl}', '${orderNumber}')" class="inline-flex items-center px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 rounded transition-colors" type="button">
+                                <i class="fas fa-download mr-2"></i>
+                                Download
+                            </button>
+                            <button onclick="closePreviewModal()" class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 hover:bg-gray-400 rounded transition-colors" type="button">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Remove existing preview modal if any
+            const existingModal = document.getElementById('previewModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Create and append modal
+            const temp = document.createElement('div');
+            temp.innerHTML = modalHTML;
+            const modalElement = temp.firstElementChild;
+
+            // Add fade-in animation
+            const style = document.createElement('style');
+            if (!document.getElementById('previewModalStyle')) {
+                style.id = 'previewModalStyle';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(modalElement);
+
+            // Add event listener to close on backdrop click
+            modalElement.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePreviewModal();
+                }
+            });
+
+        } catch (error) {
+            console.error('Error previewing contract PDF:', error);
+            showAlert('error', 'Gagal membuka preview akad jual beli: ' + error.message);
+        }
+    }
+
+    // Function to handle image load errors
+    function handleImageError() {
+        console.error('Gagal memuat gambar preview');
+        showAlert('error', 'Gagal memuat gambar. File mungkin rusak atau format tidak didukung.');
+        closePreviewModal();
+    }
+
+    // Function to close preview modal
+    function closePreviewModal() {
+        const previewModal = document.getElementById('previewModal');
+        if (previewModal) {
+            previewModal.remove();
+        }
+    }
+
     // Function to download contract PDF
     function downloadContractPdf(pdfUrl, orderNumber) {
         try {
+            // Validate URL
+            if (!pdfUrl || typeof pdfUrl !== 'string') {
+                showAlert('error', 'URL file tidak valid');
+                return;
+            }
+
+            // Remove query parameters for extension detection
+            const urlParts = pdfUrl.split('?')[0];
+            const fileExtension = urlParts.substring(urlParts.lastIndexOf('.') + 1).toLowerCase();
+
             // Create a temporary link to download the file
             const link = document.createElement('a');
             link.href = pdfUrl;
-            link.download = `Akad_Jual_Beli_${orderNumber}.pdf`;
+
+            // Set appropriate filename based on file type
+            if (fileExtension === 'pdf') {
+                link.download = `Akad_Jual_Beli_Sketsa_Masjid_${orderNumber}.pdf`;
+            } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+                link.download = `Akad_Jual_Beli_Sketsa_Masjid_${orderNumber}.${fileExtension}`;
+            } else {
+                link.download = `Akad_Jual_Beli_Sketsa_Masjid_${orderNumber}`;
+            }
+
             link.target = '_blank';
-            
+
             // Append to body, click, then remove
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             showAlert('success', 'Download akad jual beli dimulai');
         } catch (error) {
             console.error('Error downloading contract PDF:', error);
-            showAlert('error', 'Gagal mendownload akad jual beli');
+            showAlert('error', 'Gagal mendownload akad jual beli: ' + error.message);
         }
     }
     

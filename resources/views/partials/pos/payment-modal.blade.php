@@ -74,23 +74,23 @@
                         </div>
                     </div>
 
-                    <!-- Upload Akad Jual Beli - Only show for DP transactions -->
+                    <!-- Upload Akad Jual Beli/Sketsa Masjid - Only show for DP transactions -->
                     <div id="akadJualBeliSection" class="mb-4 hidden">
                         <label class="block text-gray-700 text-sm font-bold mb-2">
-                            Upload Akad Jual Beli <span class="text-red-500">*</span>
+                            Upload Akad Jual Beli/Sketsa Masjid
                         </label>
                         <div class="border-2 border-dashed border-orange-300 rounded-lg p-4 text-center bg-orange-50">
-                            <input type="file" id="akadJualBeliUpload" accept=".pdf" class="hidden">
+                            <input type="file" id="akadJualBeliUpload" accept="image/*,.pdf" class="hidden">
                             <div class="cursor-pointer" onclick="document.getElementById('akadJualBeliUpload').click()">
                                 <i class="fas fa-file-pdf text-2xl text-orange-500 mb-2"></i>
-                                <p class="text-sm font-medium text-orange-600">Klik untuk upload akad jual beli</p>
-                                <p class="text-xs text-orange-500 mt-1">File PDF • Maks 10MB</p>
+                                <p class="text-sm font-medium text-orange-600">Klik untuk upload akad jual beli/sketsa masjid</p>
+                                <p class="text-xs text-orange-500 mt-1">File PDF/JPG/PNG • Maks 10MB</p>
                             </div>
                         </div>
                         <div id="akadJualBeliPreview" class="mt-2 space-y-1">
                             <!-- File preview will appear here -->
                         </div>
-                       
+
                     </div>
 
                     <!-- Tax Type Display (Read-only) -->
@@ -349,10 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
         radio.addEventListener('change', function() {
             if (this.value === 'dp') {
                 akadJualBeliSection.classList.remove('hidden');
-                akadJualBeliUpload.setAttribute('required', 'required');
             } else {
                 akadJualBeliSection.classList.add('hidden');
-                akadJualBeliUpload.removeAttribute('required');
                 // Clear file input and preview
                 akadJualBeliUpload.value = '';
                 akadJualBeliPreview.innerHTML = '';
@@ -366,11 +364,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const file = e.target.files[0];
             if (file) {
                 // Validate file type
-                if (file.type !== 'application/pdf') {
-                    alert('Hanya file PDF yang diperbolehkan');
-                    this.value = '';
-                    return;
-                }
+                // if (file.type !== 'application/pdf') {
+                //     alert('Hanya file PDF yang diperbolehkan');
+                //     this.value = '';
+                //     return;
+                // }
 
                 // Validate file size (10MB)
                 if (file.size > 10 * 1024 * 1024) {

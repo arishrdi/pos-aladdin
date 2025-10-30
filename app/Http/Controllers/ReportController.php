@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\InventoryHistory;
 use App\Models\Outlet;
+use App\Models\OutletMonthlyTarget;
 use App\Models\Product;
 use App\Models\Shift;
 use App\Traits\ApiResponse;
@@ -734,6 +735,79 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * Calculate monthly targets for a date range
+     * Calculates total target amount for months that fall within the given date range
+     *
+     * @param  \App\Models\Outlet  $outlet
+     * @param  \Carbon\Carbon  $startDate
+     * @param  \Carbon\Carbon  $endDate
+     * @return array
+     */
+    private function calculateMonthlyTargets(Outlet $outlet, $startDate, $endDate)
+    {
+        try {
+            // Month names in Indonesian
+            $monthNames = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+
+            // Get all months covered by the date range
+            $coveredMonths = [];
+            $currentDate = $startDate->copy();
+
+            while ($currentDate <= $endDate) {
+                $coveredMonths[] = $currentDate->month;
+                $currentDate->addMonth()->startOfMonth();
+            }
+
+            // Remove duplicates and sort
+            $coveredMonths = array_unique($coveredMonths);
+            sort($coveredMonths);
+
+            // Query targets for covered months
+            $targets = $outlet->monthlyTargets()
+                ->whereIn('month', $coveredMonths)
+                ->get();
+
+            // Calculate total target
+            $totalTarget = $targets->sum('target_amount');
+
+            // Build breakdown array with month names
+            $breakdown = $targets->map(function ($target) use ($monthNames) {
+                return [
+                    'month' => $target->month,
+                    'month_name' => $monthNames[$target->month] ?? 'Unknown',
+                    'target_amount' => (float)$target->target_amount,
+                ];
+            })->sortBy('month')->values()->toArray();
+
+            return [
+                'total_target' => (float)$totalTarget,
+                'breakdown' => $breakdown,
+                'months_covered' => count($coveredMonths),
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error calculating monthly targets: ' . $e->getMessage());
+            return [
+                'total_target' => 0,
+                'breakdown' => [],
+                'months_covered' => 0,
+            ];
+        }
+    }
+
     public function dashboardSummary(Request $request, Outlet $outlet)
     {
         try {
@@ -756,12 +830,16 @@ class ReportController extends Controller
 
             $lastMonth = Carbon::now()->subMonth()->startOfMonth();
 
+            // Calculate monthly targets for date range
+            $monthlyTargetsData = $this->calculateMonthlyTargets($outlet, $startDate, $endDate);
+
             // Data untuk response
             $responseData = [
                 'outlet' => $outlet->name,
                 'cash' => $outlet->cashRegisters->balance,
                 'target_bulanan' => $outlet->target_bulanan ?? 0,
                 'target_tahunan' => $outlet->target_tahunan ?? 0,
+                'monthly_targets' => $monthlyTargetsData,
                 'period' => [
                     'start_date' => $startDate->format('Y-m-d'),
                     'end_date' => $endDate->format('Y-m-d'),
@@ -1264,6 +1342,9 @@ class ReportController extends Controller
                     ->limit(5)
                     ->get();
 
+                // Calculate monthly targets for this outlet
+                $monthlyTargetsData = $this->calculateMonthlyTargets($outlet, $startDate, $endDate);
+
                 $outletData = [
                     'outlet_id' => $outlet->id,
                     'outlet_name' => $outlet->name,
@@ -1280,6 +1361,7 @@ class ReportController extends Controller
                     'total_refunded' => $totalRefundedValue,
                     'target_bulanan' => $outlet->target_bulanan ?? 0,
                     'target_tahunan' => $outlet->target_tahunan ?? 0,
+                    'monthly_targets' => $monthlyTargetsData,
                     'dp_summary' => $dpSummary,
                     'payment_methods' => $paymentMethodSales,
                     'top_products' => $topProducts,

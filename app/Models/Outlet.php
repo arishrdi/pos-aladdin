@@ -27,7 +27,6 @@ class Outlet extends Model
         'non_pkp_nomor_transaksi_bank',
         'qris',
         'target_tahunan',
-        'target_bulanan',
     ];
 
     protected $casts = [
@@ -35,11 +34,49 @@ class Outlet extends Model
         'tax_type' => 'string',
     ];
 
-    protected $appends = ['qris_url']; 
+    protected $appends = ['qris_url'];
 
     public function getQrisUrlAttribute()
     {
         return $this->qris ? asset('uploads/' . $this->qris) : null;
+    }
+
+    /**
+     * Relationship to monthly targets
+     */
+    public function monthlyTargets()
+    {
+        return $this->hasMany(OutletMonthlyTarget::class)->orderBy('month');
+    }
+
+    /**
+     * Get target for specific month
+     */
+    public function getTargetForMonth($month)
+    {
+        return $this->monthlyTargets()
+            ->where('month', $month)
+            ->first()?->target_amount ?? 0;
+    }
+
+    /**
+     * Get all targets for current year
+     */
+    public function getCurrentYearTargets()
+    {
+        $targets = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $targets[$month] = $this->getTargetForMonth($month);
+        }
+        return $targets;
+    }
+
+    /**
+     * Calculate total yearly target from monthly targets
+     */
+    public function getTotalYearlyTarget()
+    {
+        return $this->monthlyTargets()->sum('target_amount');
     }
 
     public function print() {
