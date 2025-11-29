@@ -88,6 +88,10 @@ Route::middleware('auth')->group(function () {
             return view('dashboard.closing.riwayat-transaksi');
         })->name('riwayat-transaksi');
 
+        Route::get('/riwayat-transaksi-v2', function () {
+            return view('dashboard.closing.riwayat-transaksi-v2');
+        })->name('riwayat-transaksi-v2');
+
         Route::get('/riwayat-bonus', function () {
             return view('dashboard.closing.riwayat-bonus');
         })->name('riwayat-bonus');

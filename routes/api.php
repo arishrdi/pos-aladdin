@@ -248,6 +248,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/orders/revenue/{outletId}', 'oneMonthRevenue');
             Route::post('/orders/cancel/{orderId}', 'cancelOrder'); // Legacy method
             Route::get('/orders/history', 'orderHistory');
+            Route::get('/orders/history-v2', 'orderHistoryV2');
             Route::get('/orders/history/admin', 'orderAdmin');
             Route::get('/orders/history/compare', 'compareOrders');
             

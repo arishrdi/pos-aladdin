@@ -827,7 +827,7 @@ class OrderController extends Controller
 
             $orders = $query->with([
                 'items.product' => function ($q) {
-                    $q->withTrashed()->select('id', 'name', 'sku', 'unit', 'image');
+                    $q->withTrashed()->select('id', 'name', 'sku', 'unit', 'unit_type', 'image');
                 },
                 'outlet:id,name',
                 'leadsCabangOutlet:id,name',
@@ -857,8 +857,119 @@ class OrderController extends Controller
             $grossSales = $query->where('status', 'completed')->sum('subtotal');
 
             // dd($orders);
-            // Transformasi respons
-            $orders->transform(function ($order) {
+            // Transformasi respons dengan lead info dan settlement history
+            $leadsService = new LeadsService();
+
+            $orders->transform(function ($order) use ($leadsService) {
+                // Fetch lead info if member has lead_id
+                $leadInfo = null;
+                if ($order->member && $order->member->lead_id) {
+                    \Log::info('Fetching lead data', [
+                        'order_id' => $order->id,
+                        'member_id' => $order->member->id,
+                        'lead_id' => $order->member->lead_id,
+                        'member_phone' => $order->member->phone
+                    ]);
+
+                    $leadData = $leadsService->getLeadById($order->member->lead_id, $order->member->phone);
+
+                    \Log::info('Lead data result', [
+                        'order_id' => $order->id,
+                        'lead_data_found' => !empty($leadData),
+                        'lead_data' => $leadData
+                    ]);
+
+                    if ($leadData) {
+                        $leadInfo = [
+                            'tanggal_leads_masuk' => $leadData['tanggal_leads'] ?? null,
+                            'channel_marketing' => $leadData['sumber_leads']['nama'] ?? null,
+                            'customer_name' => $leadData['nama_pelanggan'] ?? $leadData['customer_name'] ?? null,
+                            'alamat' => $leadData['alamat'] ?? null,
+                            'contact_person' => $leadData['no_whatsapp'] ?? $leadData['customer_phone'] ?? null,
+                        ];
+                    }
+                }
+
+                // Format settlement payments (DP I, DP II, Pelunasan)
+                $settlementPayments = [
+                    'uang_muka_1' => null,
+                    'uang_muka_2' => null,
+                    'pelunasan' => null
+                ];
+
+                if ($order->dpSettlementHistory && $order->dpSettlementHistory->count() > 0) {
+                    $settlements = $order->dpSettlementHistory;
+
+                    // First payment - DP I
+                    if (isset($settlements[0])) {
+                        $settlementPayments['uang_muka_1'] = [
+                            'date' => $settlements[0]->processed_at ? $settlements[0]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[0]->amount,
+                            'method' => $settlements[0]->payment_method,
+                            'bank' => $settlements[0]->payment_method // Using payment_method as "bank" for now
+                        ];
+                    }
+
+                    // Second payment - DP II (if exists)
+                    if (isset($settlements[1])) {
+                        $settlementPayments['uang_muka_2'] = [
+                            'date' => $settlements[1]->processed_at ? $settlements[1]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[1]->amount,
+                            'method' => $settlements[1]->payment_method,
+                            'bank' => $settlements[1]->payment_method
+                        ];
+                    }
+
+                    // Final payment - Pelunasan (last settlement if more than 2, otherwise settlement[1] if it's final)
+                    if ($settlements->count() > 2) {
+                        $lastSettlement = $settlements->last();
+                        $settlementPayments['pelunasan'] = [
+                            'date' => $lastSettlement->processed_at ? $lastSettlement->processed_at->format('d/m/Y') : null,
+                            'amount' => $lastSettlement->amount,
+                            'method' => $lastSettlement->payment_method,
+                            'bank' => $lastSettlement->payment_method
+                        ];
+                    } elseif (isset($settlements[1]) && $settlements[1]->is_final_payment) {
+                        $settlementPayments['pelunasan'] = [
+                            'date' => $settlements[1]->processed_at ? $settlements[1]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[1]->amount,
+                            'method' => $settlements[1]->payment_method,
+                            'bank' => $settlements[1]->payment_method
+                        ];
+                        $settlementPayments['uang_muka_2'] = null;
+                    }
+                }
+
+                // Hitung biaya kirim (produk dengan unit_type = 'kirim')
+                $deliveryFee = 0;
+                $deliveryItems = [];
+
+                // Hitung biaya pemasangan (produk dengan unit_type = 'pasang')
+                $installationFee = 0;
+                $installationItems = [];
+
+                foreach ($order->items as $item) {
+                    if ($item->product && $item->product->unit_type === 'kirim') {
+                        $deliveryFee += floatval($item->quantity) * floatval($item->price);
+                        $deliveryItems[] = [
+                            'product' => $item->product->name,
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'total' => floatval($item->quantity) * floatval($item->price)
+                        ];
+                    }
+
+                    if ($item->product && $item->product->unit_type === 'pasang') {
+                        $installationFee += floatval($item->quantity) * floatval($item->price);
+                        $installationItems[] = [
+                            'product' => $item->product->name,
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'total' => floatval($item->quantity) * floatval($item->price)
+                        ];
+                    }
+                }
+
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
@@ -877,12 +988,17 @@ class OrderController extends Controller
                     'service_type' => $order->service_type,
                     'installation_date' => $order->installation_date,
                     'installation_notes' => $order->installation_notes,
+                    'delivery_fee' => $deliveryFee,
+                    'delivery_items' => $deliveryItems,
+                    'installation_fee' => $installationFee,
+                    'installation_items' => $installationItems,
                     'items' => $order->items->map(function ($item) {
                         return [
                             'product_image' => $item->product->image_url,
                             'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',
                             'sku' => $item->product ? $item->product->sku : '',
                             'unit' => $item->product ? ($item->product->unit ?? 'pcs') : 'pcs',
+                            'unit_type' => $item->product ? $item->product->unit_type : null,
                             'quantity' => floatval($item->quantity),
                             'price' => floatval($item->price),
                             'discount' => floatval($item->discount),
@@ -920,6 +1036,372 @@ class OrderController extends Controller
                             ];
                         });
                     }),
+                    // Data leads dan settlement untuk comprehensive report
+                    'lead_info' => $leadInfo,
+                    'settlement_payments' => $settlementPayments,
+                    // Data baru untuk approval system (tanpa mengubah struktur yang ada)
+                    'approval_status' => $order->approval_status,
+                    'payment_proof_url' => $order->payment_proof_url,
+                    'approved_by' => $order->approver ? $order->approver->name : null,
+                    'approved_at' => $order->approved_at ? $order->approved_at->format('d/m/Y H:i') : null,
+                    'rejection_reason' => $order->rejection_reason,
+                    'approval_notes' => $order->approval_notes,
+                    'transaction_category' => $order->transaction_category,
+                    // Dual approval system
+                    'dual_approval_status' => $order->getDualApprovalStatus(),
+                    'finance_approved_by' => $order->financeApprover ? $order->financeApprover->name : null,
+                    'finance_approved_at' => $order->finance_approved_at ? $order->finance_approved_at->format('d/m/Y H:i') : null,
+                    'operational_approved_by' => $order->operationalApprover ? $order->operationalApprover->name : null,
+                    'operational_approved_at' => $order->operational_approved_at ? $order->operational_approved_at->format('d/m/Y H:i') : null,
+                    'is_finance_approved' => $order->isFinanceApproved(),
+                    'is_operational_approved' => $order->isOperationalApproved(),
+                    'is_fully_approved' => $order->isFullyApproved(),
+                    'is_partially_approved' => $order->isPartiallyApproved(),
+                    // Dual approval rejection data
+                    'finance_rejected_by' => $order->financeRejector ? $order->financeRejector->name : null,
+                    'finance_rejected_at' => $order->finance_rejected_at ? $order->finance_rejected_at->format('d/m/Y H:i') : null,
+                    'finance_rejection_reason' => $order->finance_rejection_reason,
+                    'operational_rejected_by' => $order->operationalRejector ? $order->operationalRejector->name : null,
+                    'operational_rejected_at' => $order->operational_rejected_at ? $order->operational_rejected_at->format('d/m/Y H:i') : null,
+                    'operational_rejection_reason' => $order->operational_rejection_reason,
+                    'is_finance_rejected' => $order->isFinanceRejected(),
+                    'is_operational_rejected' => $order->isOperationalRejected(),
+                    // DP Helper flags
+                    'needs_settlement' => $order->needsSettlement(),
+                    'can_settle' => $order->canSettle(),
+                    'is_fully_paid' => $order->isFullyPaid(),
+                    // Data untuk cancellation/refund approval system
+                    'cancellation_status' => $order->cancellation_status,
+                    'cancellation_reason' => $order->cancellation_reason,
+                    'cancellation_notes' => $order->cancellation_notes,
+                    'cancellation_requested_by' => $order->cancellationRequester ? $order->cancellationRequester->name : null,
+                    'cancellation_requested_at' => $order->cancellation_requested_at ? $order->cancellation_requested_at->format('d/m/Y H:i') : null,
+                    'cancellation_processed_by' => $order->cancellationProcessor ? $order->cancellationProcessor->name : null,
+                    'cancellation_processed_at' => $order->cancellation_processed_at ? $order->cancellation_processed_at->format('d/m/Y H:i') : null,
+                    'cancellation_admin_notes' => $order->cancellation_admin_notes,
+                    // Transaction edit status
+                    'can_be_edited' => $order->canBeEdited(),
+                    'has_edit_history' => $order->transactionEdits()->exists(),
+                    'pending_edit' => $order->getPendingEdit() ? [
+                        'id' => $order->getPendingEdit()->id,
+                        'edit_type' => $order->getPendingEdit()->edit_type,
+                        'reason' => $order->getPendingEdit()->reason,
+                        'total_difference' => $order->getPendingEdit()->total_difference,
+                        'approval_status' => $order->getPendingEdit()->getDualApprovalStatus(),
+                        'requested_at' => $order->getPendingEdit()->created_at->format('d/m/Y H:i')
+                    ] : null
+                ];
+            });
+
+            $response = [
+                'date_from' => $request->date_from ? date('d-m-Y', strtotime($request->date_from)) : null,
+                'date_to' => $request->date_to ? date('d-m-Y', strtotime($request->date_to)) : null,
+                'total_orders' => $totalOrders,
+                'total_revenue' => $totalRevenue,
+                'average_order_value' => round($averageOrderValue, 2),
+                'total_discount' => $totalDiscount,
+                'total_items_sold' => $totalItemsSold,
+                'gross_sales' => $grossSales,
+                'orders' => $orders
+            ];
+
+            return $this->successResponse($response, 'Riwayat order berhasil diambil');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+    public function orderHistoryV2(Request $request)
+    {
+        // knnnnninini
+        try {
+            $validator = Validator::make($request->query(), [
+                'outlet_id' => 'nullable', // Allow string 'all' or numeric outlet ID
+                'search' => 'nullable|string',
+                'member_id' => 'nullable|exists:members,id',
+                'date_from' => 'nullable|date',
+                'date_to' => 'nullable|date|after_or_equal:date_from',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse($validator->errors(), 422);
+            }
+
+            // Additional validation for outlet_id
+            if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
+                $outletExists = \App\Models\Outlet::where('id', $request->outlet_id)->exists();
+                if (!$outletExists) {
+                    return $this->errorResponse('Outlet tidak ditemukan', 422);
+                }
+            }
+
+            $query = Order::query();
+
+            if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
+                $query->where('outlet_id', $request->outlet_id);
+            } elseif ($request->outlet_id === 'all') {
+                $query->where('outlet_id', '!=', 1);
+            }
+
+            // Check if search is for a specific invoice number
+            $isInvoiceSearch = false;
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                // Detect if this looks like an invoice number (starts with INV-)
+                $isInvoiceSearch = preg_match('/^INV-/i', $searchTerm);
+
+                $query->where(function ($q) use ($request) {
+                    $q->where('order_number', 'like', '%' . $request->search . '%');
+                    //   ->orWhere('member.name', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            if ($request->filled('member_id')) {
+                $query->where('member_id', $request->member_id);
+            }
+
+            // Only apply date filters if it's not a specific invoice search
+            if (!$isInvoiceSearch && $request->filled('date_from') && $request->filled('date_to')) {
+                $query->whereBetween('created_at', [
+                    $request->date_from,
+                    $request->date_to . ' 23:59:59'
+                ]);
+            }
+
+            $totalOrders = $query->count();
+            $totalRevenue = (clone $query)->where('status', 'completed')->sum('total');
+
+            // Hitung total item yang terjual
+            $totalItemsSold = 0;
+            $completedOrdersQuery = (clone $query)->where('status', 'completed')->with(['items.product' => function ($q) {
+                $q->withTrashed()->select('id', 'name', 'sku', 'unit');
+            }]);
+            $completedOrders = $completedOrdersQuery->get();
+
+            foreach ($completedOrders as $order) {
+                $totalItemsSold += $order->items->sum('quantity');
+            }
+
+            // Hitung rata-rata penjualan
+            $averageOrderValue = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
+
+            $orders = $query->with([
+                'items.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku', 'unit', 'unit_type', 'image');
+                },
+                'outlet:id,name',
+                'leadsCabangOutlet:id,name',
+                'dealMakerOutlet:id,name',
+                'shift:id',
+                'user:id,name',
+                'member:id,name,member_code,phone,lead_id,address',
+                'mosque:id,name,address',
+                'approver:id,name',
+                'financeApprover:id,name',
+                'operationalApprover:id,name',
+                'financeRejector:id,name',
+                'operationalRejector:id,name',
+                'cancellationRequester:id,name',
+                'cancellationProcessor:id,name',
+                'transactionEdits' => function ($q) {
+                    $q->where('status', 'pending')->latest();
+                },
+                'bonusTransactions.bonusItems.product' => function ($q) {
+                    $q->withTrashed()->select('id', 'name', 'sku', 'image', 'unit_type');
+                },
+                'dpSettlementHistory' => function ($q) {
+                    $q->with('processedBy:id,name')->orderBy('processed_at', 'asc');
+                }
+            ])->has('outlet')->has('user')->latest()->get();
+
+            // $totalDiscount = $query->where('status', 'completed')->sum('discount');
+            // $grossSales = $order->where('status', 'completed')->sum('subtotal');
+            $totalDiscount = $query->where('status', 'completed')->sum('discount');
+            $grossSales = $query->where('status', 'completed')->sum('subtotal');
+
+            // dd($orders);
+            // Transformasi respons dengan lead info dan settlement history
+            $leadsService = new LeadsService();
+
+            $orders->transform(function ($order) use ($leadsService) {
+                // Fetch lead info if member has lead_id
+                $leadInfo = null;
+                if ($order->member && $order->member->lead_id) {
+                    \Log::info('Fetching lead data', [
+                        'order_id' => $order->id,
+                        'member_id' => $order->member->id,
+                        'lead_id' => $order->member->lead_id,
+                        'member_phone' => $order->member->phone
+                    ]);
+
+                    $leadData = $leadsService->getLeadById($order->member->lead_id, $order->member->phone);
+
+                    \Log::info('Lead data result', [
+                        'order_id' => $order->id,
+                        'lead_data_found' => !empty($leadData),
+                        'lead_data' => $leadData
+                    ]);
+
+                    if ($leadData) {
+                        $leadInfo = [
+                            'tanggal_leads_masuk' => $leadData['tanggal_leads'] ?? null,
+                            'channel_marketing' => $leadData['sumber_leads']['nama'] ?? null,
+                            'customer_name' => $leadData['nama_pelanggan'] ?? $leadData['customer_name'] ?? null,
+                            'alamat' => $leadData['alamat'] ?? null,
+                            'contact_person' => $leadData['no_whatsapp'] ?? $leadData['customer_phone'] ?? null,
+                        ];
+                    }
+                }
+
+                // Format settlement payments (DP I, DP II, Pelunasan)
+                $settlementPayments = [
+                    'uang_muka_1' => null,
+                    'uang_muka_2' => null,
+                    'pelunasan' => null
+                ];
+
+                if ($order->dpSettlementHistory && $order->dpSettlementHistory->count() > 0) {
+                    $settlements = $order->dpSettlementHistory;
+
+                    // First payment - DP I
+                    if (isset($settlements[0])) {
+                        $settlementPayments['uang_muka_1'] = [
+                            'date' => $settlements[0]->processed_at ? $settlements[0]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[0]->amount,
+                            'method' => $settlements[0]->payment_method,
+                            'bank' => $settlements[0]->payment_method // Using payment_method as "bank" for now
+                        ];
+                    }
+
+                    // Second payment - DP II (if exists)
+                    if (isset($settlements[1])) {
+                        $settlementPayments['uang_muka_2'] = [
+                            'date' => $settlements[1]->processed_at ? $settlements[1]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[1]->amount,
+                            'method' => $settlements[1]->payment_method,
+                            'bank' => $settlements[1]->payment_method
+                        ];
+                    }
+
+                    // Final payment - Pelunasan (last settlement if more than 2, otherwise settlement[1] if it's final)
+                    if ($settlements->count() > 2) {
+                        $lastSettlement = $settlements->last();
+                        $settlementPayments['pelunasan'] = [
+                            'date' => $lastSettlement->processed_at ? $lastSettlement->processed_at->format('d/m/Y') : null,
+                            'amount' => $lastSettlement->amount,
+                            'method' => $lastSettlement->payment_method,
+                            'bank' => $lastSettlement->payment_method
+                        ];
+                    } elseif (isset($settlements[1]) && $settlements[1]->is_final_payment) {
+                        $settlementPayments['pelunasan'] = [
+                            'date' => $settlements[1]->processed_at ? $settlements[1]->processed_at->format('d/m/Y') : null,
+                            'amount' => $settlements[1]->amount,
+                            'method' => $settlements[1]->payment_method,
+                            'bank' => $settlements[1]->payment_method
+                        ];
+                        $settlementPayments['uang_muka_2'] = null;
+                    }
+                }
+
+                // Hitung biaya kirim (produk dengan unit_type = 'kirim')
+                $deliveryFee = 0;
+                $deliveryItems = [];
+
+                // Hitung biaya pemasangan (produk dengan unit_type = 'pasang')
+                $installationFee = 0;
+                $installationItems = [];
+
+                foreach ($order->items as $item) {
+                    if ($item->product && $item->product->unit_type === 'kirim') {
+                        $deliveryFee += floatval($item->quantity) * floatval($item->price);
+                        $deliveryItems[] = [
+                            'product' => $item->product->name,
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'total' => floatval($item->quantity) * floatval($item->price)
+                        ];
+                    }
+
+                    if ($item->product && $item->product->unit_type === 'pasang') {
+                        $installationFee += floatval($item->quantity) * floatval($item->price);
+                        $installationItems[] = [
+                            'product' => $item->product->name,
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'total' => floatval($item->quantity) * floatval($item->price)
+                        ];
+                    }
+                }
+
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'outlet' => $order->outlet->name,
+                    'user' => $order->user->name,
+                    'total' => $order->total,
+                    'status' => $order->status,
+                    'subtotal' => $order->subtotal,
+                    'tax' => $order->tax,
+                    'discount' => $order->discount,
+                    'total_paid' => $order->total_paid,
+                    'remaining_balance' => $order->remaining_balance,
+                    'change' => $order->change,
+                    'payment_method' => $order->payment_method,
+                    'created_at' => $order->created_at->format('d/m/Y H:i'),
+                    'service_type' => $order->service_type,
+                    'installation_date' => $order->installation_date,
+                    'installation_notes' => $order->installation_notes,
+                    'delivery_fee' => $deliveryFee,
+                    'delivery_items' => $deliveryItems,
+                    'installation_fee' => $installationFee,
+                    'installation_items' => $installationItems,
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'product_image' => $item->product->image_url,
+                            'product' => $item->product ? $item->product->name : 'Produk tidak tersedia',
+                            'sku' => $item->product ? $item->product->sku : '',
+                            'unit' => $item->product ? ($item->product->unit ?? 'pcs') : 'pcs',
+                            'unit_type' => $item->product ? $item->product->unit_type : null,
+                            'quantity' => floatval($item->quantity),
+                            'price' => floatval($item->price),
+                            'discount' => floatval($item->discount),
+                            'total' => floatval($item->quantity) * floatval($item->price)
+                        ];
+                    }),
+                    'member' => $order->member ? [
+                        'name' => $order->member->name,
+                        'member_code' => $order->member->member_code,
+                        'phone' => $order->member->phone
+                    ] : null,
+                    'mosque' => $order->mosque ? [
+                        'name' => $order->mosque->name,
+                        'address' => $order->mosque->address
+                    ] : null,
+                    'leads_cabang_outlet' => $order->leadsCabangOutlet ? [
+                        'id' => $order->leadsCabangOutlet->id,
+                        'name' => $order->leadsCabangOutlet->name
+                    ] : null,
+                    'deal_maker_outlet' => $order->dealMakerOutlet ? [
+                        'id' => $order->dealMakerOutlet->id,
+                        'name' => $order->dealMakerOutlet->name
+                    ] : null,
+                    'contract_pdf_url' => $order->contract_pdf_url,
+                    'bonus_items' => $order->bonusTransactions->flatMap(function ($bonusTransaction) {
+                        return $bonusTransaction->bonusItems->map(function ($bonusItem) {
+                            return [
+                                'product' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'product_name' => $bonusItem->product ? $bonusItem->product->name : 'Produk tidak tersedia',
+                                'unit_type' => $bonusItem->product ? $bonusItem->product->unit_type : 'pcs',
+                                'product_image' => $bonusItem->product ? $bonusItem->product->image_url : null,
+                                'sku' => $bonusItem->product ? $bonusItem->product->sku : '',
+                                'quantity' => $bonusItem->quantity,
+                                'bonus_value' => $bonusItem->bonus_value ?? 0,
+                                'status' => $bonusItem->status ?? 'approved'
+                            ];
+                        });
+                    }),
+                    // Data leads dan settlement untuk comprehensive report
+                    'lead_info' => $leadInfo,
+                    'settlement_payments' => $settlementPayments,
                     // Data baru untuk approval system (tanpa mengubah struktur yang ada)
                     'approval_status' => $order->approval_status,
                     'payment_proof_url' => $order->payment_proof_url,

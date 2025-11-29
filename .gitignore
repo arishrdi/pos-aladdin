@@ -24,5 +24,6 @@ yarn-error.log
 .qodo
 public/LPT1
 
-*.DS_Store
+.DS_Store
 *.zip
+docs/API.md

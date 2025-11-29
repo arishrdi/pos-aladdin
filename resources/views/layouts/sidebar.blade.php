@@ -322,6 +322,10 @@
                     <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Transaksi</span>
                 </a>
+                <a href="/riwayat-transaksi-v2" class="menu-subitem flex items-center py-2 transition-all w-full">
+                    <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
+                    <span class="sidebar-text">Riwayat Transaksi V2</span>
+                </a>
                 <a href="/riwayat-bonus" class="menu-subitem flex items-center py-2 transition-all w-full">
                     <i data-lucide="receipt" class="w-4 h-4 mr-3 sidebar-icon"></i>
                     <span class="sidebar-text">Riwayat Bonus</span>
@@ -915,12 +919,19 @@
                 el.classList.remove('active-parent', 'active');
             });
 
-            // Find matching menu item
+            // Find matching menu item - prioritize longest match (most specific)
             const allLinks = [...document.querySelectorAll('.menu-link, .menu-subitem')];
-            const activeLink = allLinks.find(link => {
+            const matchingLinks = allLinks.filter(link => {
                 const href = link.getAttribute('href');
                 return href && (currentPath === href || currentPath.startsWith(href));
             });
+
+            // Sort by href length (longest first) to get most specific match
+            const activeLink = matchingLinks.sort((a, b) => {
+                const hrefA = a.getAttribute('href') || '';
+                const hrefB = b.getAttribute('href') || '';
+                return hrefB.length - hrefA.length;
+            })[0];
 
             if (activeLink) {
                 activeLink.classList.add('active');
