@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TransactionHistoryExport;
 use App\Mail\ApprovalRequest;
 use App\Models\CashRegister;
 use App\Models\DpSettlementHistory;
@@ -12,6 +13,7 @@ use App\Models\Outlet;
 use App\Services\CashBalanceService;
 use App\Services\LeadsService;
 use App\Traits\ApiResponse;
+use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -2237,6 +2239,72 @@ class OrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export transaction history v2 to Excel
+     */
+    public function exportTransactionHistoryV2(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->query(), [
+                'outlet_id' => 'nullable',
+                'search' => 'nullable|string',
+                'member_id' => 'nullable|exists:members,id',
+                'date_from' => 'nullable|date',
+                'date_to' => 'nullable|date|after_or_equal:date_from',
+                'status' => 'nullable|string',
+                'approval_status' => 'nullable|string',
+                'payment_method' => 'nullable|string',
+                'transaction_category' => 'nullable|string',
+                'service_type' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Validate outlet exists if provided
+            if ($request->filled('outlet_id') && $request->outlet_id !== 'all') {
+                $outletExists = Outlet::where('id', $request->outlet_id)->exists();
+                if (!$outletExists) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Outlet tidak ditemukan'
+                    ], 422);
+                }
+            }
+
+            // Prepare filters
+            $filters = [
+                'outlet_id' => $request->outlet_id,
+                'search' => $request->search,
+                'member_id' => $request->member_id,
+                'date_from' => $request->date_from,
+                'date_to' => $request->date_to,
+                'status' => $request->status,
+                'approval_status' => $request->approval_status,
+                'payment_method' => $request->payment_method,
+                'transaction_category' => $request->transaction_category,
+                'service_type' => $request->service_type,
+            ];
+
+            // Generate filename
+            $filename = 'Riwayat_Transaksi_' . date('Y-m-d_His') . '.xlsx';
+
+            // Export to Excel
+            return Excel::download(new TransactionHistoryExport($filters), $filename);
+        } catch (\Exception $e) {
+            Log::error('Export transaction history error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat export: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class LeadsService
 {
@@ -14,10 +15,21 @@ class LeadsService
     
     /**
      * Cari leads berdasarkan query (nama atau nomor telepon)
+     * Optimized: Added 5-minute cache to reduce API calls
      */
     public function searchLeads($query)
     {
         try {
+            // Generate cache key based on query
+            $cacheKey = 'leads_search_' . md5($query);
+
+            // Check cache first (5 minutes TTL)
+            $cachedResults = Cache::get($cacheKey);
+            if ($cachedResults !== null) {
+                Log::info('searchLeads - returning cached results', ['query' => $query]);
+                return $cachedResults;
+            }
+
             // Jika query adalah nomor telepon, format dulu
             if (preg_match('/^[0-9+\-\s()]+$/', $query)) {
                 $formattedPhone = $this->formatPhoneForLeads($query);
@@ -28,7 +40,8 @@ class LeadsService
                     'api_url' => "{$this->baseUrl}/leads/search"
                 ]);
 
-                $response = Http::timeout(10)
+                // Optimized: Reduced timeout from 10s to 3s for faster response
+                $response = Http::timeout(3)
                     ->withHeaders([
                         'Authorization' => 'Bearer ' . $this->token,
                         'Content-Type' => 'application/json',
@@ -46,7 +59,8 @@ class LeadsService
 
                 // Untuk pencarian nama, tetap gunakan parameter phone
                 // karena API hanya menyediakan search by phone
-                $response = Http::timeout(10)
+                // Optimized: Reduced timeout from 10s to 3s for faster response
+                $response = Http::timeout(3)
                     ->withHeaders([
                         'Authorization' => 'Bearer ' . $this->token,
                         'Content-Type' => 'application/json',
@@ -64,16 +78,20 @@ class LeadsService
                 'body' => $response->json()
             ]);
 
+            $results = [];
             if ($response->successful()) {
                 $data = $response->json();
                 if ($data['success'] ?? false) {
                     $leads = $data['data'] ?? [];
                     // Pastikan selalu return array, bahkan jika hanya 1 lead
-                    return is_array($leads) ? $leads : [$leads];
+                    $results = is_array($leads) ? $leads : [$leads];
                 }
             }
 
-            return [];
+            // Cache the results for 5 minutes (300 seconds)
+            Cache::put($cacheKey, $results, 300);
+
+            return $results;
         } catch (\Exception $e) {
             Log::error('Error searching leads: ' . $e->getMessage());
             return [];
@@ -96,7 +114,8 @@ class LeadsService
     public function updateLeadStatus($leadId, $status = 'CUSTOMER')
     {
         try {
-            $response = Http::timeout(10)
+            // Optimized: Reduced timeout from 10s to 3s for faster response
+            $response = Http::timeout(3)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $this->token,
                     'Content-Type' => 'application/json',
@@ -142,7 +161,8 @@ class LeadsService
     public function checkApiHealth()
     {
         try {
-            $response = Http::timeout(10)
+            // Optimized: Reduced timeout from 10s to 3s for faster response
+            $response = Http::timeout(3)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $this->token,
                     'Content-Type' => 'application/json',

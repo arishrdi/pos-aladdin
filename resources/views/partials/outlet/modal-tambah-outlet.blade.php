@@ -63,12 +63,15 @@
             <p class="text-xs text-gray-500 mt-1">Kasir tetap bisa memilih PKP atau Non-PKP per transaksi</p>
           </div>
           <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Target Tahunan</label>
+            <label class="block font-medium mb-1">Target Tahunan (Otomatis)</label>
             <input type="text" id="targetTahunan"
-              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-              placeholder="Rp 0">
+              class="format-angka w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+              placeholder="Rp 0" readonly>
             <input type="hidden" id="targetTahunanRaw" name="target_tahunan">
-            <p class="text-xs text-gray-500 mt-1">Target penjualan per tahun dalam Rupiah</p>
+            <p class="text-xs text-blue-600 mt-1">
+              <i data-lucide="info" class="w-3 h-3 inline"></i>
+              Nilai ini otomatis dihitung dari jumlah seluruh target bulanan
+            </p>
           </div>
         </div>
       </div>

@@ -148,7 +148,9 @@ class MemberController extends Controller
             
             if (strlen($query) >= 2) {
                 // Cari di database member lokal (termasuk yang belum punya outlet_id)
-                $members = Member::where(function($q) use ($query) {
+                // Optimized: Select only needed fields to reduce memory usage
+                $members = Member::select('id', 'name', 'phone', 'member_code', 'lead_id', 'outlet_id')
+                    ->where(function($q) use ($query) {
                         $q->where('name', 'LIKE', "%{$query}%")
                           ->orWhere('phone', 'LIKE', "%{$query}%")
                           ->orWhere('member_code', 'LIKE', "%{$query}%");

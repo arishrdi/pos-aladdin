@@ -249,6 +249,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/orders/cancel/{orderId}', 'cancelOrder'); // Legacy method
             Route::get('/orders/history', 'orderHistory');
             Route::get('/orders/history-v2', 'orderHistoryV2');
+            Route::get('/orders/history-v2/export', 'exportTransactionHistoryV2');
             Route::get('/orders/history/admin', 'orderAdmin');
             Route::get('/orders/history/compare', 'compareOrders');
             

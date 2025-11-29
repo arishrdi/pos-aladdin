@@ -205,10 +205,10 @@
 
             outlets.forEach((outlet, index) => {
                 // Potong alamat jika lebih dari 25 karakter dan tambahkan ...
-                const addressDisplay = outlet.address.length > 25 
-                    ? `${outlet.address.substring(0, 25)}...` 
+                const addressDisplay = outlet.address.length > 25
+                    ? `${outlet.address.substring(0, 25)}...`
                     : outlet.address;
-                
+
                 // Format target values
                 const formatCurrency = (value) => {
                     if (!value || value === 0) return '-';
@@ -219,7 +219,15 @@
                         maximumFractionDigits: 0
                     }).format(value);
                 };
-                
+
+                // Hitung target tahunan dari jumlah monthly targets
+                let calculatedTargetTahunan = 0;
+                if (outlet.monthly_targets && outlet.monthly_targets.length > 0) {
+                    calculatedTargetTahunan = outlet.monthly_targets.reduce((total, target) => {
+                        return total + (parseFloat(target.target_amount) || 0);
+                    }, 0);
+                }
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="py-4">${index + 1}</td>
@@ -238,7 +246,7 @@
                     <td class="py-4">${outlet.phone}</td>
                     <td class="py-4">${outlet.tax}%</td>
                     <td class="py-4">
-                        <span class="text-sm font-medium text-blue-600">${formatCurrency(outlet.target_tahunan)}</span>
+                        <span class="text-sm font-medium text-blue-600">${formatCurrency(calculatedTargetTahunan)}</span>
                     </td>
                     <td class="py-4">
                         <button onclick="showMonthlyTargets(${outlet.id})" class="px-3 py-1 text-sm font-medium text-white bg-yellow-500 rounded hover:bg-yellow-600">
@@ -718,6 +726,11 @@
             }
 
             openModalEdit();
+
+            // Trigger calculation of target tahunan after modal opens
+            setTimeout(() => {
+                calculateEditTargetTahunan();
+            }, 100);
         }
 
         // Fungsi untuk validasi form tambah
@@ -930,7 +943,7 @@
                 'namaOutlet', 'teleponOutlet', 'alamatOutlet', 'emailOutlet',
                 'pajakOutlet', 'taxType', 'fotoOutlet', 'pkpAtasNama',
                 'pkpNamaBank', 'pkpNomorTransaksi', 'nonPkpAtasNama',
-                'nonPkpNamaBank', 'nonPkpNomorTransaksi', 'targetTahunan'
+                'nonPkpNamaBank', 'nonPkpNomorTransaksi'
             ];
 
             // Reset only existing elements
@@ -948,6 +961,12 @@
                 if (targetInput) targetInput.value = '';
                 if (targetRaw) targetRaw.value = '';
             }
+
+            // Reset target tahunan (both display and raw)
+            const targetTahunan = document.getElementById('targetTahunan');
+            const targetTahunanRaw = document.getElementById('targetTahunanRaw');
+            if (targetTahunan) targetTahunan.value = '';
+            if (targetTahunanRaw) targetTahunanRaw.value = '';
 
             // Reset checkbox
             const statusAktif = document.getElementById('statusAktif');
@@ -1211,6 +1230,53 @@
             updateSidebarVisibility();
         });
 
+        // === AUTO CALCULATE TARGET TAHUNAN ===
+        // Fungsi global untuk menghitung total target bulanan (Modal Tambah)
+        function calculateTargetTahunan() {
+            let total = 0;
+            for (let month = 1; month <= 12; month++) {
+                const rawInput = document.getElementById(`target_bulanan_${month}Raw`);
+                if (rawInput && rawInput.value) {
+                    total += parseInt(rawInput.value) || 0;
+                }
+            }
+
+            // Update target tahunan display
+            const targetTahunanDisplay = document.getElementById('targetTahunan');
+            const targetTahunanRaw = document.getElementById('targetTahunanRaw');
+
+            if (targetTahunanRaw) {
+                targetTahunanRaw.value = total.toString();
+            }
+
+            if (targetTahunanDisplay) {
+                targetTahunanDisplay.value = total > 0 ? total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            }
+        }
+
+        // Fungsi global untuk menghitung total target bulanan (Modal Edit)
+        function calculateEditTargetTahunan() {
+            let total = 0;
+            for (let month = 1; month <= 12; month++) {
+                const rawInput = document.getElementById(`editTarget_bulanan_${month}Raw`);
+                if (rawInput && rawInput.value) {
+                    total += parseInt(rawInput.value) || 0;
+                }
+            }
+
+            // Update target tahunan display
+            const targetTahunanDisplay = document.getElementById('editTargetTahunan');
+            const targetTahunanRaw = document.getElementById('editTargetTahunanRaw');
+
+            if (targetTahunanRaw) {
+                targetTahunanRaw.value = total.toString();
+            }
+
+            if (targetTahunanDisplay) {
+                targetTahunanDisplay.value = total > 0 ? total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
     // Ambil semua input yang ingin diformat
     const formatInputs = document.querySelectorAll('.format-angka');
@@ -1239,6 +1305,24 @@
         // Saat blur, format ulang untuk memastikan konsistensi
         input.addEventListener('blur', updateAndFormat);
     });
+
+    // Attach event listeners untuk semua input target bulanan (Modal Tambah)
+    for (let month = 1; month <= 12; month++) {
+        const monthlyInput = document.getElementById(`target_bulanan_${month}`);
+        if (monthlyInput) {
+            monthlyInput.addEventListener('input', calculateTargetTahunan);
+            monthlyInput.addEventListener('blur', calculateTargetTahunan);
+        }
+    }
+
+    // Attach event listeners untuk semua input target bulanan (Modal Edit)
+    for (let month = 1; month <= 12; month++) {
+        const monthlyInput = document.getElementById(`editTarget_bulanan_${month}`);
+        if (monthlyInput) {
+            monthlyInput.addEventListener('input', calculateEditTargetTahunan);
+            monthlyInput.addEventListener('blur', calculateEditTargetTahunan);
+        }
+    }
 });
 
 </script>
